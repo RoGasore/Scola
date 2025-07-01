@@ -24,9 +24,9 @@ export default function TeachersLoading() {
             <TableHeader>
               <TableRow>
                 <TableHead><Skeleton className="h-5 w-32" /></TableHead>
-                <TableHead><Skeleton className="h-5 w-48" /></TableHead>
+                <TableHead className="hidden md:table-cell"><Skeleton className="h-5 w-48" /></TableHead>
                 <TableHead><Skeleton className="h-5 w-32" /></TableHead>
-                <TableHead><Skeleton className="h-5 w-40" /></TableHead>
+                <TableHead className="hidden sm:table-cell"><Skeleton className="h-5 w-40" /></TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
               </TableRow>
             </TableHeader>
@@ -34,9 +34,9 @@ export default function TeachersLoading() {
               {skeletonRows.map((_, i) => (
                 <TableRow key={i}>
                   <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                  <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-48" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
-                  <TableCell><Skeleton className="h-5 w-40" /></TableCell>
+                  <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-40" /></TableCell>
                   <TableCell><Skeleton className="h-8 w-8" /></TableCell>
                 </TableRow>
               ))}

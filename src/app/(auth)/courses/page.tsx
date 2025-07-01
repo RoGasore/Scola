@@ -40,16 +40,16 @@ export default function CoursesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nom du cours</TableHead>
-                <TableHead>Section</TableHead>
-                <TableHead>Heures/semaine</TableHead>
+                <TableHead className="hidden sm:table-cell">Section</TableHead>
+                <TableHead className="hidden md:table-cell">Heures/semaine</TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow>
                 <TableCell className="font-medium">Mathématiques I</TableCell>
-                <TableCell>Primaire</TableCell>
-                <TableCell>5</TableCell>
+                <TableCell className="hidden sm:table-cell">Primaire</TableCell>
+                <TableCell className="hidden md:table-cell">5</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -69,8 +69,8 @@ export default function CoursesPage() {
               </TableRow>
               <TableRow>
                 <TableCell className="font-medium">Physique</TableCell>
-                <TableCell>Secondaire</TableCell>
-                <TableCell>4</TableCell>
+                <TableCell className="hidden sm:table-cell">Secondaire</TableCell>
+                <TableCell className="hidden md:table-cell">4</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

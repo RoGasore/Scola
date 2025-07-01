@@ -48,18 +48,18 @@ export default function TeachersPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nom</TableHead>
-                <TableHead>Email</TableHead>
+                <TableHead className="hidden md:table-cell">Email</TableHead>
                 <TableHead>Section principale</TableHead>
-                <TableHead>Cours enseignés</TableHead>
+                <TableHead className="hidden sm:table-cell">Cours enseignés</TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow>
                 <TableCell className="font-medium">Marie Curie</TableCell>
-                <TableCell>m.curie@scolagest.edu</TableCell>
+                <TableCell className="hidden md:table-cell">m.curie@scolagest.edu</TableCell>
                 <TableCell><Badge variant="outline">Secondaire</Badge></TableCell>
-                <TableCell>Physique, Chimie</TableCell>
+                <TableCell className="hidden sm:table-cell">Physique, Chimie</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -79,9 +79,9 @@ export default function TeachersPage() {
               </TableRow>
                <TableRow>
                 <TableCell className="font-medium">Albert Einstein</TableCell>
-                <TableCell>a.einstein@scolagest.edu</TableCell>
+                <TableCell className="hidden md:table-cell">a.einstein@scolagest.edu</TableCell>
                 <TableCell><Badge variant="outline">Secondaire</Badge></TableCell>
-                <TableCell>Mathématiques</TableCell>
+                <TableCell className="hidden sm:table-cell">Mathématiques</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

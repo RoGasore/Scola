@@ -75,8 +75,8 @@ export default function StudentsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nom</TableHead>
-                <TableHead>ID</TableHead>
-                <TableHead>Classe</TableHead>
+                <TableHead className="hidden md:table-cell">ID</TableHead>
+                <TableHead className="hidden sm:table-cell">Classe</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead className="hidden md:table-cell">Contact Parent</TableHead>
                 <TableHead>
@@ -87,8 +87,8 @@ export default function StudentsPage() {
             <TableBody>
               <TableRow>
                 <TableCell className="font-medium">Jean Dupont</TableCell>
-                <TableCell>ST-2024-001</TableCell>
-                <TableCell>4ème Humanités - Math/Physique</TableCell>
+                <TableCell className="hidden md:table-cell">ST-2024-001</TableCell>
+                <TableCell className="hidden sm:table-cell">4ème Humanités - Math/Physique</TableCell>
                 <TableCell>
                   <Badge variant="outline">Actif</Badge>
                 </TableCell>
@@ -118,8 +118,8 @@ export default function StudentsPage() {
               </TableRow>
               <TableRow>
                 <TableCell className="font-medium">Amina Ndiaye</TableCell>
-                <TableCell>ST-2024-002</TableCell>
-                <TableCell>6ème Primaire</TableCell>
+                <TableCell className="hidden md:table-cell">ST-2024-002</TableCell>
+                <TableCell className="hidden sm:table-cell">6ème Primaire</TableCell>
                 <TableCell>
                   <Badge variant="outline">Actif</Badge>
                 </TableCell>
