@@ -32,15 +32,15 @@ const allStudents = [
   { matricule: 'P24003', name: 'Emma Simon', email: 'emma.s@example.com', level: 'Primaire', classe: '4ème Primaire', section: null, option: null, status: 'Actif', dateJoined: '2020-09-02', avatar: 'fille congolaise' },
 
   // Secondaire - Éducation de base
-  { matricule: 'S24001', name: 'Manon Lefebvre', email: 'manon.l@example.com', level: 'Secondaire', classe: '1ère Année', section: 'Éducation de base', option: null, status: 'Actif', dateJoined: '2023-09-05', avatar: 'femme congolaise' },
-  { matricule: 'S24002', name: 'Lucas Moreau', email: 'lucas.m@example.com', level: 'Secondaire', classe: '2ème Année', section: 'Éducation de base', option: null, status: 'Actif', dateJoined: '2022-09-05', avatar: 'homme congolais' },
+  { matricule: 'S24001', name: 'Manon Lefebvre', email: 'manon.l@example.com', level: 'Secondaire', classe: '7ème Année', section: 'Éducation de base', option: null, status: 'Actif', dateJoined: '2023-09-05', avatar: 'femme congolaise' },
+  { matricule: 'S24002', name: 'Lucas Moreau', email: 'lucas.m@example.com', level: 'Secondaire', classe: '8ème Année', section: 'Éducation de base', option: null, status: 'Actif', dateJoined: '2022-09-05', avatar: 'homme congolais' },
 
   // Secondaire - Humanités
-  { matricule: 'S24003', name: 'Jade Garcia', email: 'jade.g@example.com', level: 'Secondaire', classe: '3ème Latin-Grec', section: 'Humanités', option: 'Latin-Grec', status: 'Actif', dateJoined: '2021-09-05', avatar: 'femme congolaise' },
-  { matricule: 'S24004', name: 'Louis Roux', email: 'louis.r@example.com', level: 'Secondaire', classe: '4ème Sciences Économiques', section: 'Humanités', option: 'Sciences Économiques', status: 'Actif', dateJoined: '2020-09-05', avatar: 'homme congolais' },
-  { matricule: 'S24005', name: 'Emma Laurent', email: 'emma.l@example.com', level: 'Secondaire', classe: '4ème Électricité', section: 'Humanités', option: 'Électricité', status: 'Inactif', dateJoined: '2020-09-05', avatar: 'femme congolaise' },
-  { matricule: 'S24006', name: 'Arthur Lemoine', email: 'arthur.l@example.com', level: 'Secondaire', classe: '5ème Biochimie', section: 'Humanités', option: 'Biochimie', status: 'Actif', dateJoined: '2019-09-05', avatar: 'homme congolais' },
-  { matricule: 'S24007', name: 'Mohamed Cissé', email: 'mohamed.c@example.com', level: 'Secondaire', classe: '6ème Électricité', section: 'Humanités', option: 'Électricité', status: 'En attente', dateJoined: '2024-08-01', avatar: 'homme africain' },
+  { matricule: 'S24003', name: 'Jade Garcia', email: 'jade.g@example.com', level: 'Secondaire', classe: '1ère Latin-Grec', section: 'Humanités', option: 'Latin-Grec', status: 'Actif', dateJoined: '2021-09-05', avatar: 'femme congolaise' },
+  { matricule: 'S24004', name: 'Louis Roux', email: 'louis.r@example.com', level: 'Secondaire', classe: '2ème Sciences Économiques', section: 'Humanités', option: 'Sciences Économiques', status: 'Actif', dateJoined: '2020-09-05', avatar: 'homme congolais' },
+  { matricule: 'S24005', name: 'Emma Laurent', email: 'emma.l@example.com', level: 'Secondaire', classe: '2ème Électricité', section: 'Humanités', option: 'Électricité', status: 'Inactif', dateJoined: '2020-09-05', avatar: 'femme congolaise' },
+  { matricule: 'S24006', name: 'Arthur Lemoine', email: 'arthur.l@example.com', level: 'Secondaire', classe: '3ème Biochimie', section: 'Humanités', option: 'Biochimie', status: 'Actif', dateJoined: '2019-09-05', avatar: 'homme congolais' },
+  { matricule: 'S24007', name: 'Mohamed Cissé', email: 'mohamed.c@example.com', level: 'Secondaire', classe: '4ème Électricité', section: 'Humanités', option: 'Électricité', status: 'En attente', dateJoined: '2024-08-01', avatar: 'homme africain' },
 ];
 
 const fuseOptions = {
