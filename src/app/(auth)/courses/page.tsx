@@ -17,14 +17,14 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationEllipsis, PaginationNext } from '@/components/ui/pagination'
 
 const courses = [
-  { id: '#C101', name: 'Mathématiques de Base', student: 'Olivia Martin', teacher: 'M. Dupont', status: 'Terminé', date: '20/02/2024' },
-  { id: '#C102', name: 'Introduction à la Physique', student: 'Ava Johnson', teacher: 'Mme. Curie', status: 'En cours', date: '05/01/2024' },
-  { id: '#C103', name: 'Histoire de l\'Art', student: 'Liam Smith', teacher: 'M. Vinci', status: 'Terminé', date: '12/12/2023' },
-  { id: '#C104', name: 'Chimie Organique', student: 'Noah Brown', teacher: 'M. Lavoisier', status: 'Annulé', date: '02/11/2023' },
-  { id: '#C105', name: 'Programmation Python', student: 'Emma Garcia', teacher: 'Mme. Lovelace', status: 'Terminé', date: '15/10/2023' },
-  { id: '#C106', name: 'Littérature Française', student: 'James Wilson', teacher: 'M. Hugo', status: 'En cours', date: '28/09/2023' },
-  { id: '#C107', name: 'Biologie Cellulaire', student: 'Sophia Miller', teacher: 'M. Pasteur', status: 'Terminé', date: '21/08/2023' },
-  { id: '#C108', name: 'Philosophie Moderne', student: 'Isabella Davis', teacher: 'M. Descartes', status: 'Terminé', date: '10/07/2023' },
+  { id: '#C-MAT01', name: 'Mathématiques de Base', professeur: 'M. Dupont', classe: 'Seconde', option: 'Général', heures: '3h/sem', status: 'Terminé', date: '20/02/2024' },
+  { id: '#C-PHY02', name: 'Introduction à la Physique', professeur: 'Mme. Curie', classe: 'Première', option: 'Sciences', heures: '4h/sem', status: 'En cours', date: '05/01/2024' },
+  { id: '#C-ART03', name: 'Histoire de l\'Art', professeur: 'M. Vinci', classe: 'Terminale', option: 'Arts', heures: '2h/sem', status: 'Terminé', date: '12/12/2023' },
+  { id: '#C-CHI04', name: 'Chimie Organique', professeur: 'M. Lavoisier', classe: 'Première', option: 'Sciences', heures: '4h/sem', status: 'Annulé', date: '02/11/2023' },
+  { id: '#C-INF05', name: 'Programmation Python', professeur: 'Mme. Lovelace', classe: 'Terminale', option: 'Numérique', heures: '5h/sem', status: 'Terminé', date: '15/10/2023' },
+  { id: '#C-LIT06', name: 'Littérature Française', professeur: 'M. Hugo', classe: 'Seconde', option: 'Général', heures: '3h/sem', status: 'En cours', date: '28/09/2023' },
+  { id: '#C-BIO07', name: 'Biologie Cellulaire', professeur: 'M. Pasteur', classe: 'Terminale', option: 'Sciences de la Vie', heures: '4h/sem', status: 'Terminé', date: '21/08/2023' },
+  { id: '#C-PHI08', name: 'Philosophie Moderne', professeur: 'M. Descartes', classe: 'Terminale', option: 'Humanités', heures: '2h/sem', status: 'Terminé', date: '10/07/2023' },
 ];
 
 export default function CoursesPage() {
@@ -48,11 +48,18 @@ export default function CoursesPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Filtrer par</DropdownMenuLabel>
+              <DropdownMenuLabel>Filtrer par Classe</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem checked>Terminé</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>En cours</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Annulé</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Seconde</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Première</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Terminale</DropdownMenuCheckboxItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Filtrer par Option</DropdownMenuLabel>
+               <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem>Général</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Sciences</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Numérique</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Arts</DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Button size="sm" variant="outline" className="h-8 gap-1">
@@ -84,10 +91,11 @@ export default function CoursesPage() {
                   </TableHead>
                   <TableHead>ID Cours</TableHead>
                   <TableHead>Nom du cours</TableHead>
-                  <TableHead className="hidden md:table-cell">Élève</TableHead>
-                  <TableHead className="hidden sm:table-cell">Statut</TableHead>
-                  <TableHead className="hidden md:table-cell">Professeur</TableHead>
-                  <TableHead className="hidden md:table-cell">Date</TableHead>
+                  <TableHead>Professeur</TableHead>
+                  <TableHead className="hidden sm:table-cell">Classe</TableHead>
+                  <TableHead className="hidden md:table-cell">Option</TableHead>
+                  <TableHead className="hidden md:table-cell">Heures</TableHead>
+                  <TableHead>Statut</TableHead>
                   <TableHead><span className="sr-only">Actions</span></TableHead>
                 </TableRow>
               </TableHeader>
@@ -99,18 +107,23 @@ export default function CoursesPage() {
                     </TableCell>
                     <TableCell className="font-medium">{course.id}</TableCell>
                     <TableCell>{course.name}</TableCell>
-                    <TableCell className="hidden md:table-cell">{course.student}</TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                       <Badge variant="outline" className={
-                        course.status === 'Terminé' ? 'text-green-400 border-green-400/50' : 
-                        course.status === 'En cours' ? 'text-yellow-400 border-yellow-400/50' :
-                        'text-red-400 border-red-400/50'
+                    <TableCell>{course.professeur}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{course.classe}</TableCell>
+                    <TableCell className="hidden md:table-cell">{course.option}</TableCell>
+                    <TableCell className="hidden md:table-cell">{course.heures}</TableCell>
+                    <TableCell>
+                       <Badge variant={
+                        course.status === 'Terminé' ? 'default' : 
+                        course.status === 'En cours' ? 'secondary' :
+                        'destructive'
+                       } className={
+                        course.status === 'Terminé' ? 'bg-green-500/80 text-white' : 
+                        course.status === 'En cours' ? 'bg-yellow-500/80 text-black' :
+                        'bg-red-500/80 text-white'
                       }>
                         {course.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">{course.teacher}</TableCell>
-                    <TableCell className="hidden md:table-cell">{course.date}</TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

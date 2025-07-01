@@ -38,13 +38,13 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationEllipsis, PaginationNext } from '@/components/ui/pagination'
 
 const students = [
-  { name: 'Jean Dupont', email: 'jean.d@example.com', type: 'Premium', status: 'Actif', dateJoined: '2023-06-23' },
-  { name: 'Amina Ndiaye', email: 'amina.n@example.com', type: 'Standard', status: 'Inactif', dateJoined: '2023-02-14' },
-  { name: 'John Smith', email: 'john.s@example.com', type: 'Premium', status: 'Actif', dateJoined: '2023-01-15' },
-  { name: 'Maria Garcia', email: 'maria.g@example.com', type: 'VIP', status: 'Actif', dateJoined: '2022-11-30' },
-  { name: 'Chen Wei', email: 'chen.w@example.com', type: 'Standard', status: 'En attente', dateJoined: '2023-07-01' },
-  { name: 'Fatima Zahra', email: 'fatima.z@example.com', type: 'Premium', status: 'Actif', dateJoined: '2023-03-20' },
-  { name: 'David Miller', email: 'david.m@example.com', type: 'Standard', status: 'Inactif', dateJoined: '2022-09-10' },
+  { matricule: 'E24001', name: 'Jean Dupont', email: 'jean.d@example.com', classe: 'Première G', status: 'Actif', dateJoined: '2023-06-23' },
+  { matricule: 'E24002', name: 'Amina Ndiaye', email: 'amina.n@example.com', classe: 'Seconde', status: 'Inactif', dateJoined: '2023-02-14' },
+  { matricule: 'E24003', name: 'John Smith', email: 'john.s@example.com', classe: 'Terminale S', status: 'Actif', dateJoined: '2023-01-15' },
+  { matricule: 'E24004', name: 'Maria Garcia', email: 'maria.g@example.com', classe: 'Terminale ES', status: 'Actif', dateJoined: '2022-11-30' },
+  { matricule: 'E24005', name: 'Chen Wei', email: 'chen.w@example.com', classe: 'Première STMG', status: 'En attente', dateJoined: '2023-07-01' },
+  { matricule: 'E24006', name: 'Fatima Zahra', email: 'fatima.z@example.com', classe: 'Terminale S', status: 'Actif', dateJoined: '2023-03-20' },
+  { matricule: 'E24007', name: 'David Miller', email: 'david.m@example.com', classe: 'Seconde', status: 'Inactif', dateJoined: '2022-09-10' },
 ];
 
 export default function StudentsPage() {
@@ -68,15 +68,11 @@ export default function StudentsPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Filtrer par</DropdownMenuLabel>
+              <DropdownMenuLabel>Filtrer par Classe</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem checked>
-                Actif
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Inactif</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>
-                En attente
-              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Seconde</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Première</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Terminale</DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Button size="sm" variant="outline" className="h-8 gap-1">
@@ -121,9 +117,10 @@ export default function StudentsPage() {
                    <TableHead className="h-12 w-12 sm:w-auto">
                     <Checkbox aria-label="Tout sélectionner" />
                   </TableHead>
+                  <TableHead>Matricule</TableHead>
                   <TableHead>Nom</TableHead>
                   <TableHead className="hidden sm:table-cell">Email</TableHead>
-                  <TableHead className="hidden sm:table-cell">Type</TableHead>
+                  <TableHead className="hidden sm:table-cell">Classe</TableHead>
                   <TableHead>Statut</TableHead>
                   <TableHead className="hidden md:table-cell">Date d'inscription</TableHead>
                   <TableHead>
@@ -137,14 +134,15 @@ export default function StudentsPage() {
                      <TableCell>
                       <Checkbox aria-label={`Sélectionner la ligne ${index + 1}`} />
                     </TableCell>
+                    <TableCell className="font-medium">{student.matricule}</TableCell>
                     <TableCell className="font-medium">{student.name}</TableCell>
                     <TableCell className="hidden sm:table-cell">{student.email}</TableCell>
-                    <TableCell className="hidden sm:table-cell">{student.type}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{student.classe}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className={
-                          student.status === 'Actif' ? 'text-green-400 border-green-400/50' :
-                          student.status === 'Inactif' ? 'text-red-400 border-red-400/50' :
-                          'text-yellow-400 border-yellow-400/50'
+                          student.status === 'Actif' ? 'text-green-600 border-green-500/50 bg-green-500/10' :
+                          student.status === 'Inactif' ? 'text-red-600 border-red-500/50 bg-red-500/10' :
+                          'text-yellow-600 border-yellow-500/50 bg-yellow-500/10'
                         }>
                         {student.status}
                       </Badge>
