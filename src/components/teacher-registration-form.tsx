@@ -12,40 +12,46 @@ export function TeacherRegistrationForm() {
       <ScrollArea className="h-[calc(100vh-8rem)]">
         <form className="grid gap-6 px-4">
           <div className="grid gap-3">
-            <h3 className="font-semibold text-lg">Informations du professeur</h3>
+            <h3 className="font-semibold text-lg">Staff Information</h3>
             <div className="grid grid-cols-1 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="full-name">Nom complet</Label>
-                <Input id="full-name" placeholder="Nom, Postnom, Prénom" required />
+                <Label htmlFor="full-name">Full Name</Label>
+                <Input id="full-name" placeholder="Jane Smith" required />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="email">Adresse e-mail</Label>
-                <Input id="email" type="email" placeholder="professeur@example.com" required />
+                <Label htmlFor="email">Email Address</Label>
+                <Input id="email" type="email" placeholder="staff@example.com" required />
               </div>
                <div className="grid gap-2">
-                <Label htmlFor="phone">Numéro de téléphone</Label>
-                <Input id="phone" type="tel" placeholder="+243 ... " required />
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input id="phone" type="tel" placeholder="+1 ... " required />
               </div>
             </div>
           </div>
           
           <div className="grid gap-3">
-            <h3 className="font-semibold text-lg">Assignation de classe et de cours</h3>
-            <p className="text-sm text-muted-foreground">La logique d'affectation détaillée sera mise en œuvre. Sélectionnez la section principale pour l'instant.</p>
-             <div className="grid gap-2">
-                <Label htmlFor="section">Section principale</Label>
-                <Select>
-                  <SelectTrigger><SelectValue placeholder="Sélectionner la section" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="kindergarten">Maternelle</SelectItem>
-                    <SelectItem value="primary">Primaire</SelectItem>
-                    <SelectItem value="secondary">Secondaire</SelectItem>
-                  </SelectContent>
-                </Select>
+            <h3 className="font-semibold text-lg">Role and Department</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <div className="grid gap-2">
+                  <Label htmlFor="department">Department</Label>
+                  <Select>
+                    <SelectTrigger><SelectValue placeholder="Select Department" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sales">Sales</SelectItem>
+                      <SelectItem value="support">Support</SelectItem>
+                      <SelectItem value="billing">Billing</SelectItem>
+                      <SelectItem value="management">Management</SelectItem>
+                    </SelectContent>
+                  </Select>
+              </div>
+               <div className="grid gap-2">
+                  <Label htmlFor="role">Role</Label>
+                  <Input id="role" placeholder="Sales Manager" required />
+              </div>
             </div>
           </div>
           
-          <Button type="submit" className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground">Enregistrer le professeur</Button>
+          <Button type="submit" className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground">Add Staff Member</Button>
         </form>
       </ScrollArea>
     </div>

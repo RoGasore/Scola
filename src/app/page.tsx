@@ -1,30 +1,20 @@
 import { LoginForm } from '@/components/login-form';
-import Image from 'next/image';
 
 export default function LoginPage() {
   return (
-    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 xl:min-h-screen">
-      <div className="flex items-center justify-center py-12">
-        <div className="mx-auto grid w-[350px] gap-6">
+    <div className="w-full min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="mx-auto grid w-[380px] gap-8">
           <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold font-headline">ScolaGest</h1>
+            <div className="flex items-center justify-center gap-2 font-semibold text-2xl">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-7 w-7 text-primary"><path d="M15 12c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3z"></path><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"></path></svg>
+              <h1 className="font-bold">BankDash</h1>
+            </div>
             <p className="text-balance text-muted-foreground">
-              Entrez vos identifiants pour accéder à votre compte
+              Enter your credentials to access your account
             </p>
           </div>
           <LoginForm />
         </div>
-      </div>
-      <div className="hidden bg-muted lg:block">
-        <Image
-          src="https://placehold.co/1920x1080.png"
-          alt="Image"
-          width="1920"
-          height="1080"
-          data-ai-hint="salle de classe etudiants"
-          className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-        />
-      </div>
     </div>
   );
 }

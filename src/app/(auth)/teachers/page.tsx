@@ -1,108 +1,131 @@
-import { File, PlusCircle, MoreHorizontal } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { TeacherRegistrationForm } from '@/components/teacher-registration-form'
 
-export default function TeachersPage() {
+'use client'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, Sector } from 'recharts'
+import { Skeleton } from '@/components/ui/skeleton'
+import React, { useState } from 'react'
+
+const trafficData = [
+  { name: 'Direct', value: 400, fill: 'hsl(var(--chart-1))' },
+  { name: 'Referral', value: 300, fill: 'hsl(var(--chart-2))' },
+  { name: 'Organic', value: 300, fill: 'hsl(var(--chart-3))' },
+  { name: 'Social', value: 200, fill: 'hsl(var(--chart-4))' },
+];
+
+const dailySalesData = [
+  { name: 'Mon', sales: 4000 }, { name: 'Tue', sales: 3000 }, { name: 'Wed', sales: 2000 },
+  { name: 'Thu', sales: 2780 }, { name: 'Fri', sales: 1890 }, { name: 'Sat', sales: 2390 }, { name: 'Sun', sales: 3490 },
+];
+
+const renderActiveShape = (props: any) => {
+  const RADIAN = Math.PI / 180;
+  const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, value } = props;
+  const sin = Math.sin(-RADIAN * midAngle);
+  const cos = Math.cos(-RADIAN * midAngle);
+  const sx = cx + (outerRadius + 10) * cos;
+  const sy = cy + (outerRadius + 10) * sin;
+  const mx = cx + (outerRadius + 30) * cos;
+  const my = cy + (outerRadius + 30) * sin;
+  const ex = mx + (cos >= 0 ? 1 : -1) * 22;
+  const ey = my;
+  const textAnchor = cos >= 0 ? 'start' : 'end';
+
+  return (
+    <g>
+      <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill} className="text-lg font-bold">
+        {payload.name}
+      </text>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+      <Sector
+        cx={cx}
+        cy={cy}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        innerRadius={outerRadius + 6}
+        outerRadius={outerRadius + 10}
+        fill={fill}
+      />
+      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
+      <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="hsl(var(--foreground))" className="text-sm">{`Value ${value}`}</text>
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={18} textAnchor={textAnchor} fill="hsl(var(--muted-foreground))" className="text-xs">
+        {`(Rate ${(percent * 100).toFixed(2)}%)`}
+      </text>
+    </g>
+  );
+};
+
+export default function AnalyticsPage() {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const onPieEnter = (_: any, index: number) => {
+    setActiveIndex(index);
+  };
+
   return (
     <div className="grid flex-1 items-start gap-4">
-      <div className="flex items-center gap-4">
-        <h1 className="text-lg font-semibold md:text-2xl font-headline">Professeurs</h1>
-        <div className="ml-auto flex items-center gap-2">
-          <Button size="sm" variant="outline" className="h-8 gap-1">
-            <File className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Exporter</span>
-          </Button>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button size="sm" className="h-8 gap-1 bg-primary hover:bg-primary/90 text-primary-foreground">
-                <PlusCircle className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Ajouter un professeur</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="sm:max-w-lg">
-              <SheetHeader>
-                <SheetTitle>Enregistrer un nouveau professeur</SheetTitle>
-                <SheetDescription>
-                  Remplissez le formulaire pour ajouter un nouveau professeur au système.
-                </SheetDescription>
-              </SheetHeader>
-              <TeacherRegistrationForm />
-            </SheetContent>
-          </Sheet>
-        </div>
+      <h1 className="text-2xl font-semibold">Analytics</h1>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Website Traffic Sources</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  activeIndex={activeIndex}
+                  activeShape={renderActiveShape}
+                  data={trafficData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={70}
+                  outerRadius={90}
+                  fill="hsl(var(--primary))"
+                  dataKey="value"
+                  onMouseEnter={onPieEnter}
+                >
+                  {trafficData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Daily Sales</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={dailySalesData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
+                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip
+                  cursor={{ fill: 'hsl(var(--primary) / 0.1)' }}
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--background) / 0.8)',
+                    borderColor: 'hsl(var(--border))'
+                  }}
+                />
+                <Legend iconSize={10} />
+                <Bar dataKey="sales" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Annuaire des professeurs</CardTitle>
-          <CardDescription>
-            Gérez vos professeurs et leurs affectations.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nom</TableHead>
-                <TableHead className="hidden md:table-cell">Email</TableHead>
-                <TableHead>Section principale</TableHead>
-                <TableHead className="hidden sm:table-cell">Cours enseignés</TableHead>
-                <TableHead><span className="sr-only">Actions</span></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell className="font-medium">Marie Curie</TableCell>
-                <TableCell className="hidden md:table-cell">m.curie@scolagest.edu</TableCell>
-                <TableCell><Badge variant="outline">Secondaire</Badge></TableCell>
-                <TableCell className="hidden sm:table-cell">Physique, Chimie</TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button aria-haspopup="true" size="icon" variant="ghost">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Ouvrir le menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Modifier</DropdownMenuItem>
-                      <DropdownMenuItem>Voir le profil</DropdownMenuItem>
-                      <DropdownMenuItem>Supprimer</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-               <TableRow>
-                <TableCell className="font-medium">Albert Einstein</TableCell>
-                <TableCell className="hidden md:table-cell">a.einstein@scolagest.edu</TableCell>
-                <TableCell><Badge variant="outline">Secondaire</Badge></TableCell>
-                <TableCell className="hidden sm:table-cell">Mathématiques</TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button aria-haspopup="true" size="icon" variant="ghost">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Ouvrir le menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Modifier</DropdownMenuItem>
-                      <DropdownMenuItem>Voir le profil</DropdownMenuItem>
-                      <DropdownMenuItem>Supprimer</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
     </div>
   )
 }
