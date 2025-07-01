@@ -1,58 +1,274 @@
+
 "use client";
 
+import * as React from 'react';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { CalendarIcon, Trash2, Upload, PlusCircle, X } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollArea } from "./ui/scroll-area";
+import { ScrollArea } from './ui/scroll-area';
+import { Separator } from './ui/separator';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Badge } from './ui/badge';
+
+const levels = ['Maternelle', 'Primaire', 'Secondaire'];
+const classesByLevel = {
+  Maternelle: ['1ère Maternelle', '2ème Maternelle', '3ème Maternelle'],
+  Primaire: ['1ère Primaire', '2ème Primaire', '3ème Primaire', '4ème Primaire', '5ème Primaire', '6ème Primaire'],
+  Secondaire: ['1ère', '2ème', '3ème', '4ème', '5ème', '6ème'],
+};
+const coursesByLevel = {
+    Maternelle: ['Psychomotricité', 'Éveil Artistique', 'Langage'],
+    Primaire: ['Lecture et Écriture', 'Mathématiques de Base', 'Découverte du Monde'],
+    Secondaire: ['Mathématiques', 'Physique', 'Chimie', 'Français', 'Anglais', 'Histoire', 'Géographie', 'Biologie'],
+}
+
+// We define a schema for a single assignment to validate it before adding
+const assignmentSchema = z.object({
+  level: z.string().min(1),
+  class: z.string().min(1),
+  course: z.string().min(1),
+});
+type Assignment = z.infer<typeof assignmentSchema>;
+
+const formSchema = z.object({
+  fullName: z.string().min(3, { message: "Le nom complet est requis." }),
+  email: z.string().email({ message: "Adresse e-mail invalide." }),
+  phone: z.string().min(1, { message: "Le numéro de téléphone est requis." }),
+  experience: z.string().optional(),
+  assignments: z.array(assignmentSchema).min(1, { message: "Au moins une assignation est requise." }),
+});
+
 
 export function TeacherRegistrationForm() {
+  const [documents, setDocuments] = React.useState<Array<{ file: File; description: string }>>([]);
+  const [photoPreview, setPhotoPreview] = React.useState<string | null>(null);
+  const photoInputRef = React.useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  // State for building a new assignment before adding it to the list
+  const [currentAssignment, setCurrentAssignment] = React.useState<{level: string, class: string, course: string}>({level: '', class: '', course: ''});
+  const [availableClasses, setAvailableClasses] = React.useState<string[]>([]);
+  const [availableCourses, setAvailableCourses] = React.useState<string[]>([]);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phone: "",
+      experience: "",
+      assignments: [],
+    },
+  });
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    console.log({ ...values, documents, photo: photoPreview ? 'Photo Selected' : 'No Photo' });
+    toast({
+      title: "Enregistrement réussi",
+      description: "Le professeur a été ajouté au système avec succès.",
+      className: "bg-green-500 text-white",
+    });
+    form.reset();
+    setDocuments([]);
+    setPhotoPreview(null);
+    setCurrentAssignment({level: '', class: '', course: ''});
+  };
+
+  const handleLevelChange = (level: string) => {
+      setCurrentAssignment({ level, class: '', course: '' });
+      setAvailableClasses(classesByLevel[level as keyof typeof classesByLevel] || []);
+      setAvailableCourses(coursesByLevel[level as keyof typeof coursesByLevel] || []);
+      form.clearErrors("assignments");
+  };
+  
+  const handleAddAssignment = () => {
+    const result = assignmentSchema.safeParse(currentAssignment);
+    if (result.success) {
+      const currentAssignments = form.getValues("assignments");
+      // Prevent duplicate assignments
+      if (!currentAssignments.some(a => a.level === result.data.level && a.class === result.data.class && a.course === result.data.course)) {
+        form.setValue("assignments", [...currentAssignments, result.data]);
+        setCurrentAssignment({level: currentAssignment.level, class: '', course: ''}); // Reset class and course
+      } else {
+         toast({
+          variant: "destructive",
+          title: "Assignation en double",
+          description: "Cette assignation existe déjà pour ce professeur.",
+        });
+      }
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Assignation incomplète",
+        description: "Veuillez sélectionner un niveau, une classe et un cours.",
+      });
+    }
+  };
+
+  const handleRemoveAssignment = (index: number) => {
+    const currentAssignments = form.getValues("assignments");
+    form.setValue("assignments", currentAssignments.filter((_, i) => i !== index));
+  };
+  
+  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+        toast({ variant: "destructive", title: "Fichier trop volumineux", description: "La taille de la photo ne doit pas dépasser 2 Mo." });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => setPhotoPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newFiles = Array.from(files).map(file => ({ file, description: '' }));
+      setDocuments(prevDocs => [...prevDocs, ...newFiles]);
+    }
+  };
+
+  const handleDescriptionChange = (index: number, description: string) => {
+    setDocuments(prevDocs => {
+      const newDocs = [...prevDocs];
+      newDocs[index].description = description;
+      return newDocs;
+    });
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setDocuments(prevDocs => prevDocs.filter((_, i) => i !== index));
+  };
+
+
   return (
     <div className="py-4">
       <ScrollArea className="h-[calc(100vh-8rem)]">
-        <form className="grid gap-6 px-4">
-          <div className="grid gap-3">
-            <h3 className="font-semibold text-lg">Informations du Personnel</h3>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="full-name">Nom Complet</Label>
-                <Input id="full-name" placeholder="Jeanne Moreau" required />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-6 px-4">
+            
+            <div className="grid gap-4">
+              <h3 className="font-semibold text-lg">Informations Personnelles</h3>
+              <div className="flex items-center gap-6">
+                <Avatar className="h-24 w-24"><AvatarImage src={photoPreview || undefined} alt="Avatar prof" /><AvatarFallback className="text-3xl">P</AvatarFallback></Avatar>
+                <div className="grid gap-2">
+                  <Button type="button" variant="outline" onClick={() => photoInputRef.current?.click()}><Upload className="mr-2 h-4 w-4" />Joindre une photo</Button>
+                  <Input ref={photoInputRef} id="photo-upload" type="file" className="hidden" accept="image/*" onChange={handlePhotoChange}/>
+                  <p className="text-xs text-muted-foreground">PNG, JPG. Max 2Mo.</p>
+                </div>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Adresse Email</Label>
-                <Input id="email" type="email" placeholder="prof@example.com" required />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <FormField control={form.control} name="fullName" render={({ field }) => (<FormItem><FormLabel>Nom Complet</FormLabel><FormControl><Input placeholder="Ex: Jean-Luc Picard" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                 <FormField control={form.control} name="email" render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="prof@example.cd" {...field} /></FormControl><FormMessage /></FormItem>)} />
               </div>
-               <div className="grid gap-2">
-                <Label htmlFor="phone">Numéro de téléphone</Label>
-                <Input id="phone" type="tel" placeholder="+33 ... " required />
-              </div>
+              <FormField control={form.control} name="phone" render={({ field }) => (<FormItem><FormLabel>Téléphone</FormLabel><FormControl><Input type="tel" placeholder="+243 81 234 5678" {...field} /></FormControl><FormMessage /></FormItem>)} />
             </div>
-          </div>
-          
-          <div className="grid gap-3">
-            <h3 className="font-semibold text-lg">Rôle et Département</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <div className="grid gap-2">
-                  <Label htmlFor="department">Département</Label>
-                  <Select>
-                    <SelectTrigger><SelectValue placeholder="Sélectionner un département" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="mathematiques">Mathématiques</SelectItem>
-                      <SelectItem value="sciences">Sciences</SelectItem>
-                      <SelectItem value="lettres">Lettres</SelectItem>
-                      <SelectItem value="histoire-geo">Histoire-Géographie</SelectItem>
-                    </SelectContent>
-                  </Select>
+
+            <Separator />
+            
+            <div className="grid gap-4">
+              <h3 className="font-semibold text-lg">Expérience et Qualifications</h3>
+              <FormField control={form.control} name="experience" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Expériences passées</FormLabel>
+                    <FormControl><Textarea placeholder="Décrivez les expériences professionnelles pertinentes..." {...field} rows={5} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+              )} />
+              <div className="grid gap-2">
+                <Label htmlFor="documents-upload">Diplômes et attestations</Label>
+                <Input id="documents-upload" type="file" multiple onChange={handleFileChange} className="bg-input" />
+                <p className="text-sm text-muted-foreground">Formats : PDF, JPG, PNG.</p>
               </div>
-               <div className="grid gap-2">
-                  <Label htmlFor="role">Rôle</Label>
-                  <Input id="role" placeholder="Professeur de Mathématiques" required />
-              </div>
+              {documents.length > 0 && (
+                <div className="space-y-3 pt-2">
+                  {documents.map((doc, index) => (
+                    <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 border p-3 rounded-lg bg-muted/40">
+                      <div className="flex-1 grid gap-2">
+                        <p className="text-sm font-semibold truncate" title={doc.file.name}>{doc.file.name}</p>
+                        <Input type="text" placeholder="Description (ex: Diplôme de Licence)" value={doc.description} onChange={(e) => handleDescriptionChange(index, e.target.value)} className="bg-background"/>
+                      </div>
+                      <Button type="button" variant="destructive" size="sm" onClick={() => handleRemoveFile(index)} className="w-full sm:w-auto"><Trash2 className="h-4 w-4 sm:mr-2" /><span className="sm:inline">Supprimer</span></Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-          
-          <Button type="submit" className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground">Ajouter un membre du personnel</Button>
-        </form>
+
+            <Separator />
+
+            <div className="grid gap-4">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="font-semibold text-lg">Assignations Pédagogiques</h3>
+                        <p className="text-sm text-muted-foreground">Définissez les cours que ce professeur enseignera.</p>
+                    </div>
+                </div>
+                <FormField control={form.control} name="assignments" render={() => (
+                    <FormItem>
+                        {form.getValues("assignments").length > 0 && (
+                             <div className="space-y-2">
+                                <FormLabel>Assignations actuelles</FormLabel>
+                                <div className="flex flex-wrap gap-2">
+                                {form.getValues("assignments").map((assign, index) => (
+                                    <Badge key={index} variant="secondary" className="flex items-center gap-2">
+                                        <span>{`${assign.level} / ${assign.class} / ${assign.course}`}</span>
+                                        <button type="button" onClick={() => handleRemoveAssignment(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5"><X className="h-3 w-3" /></button>
+                                    </Badge>
+                                ))}
+                                </div>
+                            </div>
+                        )}
+                        <FormMessage />
+                    </FormItem>
+                )} />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-4 border rounded-lg border-dashed">
+                    <div className="grid gap-2">
+                        <Label>Niveau</Label>
+                        <Select onValueChange={handleLevelChange} value={currentAssignment.level}>
+                            <SelectTrigger><SelectValue placeholder="Choisir..." /></SelectTrigger>
+                            <SelectContent>{levels.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </div>
+                     <div className="grid gap-2">
+                        <Label>Classe</Label>
+                        <Select onValueChange={(value) => setCurrentAssignment(prev => ({...prev, class: value}))} value={currentAssignment.class} disabled={!currentAssignment.level}>
+                            <SelectTrigger><SelectValue placeholder="Choisir..." /></SelectTrigger>
+                            <SelectContent>{availableClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label>Cours</Label>
+                        <Select onValueChange={(value) => setCurrentAssignment(prev => ({...prev, course: value}))} value={currentAssignment.course} disabled={!currentAssignment.level}>
+                            <SelectTrigger><SelectValue placeholder="Choisir..." /></SelectTrigger>
+                            <SelectContent>{availableCourses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </div>
+                    <Button type="button" onClick={handleAddAssignment} className="self-end" variant="outline">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Ajouter
+                    </Button>
+                </div>
+            </div>
+
+            <Button type="submit" className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">Enregistrer le professeur</Button>
+          </form>
+        </Form>
       </ScrollArea>
     </div>
   );
