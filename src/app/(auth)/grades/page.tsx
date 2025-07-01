@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationEllipsis, PaginationNext } from '@/components/ui/pagination';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 
 const gradesData = [
   { id: 1, student: 'Alice Petit', subject: 'Mathématiques', grade: '18/20', date: '2024-05-15', evaluator: 'M. Dupont' },
