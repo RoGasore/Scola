@@ -1,33 +1,26 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Input } from '@/components/ui/input'
 
 export default function StudentsLoading() {
-  const skeletonRows = Array(8).fill(0);
+  const skeletonRows = Array(10).fill(0);
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
-        <Skeleton className="h-8 w-32" />
-        <div className="ml-auto flex items-center gap-2">
-          <Skeleton className="h-8 w-20" />
-          <Skeleton className="h-8 w-32" />
-        </div>
+        <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-10 w-24" />
       </div>
-      <div className="border-b">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-8 w-16" />
-          <Skeleton className="h-8 w-20" />
-          <Skeleton className="h-8 w-24" />
-        </div>
-      </div>
-       <Card>
+      <Card>
         <CardHeader>
-          <div className="flex items-center justify-between gap-2">
-            <Skeleton className="h-8 w-1/2 md:w-1/3" />
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-8 w-24" />
-              <Skeleton className="h-8 w-20" />
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <Skeleton className="h-10 w-full sm:w-72" />
+            <div className="flex w-full sm:w-auto sm:ml-auto items-center gap-2">
+              <Skeleton className="h-10 w-full sm:w-40" />
+              <Skeleton className="h-10 w-full sm:w-40" />
+              <Skeleton className="h-10 w-full sm:w-40" />
             </div>
           </div>
         </CardHeader>
