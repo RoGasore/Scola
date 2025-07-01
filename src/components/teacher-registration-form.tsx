@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -32,12 +33,17 @@ const coursesByLevel = {
     Primaire: ['Lecture et Écriture', 'Mathématiques de Base', 'Découverte du Monde'],
     Secondaire: ['Mathématiques', 'Physique', 'Chimie', 'Français', 'Anglais', 'Histoire', 'Géographie', 'Biologie'],
 }
+const sections = ['Éducation de base', 'Humanités'];
+const optionsBySection = {
+  'Humanités': ['Latin-Grec', 'Sciences Économiques', 'Électricité', 'Biochimie', 'Arts', 'Général', 'Numérique', 'Sciences de la Vie'],
+};
 
-// We define a schema for a single assignment to validate it before adding
 const assignmentSchema = z.object({
-  level: z.string().min(1),
-  class: z.string().min(1),
-  course: z.string().min(1),
+  level: z.string().min(1, "Niveau requis"),
+  class: z.string().min(1, "Classe requise"),
+  course: z.string().min(1, "Cours requis"),
+  section: z.string().optional(),
+  option: z.string().optional(),
 });
 type Assignment = z.infer<typeof assignmentSchema>;
 
@@ -56,8 +62,7 @@ export function TeacherRegistrationForm() {
   const photoInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // State for building a new assignment before adding it to the list
-  const [currentAssignment, setCurrentAssignment] = React.useState<{level: string, class: string, course: string}>({level: '', class: '', course: ''});
+  const [currentAssignment, setCurrentAssignment] = React.useState<Partial<Assignment>>({});
   const [availableClasses, setAvailableClasses] = React.useState<string[]>([]);
   const [availableCourses, setAvailableCourses] = React.useState<string[]>([]);
 
@@ -71,6 +76,20 @@ export function TeacherRegistrationForm() {
       assignments: [],
     },
   });
+  
+  const selectedAssignmentLevel = currentAssignment.level;
+  const selectedAssignmentSection = currentAssignment.section;
+
+  React.useEffect(() => {
+    if (selectedAssignmentLevel) {
+      setAvailableClasses(classesByLevel[selectedAssignmentLevel as keyof typeof classesByLevel] || []);
+      setAvailableCourses(coursesByLevel[selectedAssignmentLevel as keyof typeof coursesByLevel] || []);
+    } else {
+      setAvailableClasses([]);
+      setAvailableCourses([]);
+    }
+  }, [selectedAssignmentLevel]);
+
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     console.log({ ...values, documents, photo: photoPreview ? 'Photo Selected' : 'No Photo' });
@@ -82,24 +101,40 @@ export function TeacherRegistrationForm() {
     form.reset();
     setDocuments([]);
     setPhotoPreview(null);
-    setCurrentAssignment({level: '', class: '', course: ''});
-  };
-
-  const handleLevelChange = (level: string) => {
-      setCurrentAssignment({ level, class: '', course: '' });
-      setAvailableClasses(classesByLevel[level as keyof typeof classesByLevel] || []);
-      setAvailableCourses(coursesByLevel[level as keyof typeof coursesByLevel] || []);
-      form.clearErrors("assignments");
+    setCurrentAssignment({});
   };
   
   const handleAddAssignment = () => {
+    if (currentAssignment.level === 'Secondaire') {
+      if (!currentAssignment.section) {
+        toast({ variant: "destructive", title: "Assignation incomplète", description: "Veuillez sélectionner un cycle pour le niveau secondaire." });
+        return;
+      }
+      if (currentAssignment.section === 'Humanités' && !currentAssignment.option) {
+        toast({ variant: "destructive", title: "Assignation incomplète", description: "Veuillez sélectionner une option pour le cycle Humanités." });
+        return;
+      }
+    }
+
     const result = assignmentSchema.safeParse(currentAssignment);
     if (result.success) {
+      const newAssignment = result.data;
       const currentAssignments = form.getValues("assignments");
-      // Prevent duplicate assignments
-      if (!currentAssignments.some(a => a.level === result.data.level && a.class === result.data.class && a.course === result.data.course)) {
-        form.setValue("assignments", [...currentAssignments, result.data]);
-        setCurrentAssignment({level: currentAssignment.level, class: '', course: ''}); // Reset class and course
+      
+      const isDuplicate = currentAssignments.some(a => 
+            a.level === newAssignment.level && 
+            a.class === newAssignment.class && 
+            a.course === newAssignment.course &&
+            a.section === newAssignment.section &&
+            a.option === newAssignment.option
+      );
+
+      if (!isDuplicate) {
+        form.setValue("assignments", [...currentAssignments, newAssignment]);
+        setCurrentAssignment({
+            level: currentAssignment.level,
+            section: currentAssignment.section,
+        });
       } else {
          toast({
           variant: "destructive",
@@ -226,43 +261,63 @@ export function TeacherRegistrationForm() {
                                 <div className="flex flex-wrap gap-2">
                                 {form.getValues("assignments").map((assign, index) => (
                                     <Badge key={index} variant="secondary" className="flex items-center gap-2">
-                                        <span>{`${assign.level} / ${assign.class} / ${assign.course}`}</span>
+                                        <span>{`${assign.level} / ${assign.class}${assign.section ? ` / ${assign.section}` : ''}${assign.option ? ` / ${assign.option}` : ''} / ${assign.course}`}</span>
                                         <button type="button" onClick={() => handleRemoveAssignment(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5"><X className="h-3 w-3" /></button>
                                     </Badge>
                                 ))}
                                 </div>
                             </div>
                         )}
-                        <FormMessage />
+                        <FormMessage className="pt-2" />
                     </FormItem>
                 )} />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-4 border rounded-lg border-dashed">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg border-dashed">
                     <div className="grid gap-2">
                         <Label>Niveau</Label>
-                        <Select onValueChange={handleLevelChange} value={currentAssignment.level}>
-                            <SelectTrigger><SelectValue placeholder="Choisir..." /></SelectTrigger>
+                        <Select onValueChange={(level) => setCurrentAssignment({ level })} value={currentAssignment.level}>
+                            <SelectTrigger><SelectValue placeholder="Choisir le niveau..." /></SelectTrigger>
                             <SelectContent>{levels.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
+                     {selectedAssignmentLevel === 'Secondaire' && (
+                        <div className="grid gap-2">
+                            <Label>Cycle</Label>
+                            <Select onValueChange={(section) => setCurrentAssignment(prev => ({ ...prev, section, option: '' }))} value={currentAssignment.section}>
+                                <SelectTrigger><SelectValue placeholder="Choisir le cycle..." /></SelectTrigger>
+                                <SelectContent>{sections.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </div>
+                     )}
+                     {selectedAssignmentLevel === 'Secondaire' && selectedAssignmentSection === 'Humanités' && (
+                        <div className="grid gap-2">
+                            <Label>Option</Label>
+                            <Select onValueChange={(option) => setCurrentAssignment(prev => ({...prev, option}))} value={currentAssignment.option}>
+                                <SelectTrigger><SelectValue placeholder="Choisir l'option..." /></SelectTrigger>
+                                <SelectContent>{(optionsBySection['Humanités'] || []).map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </div>
+                     )}
                      <div className="grid gap-2">
                         <Label>Classe</Label>
-                        <Select onValueChange={(value) => setCurrentAssignment(prev => ({...prev, class: value}))} value={currentAssignment.class} disabled={!currentAssignment.level}>
-                            <SelectTrigger><SelectValue placeholder="Choisir..." /></SelectTrigger>
+                        <Select onValueChange={(value) => setCurrentAssignment(prev => ({...prev, class: value}))} value={currentAssignment.class} disabled={!selectedAssignmentLevel}>
+                            <SelectTrigger><SelectValue placeholder="Choisir la classe..." /></SelectTrigger>
                             <SelectContent>{availableClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
                     <div className="grid gap-2">
                         <Label>Cours</Label>
-                        <Select onValueChange={(value) => setCurrentAssignment(prev => ({...prev, course: value}))} value={currentAssignment.course} disabled={!currentAssignment.level}>
-                            <SelectTrigger><SelectValue placeholder="Choisir..." /></SelectTrigger>
+                        <Select onValueChange={(value) => setCurrentAssignment(prev => ({...prev, course: value}))} value={currentAssignment.course} disabled={!selectedAssignmentLevel}>
+                            <SelectTrigger><SelectValue placeholder="Choisir le cours..." /></SelectTrigger>
                             <SelectContent>{availableCourses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
-                    <Button type="button" onClick={handleAddAssignment} className="self-end" variant="outline">
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Ajouter
-                    </Button>
+                    <div className="md:col-span-2 flex justify-end items-end">
+                      <Button type="button" onClick={handleAddAssignment} variant="outline" className="w-full md:w-auto">
+                          <PlusCircle className="mr-2 h-4 w-4" />
+                          Ajouter l'assignation
+                      </Button>
+                    </div>
                 </div>
             </div>
 
@@ -273,3 +328,4 @@ export function TeacherRegistrationForm() {
     </div>
   );
 }
+
