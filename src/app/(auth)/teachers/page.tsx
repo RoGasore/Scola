@@ -61,7 +61,6 @@ const teachersData = [
 export default function TeachersPage() {
   const [searchTerm, setSearchTerm] = React.useState('');
   
-  // Note: For a real app, filtering logic would be implemented here.
   const filteredTeachers = teachersData.filter(teacher =>
     teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     teacher.email.toLowerCase().includes(searchTerm.toLowerCase())

@@ -5,9 +5,7 @@ import * as React from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { CalendarIcon, Trash2, Upload, PlusCircle, X, LoaderCircle } from "lucide-react";
+import { Trash2, Upload, PlusCircle, X, LoaderCircle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -23,22 +21,11 @@ import { Badge } from './ui/badge';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { extractCvInfo, type ExtractCvInfoOutput } from '@/ai/flows/extract-cv-info-flow';
+import { getLevels, getClassesForLevel, getCoursesForLevel, getSectionsForSecondary, getOptionsForHumanites } from '@/lib/school-data';
 
-const levels = ['Maternelle', 'Primaire', 'Secondaire'];
-const classesByLevel = {
-  Maternelle: ['1ère Maternelle', '2ème Maternelle', '3ème Maternelle'],
-  Primaire: ['1ère Primaire', '2ème Primaire', '3ème Primaire', '4ème Primaire', '5ème Primaire', '6ème Primaire'],
-  Secondaire: ['1ère', '2ème', '3ème', '4ème', '5ème', '6ème'],
-};
-const coursesByLevel = {
-    Maternelle: ['Psychomotricité', 'Éveil Artistique', 'Langage'],
-    Primaire: ['Lecture et Écriture', 'Mathématiques de Base', 'Découverte du Monde'],
-    Secondaire: ['Mathématiques', 'Physique', 'Chimie', 'Français', 'Anglais', 'Histoire', 'Géographie', 'Biologie'],
-}
-const sections = ['Éducation de base', 'Humanités'];
-const optionsBySection = {
-  'Humanités': ['Latin-Grec', 'Sciences Économiques', 'Électricité', 'Biochimie', 'Arts', 'Général', 'Numérique', 'Sciences de la Vie'],
-};
+const levels = getLevels();
+const sections = getSectionsForSecondary();
+const options = getOptionsForHumanites();
 
 const assignmentSchema = z.object({
   level: z.string().min(1, "Niveau requis"),
@@ -69,8 +56,6 @@ export function TeacherRegistrationForm() {
   const { toast } = useToast();
 
   const [currentAssignment, setCurrentAssignment] = React.useState<Partial<Assignment>>({});
-  const [availableClasses, setAvailableClasses] = React.useState<string[]>([]);
-  const [availableCourses, setAvailableCourses] = React.useState<string[]>([]);
   
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
   const [analysisResult, setAnalysisResult] = React.useState<ExtractCvInfoOutput | null>(null);
@@ -91,16 +76,19 @@ export function TeacherRegistrationForm() {
   
   const selectedAssignmentLevel = currentAssignment.level;
   const selectedAssignmentSection = currentAssignment.section;
+  const selectedAssignmentOption = currentAssignment.option;
+
+  const availableClasses = React.useMemo(() => {
+    return getClassesForLevel(selectedAssignmentLevel, selectedAssignmentSection, selectedAssignmentOption);
+  }, [selectedAssignmentLevel, selectedAssignmentSection, selectedAssignmentOption]);
+
+  const availableCourses = React.useMemo(() => {
+    return getCoursesForLevel(selectedAssignmentLevel);
+  }, [selectedAssignmentLevel]);
+
 
   React.useEffect(() => {
-    if (selectedAssignmentLevel) {
-      setAvailableClasses(classesByLevel[selectedAssignmentLevel as keyof typeof classesByLevel] || []);
-      setAvailableCourses(coursesByLevel[selectedAssignmentLevel as keyof typeof coursesByLevel] || []);
-    } else {
-      setAvailableClasses([]);
-      setAvailableCourses([]);
-    }
-    setCurrentAssignment(prev => ({...prev, class: '', course: '', option: ''}));
+    setCurrentAssignment(prev => ({...prev, class: '', course: '', option: '', section: ''}));
   }, [selectedAssignmentLevel]);
 
   React.useEffect(() => {
@@ -438,7 +426,7 @@ export function TeacherRegistrationForm() {
                             <Label>Option</Label>
                             <Select onValueChange={(option) => setCurrentAssignment(prev => ({...prev, option}))} value={currentAssignment.option || ''}>
                                 <SelectTrigger><SelectValue placeholder="Choisir l'option..." /></SelectTrigger>
-                                <SelectContent>{(optionsBySection['Humanités'] || []).map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+                                <SelectContent>{options.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
                             </Select>
                         </div>
                      )}

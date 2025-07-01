@@ -21,17 +21,11 @@ import { Separator } from './ui/separator';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { getLevels, getClassesForLevel, getSectionsForSecondary, getOptionsForHumanites } from '@/lib/school-data';
 
-const levels = ['Maternelle', 'Primaire', 'Secondaire'];
-const classesByLevel = {
-  Maternelle: ['1ère Maternelle', '2ème Maternelle', '3ème Maternelle'],
-  Primaire: ['1ère Primaire', '2ème Primaire', '3ème Primaire', '4ème Primaire', '5ème Primaire', '6ème Primaire'],
-  Secondaire: ['1ère', '2ème', '3ème', '4ème', '5ème', '6ème'],
-};
-const sections = ['Éducation de base', 'Humanités'];
-const optionsBySection = {
-  'Humanités': ['Latin-Grec', 'Sciences Économiques', 'Électricité', 'Biochimie', 'Arts', 'Général', 'Numérique', 'Sciences de la Vie'],
-};
+const levels = getLevels();
+const sections = getSectionsForSecondary();
+const options = getOptionsForHumanites();
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: "Le prénom est requis." }),
@@ -103,6 +97,12 @@ export function StudentEnrollmentForm() {
   
   const selectedLevel = form.watch("level");
   const selectedSection = form.watch("section");
+  const selectedOption = form.watch("option");
+
+  const availableClasses = React.useMemo(() => {
+      return getClassesForLevel(selectedLevel, selectedSection, selectedOption);
+  }, [selectedLevel, selectedSection, selectedOption]);
+
 
   React.useEffect(() => {
     form.setValue("class", "");
@@ -308,18 +308,16 @@ export function StudentEnrollmentForm() {
                     <FormMessage />
                   </FormItem>
                 )} />
-                {selectedLevel && (
-                   <FormField control={form.control} name="class" render={({ field }) => (
+                <FormField control={form.control} name="class" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Classe</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value} disabled={!selectedLevel}>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!selectedLevel || availableClasses.length === 0}>
                         <FormControl><SelectTrigger><SelectValue placeholder="Sélectionner la classe" /></SelectTrigger></FormControl>
-                        <SelectContent>{(classesByLevel[selectedLevel as keyof typeof classesByLevel] || []).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                        <SelectContent>{availableClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )} />
-                )}
               </div>
 
               {selectedLevel === 'Secondaire' && (
@@ -341,7 +339,7 @@ export function StudentEnrollmentForm() {
                         <FormLabel>Option</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value} disabled={selectedSection !== 'Humanités'}>
                           <FormControl><SelectTrigger><SelectValue placeholder="Sélectionner l'option" /></SelectTrigger></FormControl>
-                          <SelectContent>{(optionsBySection['Humanités'] || []).map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+                          <SelectContent>{options.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
