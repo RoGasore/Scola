@@ -21,7 +21,7 @@ import { Badge } from './ui/badge';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { extractCvInfo, type ExtractCvInfoOutput } from '@/ai/flows/extract-cv-info-flow';
-import { getLevels, getClassesForLevel, getCoursesForLevel, getSectionsForSecondary, getOptionsForHumanites } from '@/lib/school-data';
+import { getLevels, getClassesForLevel, getCoursesForClass, getSectionsForSecondary, getOptionsForHumanites } from '@/lib/school-data';
 
 const levels = getLevels();
 const sections = getSectionsForSecondary();
@@ -77,23 +77,15 @@ export function TeacherRegistrationForm() {
   const selectedAssignmentLevel = currentAssignment.level;
   const selectedAssignmentSection = currentAssignment.section;
   const selectedAssignmentOption = currentAssignment.option;
+  const selectedAssignmentClass = currentAssignment.class;
 
   const availableClasses = React.useMemo(() => {
     return getClassesForLevel(selectedAssignmentLevel, selectedAssignmentSection, selectedAssignmentOption);
   }, [selectedAssignmentLevel, selectedAssignmentSection, selectedAssignmentOption]);
 
   const availableCourses = React.useMemo(() => {
-    return getCoursesForLevel(selectedAssignmentLevel);
-  }, [selectedAssignmentLevel]);
-
-
-  React.useEffect(() => {
-    setCurrentAssignment(prev => ({...prev, class: '', course: '', option: '', section: ''}));
-  }, [selectedAssignmentLevel]);
-
-  React.useEffect(() => {
-    setCurrentAssignment(prev => ({...prev, option: ''}));
-  }, [selectedAssignmentSection])
+    return getCoursesForClass(selectedAssignmentClass);
+  }, [selectedAssignmentClass]);
 
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
@@ -407,7 +399,10 @@ export function TeacherRegistrationForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg border-dashed">
                     <div className="grid gap-2">
                         <Label>Niveau</Label>
-                        <Select onValueChange={(level) => setCurrentAssignment({ level })} value={currentAssignment.level || ''}>
+                        <Select
+                           onValueChange={(level) => setCurrentAssignment({ level })}
+                           value={currentAssignment.level || ''}
+                        >
                             <SelectTrigger><SelectValue placeholder="Choisir le niveau..." /></SelectTrigger>
                             <SelectContent>{levels.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
                         </Select>
@@ -415,7 +410,10 @@ export function TeacherRegistrationForm() {
                      {selectedAssignmentLevel === 'Secondaire' && (
                         <div className="grid gap-2">
                             <Label>Cycle</Label>
-                            <Select onValueChange={(section) => setCurrentAssignment(prev => ({ ...prev, section, option: '' }))} value={currentAssignment.section || ''}>
+                            <Select
+                                onValueChange={(section) => setCurrentAssignment(prev => ({ ...prev, section, option: '', class: '', course: '' }))}
+                                value={currentAssignment.section || ''}
+                            >
                                 <SelectTrigger><SelectValue placeholder="Choisir le cycle..." /></SelectTrigger>
                                 <SelectContent>{sections.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                             </Select>
@@ -424,7 +422,10 @@ export function TeacherRegistrationForm() {
                      {selectedAssignmentLevel === 'Secondaire' && selectedAssignmentSection === 'Humanités' && (
                         <div className="grid gap-2">
                             <Label>Option</Label>
-                            <Select onValueChange={(option) => setCurrentAssignment(prev => ({...prev, option}))} value={currentAssignment.option || ''}>
+                             <Select
+                                onValueChange={(option) => setCurrentAssignment(prev => ({...prev, option, class: '', course: ''}))}
+                                value={currentAssignment.option || ''}
+                            >
                                 <SelectTrigger><SelectValue placeholder="Choisir l'option..." /></SelectTrigger>
                                 <SelectContent>{options.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
                             </Select>
@@ -432,14 +433,22 @@ export function TeacherRegistrationForm() {
                      )}
                      <div className="grid gap-2">
                         <Label>Classe</Label>
-                        <Select onValueChange={(value) => setCurrentAssignment(prev => ({...prev, class: value}))} value={currentAssignment.class || ''} disabled={!selectedAssignmentLevel}>
+                        <Select
+                            onValueChange={(value) => setCurrentAssignment(prev => ({...prev, class: value, course: ''}))}
+                            value={currentAssignment.class || ''}
+                            disabled={!selectedAssignmentLevel}
+                        >
                             <SelectTrigger><SelectValue placeholder="Choisir la classe..." /></SelectTrigger>
                             <SelectContent>{availableClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
                     <div className="grid gap-2">
                         <Label>Cours</Label>
-                        <Select onValueChange={(value) => setCurrentAssignment(prev => ({...prev, course: value}))} value={currentAssignment.course || ''} disabled={!selectedAssignmentLevel}>
+                        <Select
+                            onValueChange={(value) => setCurrentAssignment(prev => ({...prev, course: value}))}
+                            value={currentAssignment.course || ''}
+                            disabled={!currentAssignment.class}
+                        >
                             <SelectTrigger><SelectValue placeholder="Choisir le cours..." /></SelectTrigger>
                             <SelectContent>{availableCourses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                         </Select>
