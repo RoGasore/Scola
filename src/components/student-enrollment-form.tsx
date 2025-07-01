@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Trash2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -30,6 +31,28 @@ export function StudentEnrollmentForm() {
   const [date, setDate] = useState<Date>();
   const [selectedLevel, setSelectedLevel] = useState<string>('');
   const [selectedSection, setSelectedSection] = useState<string>('');
+  const [documents, setDocuments] = useState<Array<{ file: File; description: string }>>([]);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newFiles = Array.from(files).map(file => ({ file, description: '' }));
+      setDocuments(prevDocs => [...prevDocs, ...newFiles]);
+    }
+  };
+
+  const handleDescriptionChange = (index: number, description: string) => {
+    setDocuments(prevDocs => {
+      const newDocs = [...prevDocs];
+      newDocs[index].description = description;
+      return newDocs;
+    });
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setDocuments(prevDocs => prevDocs.filter((_, i) => i !== index));
+  };
+
 
   return (
     <div className="py-4">
@@ -184,12 +207,44 @@ export function StudentEnrollmentForm() {
           <div className="grid gap-4">
             <h3 className="font-semibold text-lg">Documents Requis</h3>
             <div className="grid gap-2">
-              <Label htmlFor="report-cards">Copies des bulletins précédents</Label>
-              <Input id="report-cards" type="file" multiple />
+              <Label htmlFor="documents-upload">Joindre des documents (bulletins, etc.)</Label>
+              <Input id="documents-upload" type="file" multiple onChange={handleFileChange} className="bg-input" />
               <p className="text-sm text-muted-foreground">
-                Formats acceptés : PDF, JPG, PNG.
+                Vous pouvez sélectionner plusieurs fichiers. Formats : PDF, JPG, PNG.
               </p>
             </div>
+
+            {documents.length > 0 && (
+              <div className="space-y-4 pt-2">
+                <h4 className="font-medium text-sm">Fichiers sélectionnés :</h4>
+                <div className="space-y-3">
+                  {documents.map((doc, index) => (
+                    <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 border p-3 rounded-lg bg-muted/40">
+                      <div className="flex-1 grid gap-2">
+                        <p className="text-sm font-semibold truncate" title={doc.file.name}>{doc.file.name}</p>
+                        <Input
+                          type="text"
+                          placeholder="Description (ex: Bulletin 1ère semestre)"
+                          value={doc.description}
+                          onChange={(e) => handleDescriptionChange(index, e.target.value)}
+                          className="bg-background"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleRemoveFile(index)}
+                        className="w-full sm:w-auto"
+                      >
+                        <Trash2 className="h-4 w-4 sm:mr-2" />
+                        <span className="sm:inline">Supprimer</span>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           
           <Button type="submit" className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">Inscrire l'élève</Button>
