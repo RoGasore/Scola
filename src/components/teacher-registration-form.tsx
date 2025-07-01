@@ -49,7 +49,7 @@ type Assignment = z.infer<typeof assignmentSchema>;
 
 const formSchema = z.object({
   fullName: z.string().min(3, { message: "Le nom complet est requis." }),
-  email: z.string().email({ message: "Adresse e-mail invalide." }),
+  email: z.string().min(1, { message: "L'adresse e-mail est requise." }).email({ message: "Adresse e-mail invalide." }),
   phone: z.string().min(1, { message: "Le numéro de téléphone est requis." }),
   experience: z.string().optional(),
   assignments: z.array(assignmentSchema).min(1, { message: "Au moins une assignation est requise." }),
@@ -88,7 +88,12 @@ export function TeacherRegistrationForm() {
       setAvailableClasses([]);
       setAvailableCourses([]);
     }
+    setCurrentAssignment(prev => ({...prev, class: '', course: '', option: ''}));
   }, [selectedAssignmentLevel]);
+
+  React.useEffect(() => {
+    setCurrentAssignment(prev => ({...prev, option: ''}));
+  }, [selectedAssignmentSection])
 
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
@@ -219,7 +224,7 @@ export function TeacherRegistrationForm() {
               <h3 className="font-semibold text-lg">Expérience et Qualifications</h3>
               <FormField control={form.control} name="experience" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Expériences passées</FormLabel>
+                    <FormLabel>Expériences passées (optionnel)</FormLabel>
                     <FormControl><Textarea placeholder="Décrivez les expériences professionnelles pertinentes..." {...field} rows={5} /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -261,7 +266,7 @@ export function TeacherRegistrationForm() {
                                 <div className="flex flex-wrap gap-2">
                                 {form.getValues("assignments").map((assign, index) => (
                                     <Badge key={index} variant="secondary" className="flex items-center gap-2">
-                                        <span>{`${assign.level} / ${assign.class}${assign.section ? ` / ${assign.section}` : ''}${assign.option ? ` / ${assign.option}` : ''} / ${assign.course}`}</span>
+                                        <span>{`${assign.level} / ${assign.class}${assign.section ? ` / ${assign.section}` : ''}${assign.option ? ` / ${assign.option}` : ''} - ${assign.course}`}</span>
                                         <button type="button" onClick={() => handleRemoveAssignment(index)} className="rounded-full hover:bg-muted-foreground/20 p-0.5"><X className="h-3 w-3" /></button>
                                     </Badge>
                                 ))}
@@ -275,7 +280,7 @@ export function TeacherRegistrationForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg border-dashed">
                     <div className="grid gap-2">
                         <Label>Niveau</Label>
-                        <Select onValueChange={(level) => setCurrentAssignment({ level })} value={currentAssignment.level}>
+                        <Select onValueChange={(level) => setCurrentAssignment({ level })} value={currentAssignment.level || ''}>
                             <SelectTrigger><SelectValue placeholder="Choisir le niveau..." /></SelectTrigger>
                             <SelectContent>{levels.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
                         </Select>
@@ -283,7 +288,7 @@ export function TeacherRegistrationForm() {
                      {selectedAssignmentLevel === 'Secondaire' && (
                         <div className="grid gap-2">
                             <Label>Cycle</Label>
-                            <Select onValueChange={(section) => setCurrentAssignment(prev => ({ ...prev, section, option: '' }))} value={currentAssignment.section}>
+                            <Select onValueChange={(section) => setCurrentAssignment(prev => ({ ...prev, section, option: '' }))} value={currentAssignment.section || ''}>
                                 <SelectTrigger><SelectValue placeholder="Choisir le cycle..." /></SelectTrigger>
                                 <SelectContent>{sections.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                             </Select>
@@ -292,7 +297,7 @@ export function TeacherRegistrationForm() {
                      {selectedAssignmentLevel === 'Secondaire' && selectedAssignmentSection === 'Humanités' && (
                         <div className="grid gap-2">
                             <Label>Option</Label>
-                            <Select onValueChange={(option) => setCurrentAssignment(prev => ({...prev, option}))} value={currentAssignment.option}>
+                            <Select onValueChange={(option) => setCurrentAssignment(prev => ({...prev, option}))} value={currentAssignment.option || ''}>
                                 <SelectTrigger><SelectValue placeholder="Choisir l'option..." /></SelectTrigger>
                                 <SelectContent>{(optionsBySection['Humanités'] || []).map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
                             </Select>
@@ -300,14 +305,14 @@ export function TeacherRegistrationForm() {
                      )}
                      <div className="grid gap-2">
                         <Label>Classe</Label>
-                        <Select onValueChange={(value) => setCurrentAssignment(prev => ({...prev, class: value}))} value={currentAssignment.class} disabled={!selectedAssignmentLevel}>
+                        <Select onValueChange={(value) => setCurrentAssignment(prev => ({...prev, class: value}))} value={currentAssignment.class || ''} disabled={!selectedAssignmentLevel}>
                             <SelectTrigger><SelectValue placeholder="Choisir la classe..." /></SelectTrigger>
                             <SelectContent>{availableClasses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
                     <div className="grid gap-2">
                         <Label>Cours</Label>
-                        <Select onValueChange={(value) => setCurrentAssignment(prev => ({...prev, course: value}))} value={currentAssignment.course} disabled={!selectedAssignmentLevel}>
+                        <Select onValueChange={(value) => setCurrentAssignment(prev => ({...prev, course: value}))} value={currentAssignment.course || ''} disabled={!selectedAssignmentLevel}>
                             <SelectTrigger><SelectValue placeholder="Choisir le cours..." /></SelectTrigger>
                             <SelectContent>{availableCourses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                         </Select>
@@ -328,4 +333,3 @@ export function TeacherRegistrationForm() {
     </div>
   );
 }
-
