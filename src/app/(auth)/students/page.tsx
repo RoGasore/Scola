@@ -16,28 +16,29 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationEllipsis, PaginationNext } from '@/components/ui/pagination';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const allStudents = [
   // Maternelle
-  { matricule: 'M24001', name: 'Alice Petit', email: 'alice.p@example.com', level: 'Maternelle', classe: '1ère Maternelle', section: null, option: null, status: 'Actif', dateJoined: '2023-09-01' },
-  { matricule: 'M24002', name: 'Léo Dubois', email: 'leo.d@example.com', level: 'Maternelle', classe: '2ème Maternelle', section: null, option: null, status: 'Actif', dateJoined: '2022-09-01' },
-  { matricule: 'M24003', name: 'Clara Roy', email: 'clara.r@example.com', level: 'Maternelle', classe: '3ème Maternelle', section: null, option: null, status: 'Actif', dateJoined: '2021-09-01' },
+  { matricule: 'M24001', name: 'Alice Petit', email: 'alice.p@example.com', level: 'Maternelle', classe: '1ère Maternelle', section: null, option: null, status: 'Actif', dateJoined: '2023-09-01', avatar: 'fille congolaise' },
+  { matricule: 'M24002', name: 'Léo Dubois', email: 'leo.d@example.com', level: 'Maternelle', classe: '2ème Maternelle', section: null, option: null, status: 'Actif', dateJoined: '2022-09-01', avatar: 'garçon congolais' },
+  { matricule: 'M24003', name: 'Clara Roy', email: 'clara.r@example.com', level: 'Maternelle', classe: '3ème Maternelle', section: null, option: null, status: 'Actif', dateJoined: '2021-09-01', avatar: 'fille congolaise' },
 
   // Primaire
-  { matricule: 'P24001', name: 'Chloé Bernard', email: 'chloe.b@example.com', level: 'Primaire', classe: '1ère Primaire', section: null, option: null, status: 'Actif', dateJoined: '2023-09-02' },
-  { matricule: 'P24002', name: 'Hugo Martin', email: 'hugo.m@example.com', level: 'Primaire', classe: '6ème Primaire', section: null, option: null, status: 'Inactif', dateJoined: '2018-09-02' },
-  { matricule: 'P24003', name: 'Emma Simon', email: 'emma.s@example.com', level: 'Primaire', classe: '4ème Primaire', section: null, option: null, status: 'Actif', dateJoined: '2020-09-02' },
+  { matricule: 'P24001', name: 'Chloé Bernard', email: 'chloe.b@example.com', level: 'Primaire', classe: '1ère Primaire', section: null, option: null, status: 'Actif', dateJoined: '2023-09-02', avatar: 'fille congolaise' },
+  { matricule: 'P24002', name: 'Hugo Martin', email: 'hugo.m@example.com', level: 'Primaire', classe: '6ème Primaire', section: null, option: null, status: 'Inactif', dateJoined: '2018-09-02', avatar: 'garçon congolais' },
+  { matricule: 'P24003', name: 'Emma Simon', email: 'emma.s@example.com', level: 'Primaire', classe: '4ème Primaire', section: null, option: null, status: 'Actif', dateJoined: '2020-09-02', avatar: 'fille congolaise' },
 
   // Secondaire - Éducation de base
-  { matricule: 'S24001', name: 'Manon Lefebvre', email: 'manon.l@example.com', level: 'Secondaire', classe: '1ère', section: 'Éducation de base', option: null, status: 'Actif', dateJoined: '2023-09-05' },
-  { matricule: 'S24002', name: 'Lucas Moreau', email: 'lucas.m@example.com', level: 'Secondaire', classe: '2ème', section: 'Éducation de base', option: null, status: 'Actif', dateJoined: '2022-09-05' },
+  { matricule: 'S24001', name: 'Manon Lefebvre', email: 'manon.l@example.com', level: 'Secondaire', classe: '1ère', section: 'Éducation de base', option: null, status: 'Actif', dateJoined: '2023-09-05', avatar: 'femme congolaise' },
+  { matricule: 'S24002', name: 'Lucas Moreau', email: 'lucas.m@example.com', level: 'Secondaire', classe: '2ème', section: 'Éducation de base', option: null, status: 'Actif', dateJoined: '2022-09-05', avatar: 'homme congolais' },
 
   // Secondaire - Humanités
-  { matricule: 'S24003', name: 'Jade Garcia', email: 'jade.g@example.com', level: 'Secondaire', classe: '3ème', section: 'Humanités', option: 'Latin-Grec', status: 'Actif', dateJoined: '2021-09-05' },
-  { matricule: 'S24004', name: 'Louis Roux', email: 'louis.r@example.com', level: 'Secondaire', classe: '4ème', section: 'Humanités', option: 'Sciences Économiques', status: 'Actif', dateJoined: '2020-09-05' },
-  { matricule: 'S24005', name: 'Emma Laurent', email: 'emma.l@example.com', level: 'Secondaire', classe: '4ème', section: 'Humanités', option: 'Électricité', status: 'Inactif', dateJoined: '2020-09-05' },
-  { matricule: 'S24006', name: 'Arthur Lemoine', email: 'arthur.l@example.com', level: 'Secondaire', classe: '5ème', section: 'Humanités', option: 'Biochimie', status: 'Actif', dateJoined: '2019-09-05' },
-  { matricule: 'S24007', name: 'Mohamed Cissé', email: 'mohamed.c@example.com', level: 'Secondaire', classe: '6ème', section: 'Humanités', option: 'Électricité', status: 'En attente', dateJoined: '2024-08-01' },
+  { matricule: 'S24003', name: 'Jade Garcia', email: 'jade.g@example.com', level: 'Secondaire', classe: '3ème', section: 'Humanités', option: 'Latin-Grec', status: 'Actif', dateJoined: '2021-09-05', avatar: 'femme congolaise' },
+  { matricule: 'S24004', name: 'Louis Roux', email: 'louis.r@example.com', level: 'Secondaire', classe: '4ème', section: 'Humanités', option: 'Sciences Économiques', status: 'Actif', dateJoined: '2020-09-05', avatar: 'homme congolais' },
+  { matricule: 'S24005', name: 'Emma Laurent', email: 'emma.l@example.com', level: 'Secondaire', classe: '4ème', section: 'Humanités', option: 'Électricité', status: 'Inactif', dateJoined: '2020-09-05', avatar: 'femme congolaise' },
+  { matricule: 'S24006', name: 'Arthur Lemoine', email: 'arthur.l@example.com', level: 'Secondaire', classe: '5ème', section: 'Humanités', option: 'Biochimie', status: 'Actif', dateJoined: '2019-09-05', avatar: 'homme congolais' },
+  { matricule: 'S24007', name: 'Mohamed Cissé', email: 'mohamed.c@example.com', level: 'Secondaire', classe: '6ème', section: 'Humanités', option: 'Électricité', status: 'En attente', dateJoined: '2024-08-01', avatar: 'homme africain' },
 ];
 
 const fuseOptions = {
@@ -208,8 +209,7 @@ export default function StudentsPage() {
                       <Checkbox aria-label="Tout sélectionner" />
                     </TableHead>
                     <TableHead>Matricule</TableHead>
-                    <TableHead>Nom</TableHead>
-                    <TableHead className="hidden sm:table-cell">Email</TableHead>
+                    <TableHead>Élève</TableHead>
                     <TableHead className="hidden sm:table-cell">Classe</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead className="hidden md:table-cell">Date d'inscription</TableHead>
@@ -226,8 +226,18 @@ export default function StudentsPage() {
                           <Checkbox aria-label={`Sélectionner la ligne ${index + 1}`} />
                         </TableCell>
                         <TableCell className="font-medium">{student.matricule}</TableCell>
-                        <TableCell className="font-medium">{student.name}</TableCell>
-                        <TableCell className="hidden sm:table-cell">{student.email}</TableCell>
+                        <TableCell>
+                            <div className="flex items-center gap-3">
+                                <Avatar className="hidden h-9 w-9 sm:flex">
+                                    <AvatarImage src={`https://placehold.co/40x40.png`} alt={student.name} data-ai-hint={student.avatar} />
+                                    <AvatarFallback>{student.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback>
+                                </Avatar>
+                                <div className="grid gap-0.5">
+                                    <span className="font-medium">{student.name}</span>
+                                    <span className="text-xs text-muted-foreground">{student.email}</span>
+                                </div>
+                            </div>
+                        </TableCell>
                         <TableCell className="hidden sm:table-cell">{student.classe}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className={
@@ -265,7 +275,7 @@ export default function StudentsPage() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={8} className="h-24 text-center">
+                      <TableCell colSpan={7} className="h-24 text-center">
                         Aucun résultat.
                       </TableCell>
                     </TableRow>

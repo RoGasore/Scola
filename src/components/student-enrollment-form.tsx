@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CalendarIcon, Trash2 } from "lucide-react";
+import { CalendarIcon, Trash2, Upload } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { Separator } from './ui/separator';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 const levels = ['Maternelle', 'Primaire', 'Secondaire'];
 const classesByLevel = {
@@ -36,6 +37,8 @@ const formSchema = z.object({
   firstName: z.string().min(1, { message: "Le prénom est requis." }),
   middleName: z.string().optional(),
   lastName: z.string().min(1, { message: "Le nom de famille est requis." }),
+  studentEmail: z.string().email({ message: "Adresse e-mail invalide." }).optional().or(z.literal("")),
+  studentPhone: z.string().optional(),
   dob: z.date({ required_error: "La date de naissance est requise." }),
   pob: z.string().min(1, { message: "Le lieu de naissance est requis." }),
   address: z.string().min(1, { message: "L'adresse est requise." }),
@@ -64,6 +67,8 @@ const formSchema = z.object({
 
 export function StudentEnrollmentForm() {
   const [documents, setDocuments] = React.useState<Array<{ file: File; description: string }>>([]);
+  const [photoPreview, setPhotoPreview] = React.useState<string | null>(null);
+  const photoInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -72,6 +77,8 @@ export function StudentEnrollmentForm() {
       firstName: "",
       middleName: "",
       lastName: "",
+      studentEmail: "",
+      studentPhone: "",
       pob: "",
       address: "",
       parentName: "",
@@ -83,7 +90,7 @@ export function StudentEnrollmentForm() {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log({ ...values, documents });
+    console.log({ ...values, documents, photo: photoPreview ? 'Photo Selected' : 'No Photo' });
     toast({
       title: "Inscription réussie",
       description: "L'élève a été ajouté au système avec succès.",
@@ -91,6 +98,7 @@ export function StudentEnrollmentForm() {
     });
     form.reset();
     setDocuments([]);
+    setPhotoPreview(null);
   };
   
   const selectedLevel = form.watch("level");
@@ -106,6 +114,24 @@ export function StudentEnrollmentForm() {
      form.setValue("option", "");
   }, [selectedSection, form]);
 
+  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+        toast({
+          variant: "destructive",
+          title: "Fichier trop volumineux",
+          description: "La taille de la photo ne doit pas dépasser 2 Mo.",
+        });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -136,6 +162,32 @@ export function StudentEnrollmentForm() {
             
             <div className="grid gap-4">
               <h3 className="font-semibold text-lg">Informations Personnelles de l'Élève</h3>
+              
+              <div className="flex items-center gap-6">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src={photoPreview || undefined} alt="Avatar de l'élève" />
+                  <AvatarFallback className="text-3xl">
+                    {form.watch("firstName")?.[0] || "?"}
+                    {form.watch("lastName")?.[0] || "?"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="grid gap-2">
+                  <Button type="button" variant="outline" onClick={() => photoInputRef.current?.click()}>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Joindre une photo
+                  </Button>
+                  <Input 
+                    ref={photoInputRef}
+                    id="photo-upload" 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/png, image/jpeg, image/jpg" 
+                    onChange={handlePhotoChange}
+                  />
+                  <p className="text-xs text-muted-foreground">PNG, JPG, JPEG. Max 2Mo.</p>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField control={form.control} name="firstName" render={({ field }) => (
                   <FormItem>
@@ -155,6 +207,22 @@ export function StudentEnrollmentForm() {
                   <FormItem>
                     <FormLabel>Nom</FormLabel>
                     <FormControl><Input placeholder="Kapenda" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField control={form.control} name="studentEmail" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>E-mail de l'élève (optionnel)</FormLabel>
+                    <FormControl><Input type="email" placeholder="moise.kapenda@example.cd" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="studentPhone" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Téléphone de l'élève (optionnel)</FormLabel>
+                    <FormControl><Input type="tel" placeholder="+243 81 234 5678" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
@@ -350,4 +418,3 @@ export function StudentEnrollmentForm() {
     </div>
   );
 }
-
