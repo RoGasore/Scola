@@ -13,7 +13,7 @@ import { Separator } from './ui/separator';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { PlusCircle, Trash2, Wand2 } from 'lucide-react';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import { Switch } from './ui/switch';
 import { getLevels } from '@/lib/school-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -55,6 +55,62 @@ type CourseManagementFormProps = {
     onUpdate: (newStructure: z.infer<typeof structureSchema>) => void;
 }
 
+function ClassEditor({ control, classPath }: { control: any, classPath: string }) {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: `${classPath}.courses`,
+  });
+
+  return (
+    <div className='pl-4 border-l-2 ml-4 space-y-4 py-4'>
+        <FormField
+            control={control}
+            name={`${classPath}.isActive`}
+            render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <div className="space-y-0.5">
+                        <FormLabel>Classe Active</FormLabel>
+                        <FormMessage />
+                    </div>
+                    <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                </FormItem>
+            )}
+        />
+        {fields.map((course, index) => (
+            <div key={course.id} className="grid grid-cols-12 gap-2 items-center">
+                <div className="col-span-6">
+                    <FormField
+                        control={control}
+                        name={`${classPath}.courses.${index}.name`}
+                        render={({ field }) => (
+                            <FormItem><FormLabel className='sr-only'>Nom du cours</FormLabel><FormControl><Input placeholder="Nom du cours" {...field} /></FormControl><FormMessage /></FormItem>
+                        )}
+                    />
+                </div>
+                <div className="col-span-4">
+                    <FormField
+                        control={control}
+                        name={`${classPath}.courses.${index}.hours`}
+                        render={({ field }) => (
+                            <FormItem><FormLabel className='sr-only'>Heures</FormLabel><FormControl><Input type="number" placeholder="Heures/sem" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl><FormMessage /></FormItem>
+                        )}
+                    />
+                </div>
+                <div className="col-span-2">
+                    <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>
+                </div>
+            </div>
+        ))}
+        <Button type="button" variant="outline" size="sm" onClick={() => append({ name: '', hours: 1 })}>
+            <PlusCircle className="mr-2 h-4 w-4" /> Ajouter un cours
+        </Button>
+    </div>
+  );
+}
+
+
 export function CourseManagementForm({ initialStructure, onUpdate }: CourseManagementFormProps) {
   const { toast } = useToast();
   const [selectedLevel, setSelectedLevel] = React.useState<string>(getLevels()[0]);
@@ -63,11 +119,6 @@ export function CourseManagementForm({ initialStructure, onUpdate }: CourseManag
   const form = useForm<z.infer<typeof structureSchema>>({
     resolver: zodResolver(structureSchema),
     defaultValues: initialStructure,
-  });
-
-  const { fields: humanitesOptions, append: appendHumanitesOption, remove: removeHumanitesOption } = useFieldArray({
-      control: form.control,
-      name: `Secondaire.Humanités.options`
   });
 
   const onSubmit = (values: z.infer<typeof structureSchema>) => {
@@ -99,72 +150,6 @@ export function CourseManagementForm({ initialStructure, onUpdate }: CourseManag
     setNewOptionName('');
   };
 
-  const addCourse = (path: any) => {
-    const courses = form.getValues(path);
-    form.setValue(path, [...courses, { name: '', hours: 1 }]);
-  };
-  
-  const removeCourse = (path: any, index: number) => {
-      const courses = form.getValues(path);
-      form.setValue(path, courses.filter((_: any, i: number) => i !== index));
-  };
-
-
-  const renderClassEditor = (classPath: any) => {
-    const {fields: courses} = useFieldArray({
-        control: form.control,
-        name: `${classPath}.courses`,
-    });
-
-    return (
-        <div className='pl-4 border-l-2 ml-4 space-y-4 py-4'>
-            <FormField
-                control={form.control}
-                name={`${classPath}.isActive`}
-                render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                        <div className="space-y-0.5">
-                            <FormLabel>Classe Active</FormLabel>
-                            <FormMessage />
-                        </div>
-                        <FormControl>
-                            <Switch checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                    </FormItem>
-                )}
-            />
-            {courses.map((course, index) => (
-                <div key={course.id} className="grid grid-cols-12 gap-2 items-center">
-                    <div className="col-span-6">
-                        <FormField
-                            control={form.control}
-                            name={`${classPath}.courses.${index}.name`}
-                            render={({ field }) => (
-                                <FormItem><FormLabel className='sr-only'>Nom du cours</FormLabel><FormControl><Input placeholder="Nom du cours" {...field} /></FormControl><FormMessage /></FormItem>
-                            )}
-                        />
-                    </div>
-                    <div className="col-span-4">
-                        <FormField
-                            control={form.control}
-                            name={`${classPath}.courses.${index}.hours`}
-                            render={({ field }) => (
-                                <FormItem><FormLabel className='sr-only'>Heures</FormLabel><FormControl><Input type="number" placeholder="Heures/sem" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || 0)} /></FormControl><FormMessage /></FormItem>
-                            )}
-                        />
-                    </div>
-                    <div className="col-span-2">
-                        <Button type="button" variant="destructive" size="icon" onClick={() => removeCourse(`${classPath}.courses`, index)}><Trash2 className="h-4 w-4" /></Button>
-                    </div>
-                </div>
-            ))}
-            <Button type="button" variant="outline" size="sm" onClick={() => addCourse(`${classPath}.courses`)}>
-                <PlusCircle className="mr-2 h-4 w-4" /> Ajouter un cours
-            </Button>
-        </div>
-    );
-  }
-
   return (
     <div className="py-4">
       <ScrollArea className="h-[calc(100vh-8rem)]">
@@ -189,7 +174,9 @@ export function CourseManagementForm({ initialStructure, onUpdate }: CourseManag
                             {Object.keys(form.watch('Maternelle.classes')).map((className) => (
                                 <AccordionItem key={className} value={className}>
                                     <AccordionTrigger>{className}</AccordionTrigger>
-                                    <AccordionContent>{renderClassEditor(`Maternelle.classes.${className}`)}</AccordionContent>
+                                    <AccordionContent>
+                                      <ClassEditor control={form.control} classPath={`Maternelle.classes.${className}`} />
+                                    </AccordionContent>
                                 </AccordionItem>
                             ))}
                         </Accordion>
@@ -200,7 +187,9 @@ export function CourseManagementForm({ initialStructure, onUpdate }: CourseManag
                             {Object.keys(form.watch('Primaire.classes')).map((className) => (
                                 <AccordionItem key={className} value={className}>
                                     <AccordionTrigger>{className}</AccordionTrigger>
-                                    <AccordionContent>{renderClassEditor(`Primaire.classes.${className}`)}</AccordionContent>
+                                    <AccordionContent>
+                                      <ClassEditor control={form.control} classPath={`Primaire.classes.${className}`} />
+                                    </AccordionContent>
                                 </AccordionItem>
                             ))}
                         </Accordion>
@@ -215,7 +204,9 @@ export function CourseManagementForm({ initialStructure, onUpdate }: CourseManag
                                         {Object.keys(form.watch('Secondaire.Éducation de base.classes')).map((className) => (
                                             <AccordionItem key={className} value={className}>
                                                 <AccordionTrigger>{className}</AccordionTrigger>
-                                                <AccordionContent>{renderClassEditor(`Secondaire.Éducation de base.classes.${className}`)}</AccordionContent>
+                                                <AccordionContent>
+                                                  <ClassEditor control={form.control} classPath={`Secondaire.Éducation de base.classes.${className}`} />
+                                                </AccordionContent>
                                             </AccordionItem>
                                         ))}
                                     </Accordion>
@@ -242,7 +233,9 @@ export function CourseManagementForm({ initialStructure, onUpdate }: CourseManag
                                                         {Object.keys(form.watch(`Secondaire.Humanités.options.${optionName}.classes`)).map((className) => (
                                                             <AccordionItem key={className} value={className}>
                                                                 <AccordionTrigger>{className}</AccordionTrigger>
-                                                                <AccordionContent>{renderClassEditor(`Secondaire.Humanités.options.${optionName}.classes.${className}`)}</AccordionContent>
+                                                                <AccordionContent>
+                                                                  <ClassEditor control={form.control} classPath={`Secondaire.Humanités.options.${optionName}.classes.${className}`} />
+                                                                </AccordionContent>
                                                             </AccordionItem>
                                                         ))}
                                                     </Accordion>
