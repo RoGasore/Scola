@@ -2,24 +2,24 @@
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, DollarSign, BookOpen, Activity } from 'lucide-react';
+import { Users, TrendingUp, BookOpen, Activity } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useEffect, useState } from 'react';
 
 const generateChartData = () => [
-  { month: "Jan", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Fév", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Mar", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Avr", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Mai", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Juin", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Juil", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Août", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Sep", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Oct", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Nov", total: Math.floor(Math.random() * 5000) + 1000 },
-  { month: "Déc", total: Math.floor(Math.random() * 5000) + 1000 },
+  { month: "Jan", inscriptions: Math.floor(Math.random() * 500) + 100 },
+  { month: "Fév", inscriptions: Math.floor(Math.random() * 500) + 100 },
+  { month: "Mar", inscriptions: Math.floor(Math.random() * 500) + 100 },
+  { month: "Avr", inscriptions: Math.floor(Math.random() * 500) + 100 },
+  { month: "Mai", inscriptions: Math.floor(Math.random() * 500) + 100 },
+  { month: "Juin", inscriptions: Math.floor(Math.random() * 500) + 100 },
+  { month: "Juil", inscriptions: Math.floor(Math.random() * 500) + 100 },
+  { month: "Août", inscriptions: Math.floor(Math.random() * 500) + 100 },
+  { month: "Sep", inscriptions: Math.floor(Math.random() * 500) + 100 },
+  { month: "Oct", inscriptions: Math.floor(Math.random() * 500) + 100 },
+  { month: "Nov", inscriptions: Math.floor(Math.random() * 500) + 100 },
+  { month: "Déc", inscriptions: Math.floor(Math.random() * 500) + 100 },
 ];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -27,7 +27,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return (
       <div className="p-2 bg-background/80 backdrop-blur-sm border border-border rounded-lg shadow-lg">
         <p className="label text-sm text-muted-foreground">{`${label}`}</p>
-        <p className="intro text-base font-bold text-primary">{`${payload[0].value.toLocaleString()} €`}</p>
+        <p className="intro text-base font-bold text-primary">{`${payload[0].value.toLocaleString()} inscriptions`}</p>
       </div>
     );
   }
@@ -47,12 +47,12 @@ export default function Dashboard() {
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenus Totals</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Taux de Réussite</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">45,231.89 €</div>
-            <p className="text-xs text-muted-foreground">+20.1% depuis le mois dernier</p>
+            <div className="text-2xl font-bold">92.5%</div>
+            <p className="text-xs text-muted-foreground">+1.5% depuis le dernier trimestre</p>
           </CardContent>
         </Card>
         <Card>
@@ -62,17 +62,17 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+2350</div>
-            <p className="text-xs text-muted-foreground">+180.1% depuis le mois dernier</p>
+            <p className="text-xs text-muted-foreground">+180 depuis le mois dernier</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Cours Vendus</CardTitle>
+            <CardTitle className="text-sm font-medium">Cours Actifs</CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+12,234</div>
-            <p className="text-xs text-muted-foreground">+19% depuis le mois dernier</p>
+            <div className="text-2xl font-bold">125</div>
+            <p className="text-xs text-muted-foreground">+19 depuis le mois dernier</p>
           </CardContent>
         </Card>
         <Card>
@@ -89,7 +89,7 @@ export default function Dashboard() {
       <div className="grid gap-4 md:gap-8 lg:grid-cols-5">
         <Card className="lg:col-span-3">
           <CardHeader>
-            <CardTitle>Aperçu</CardTitle>
+            <CardTitle>Inscriptions par mois</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
             <ResponsiveContainer width="100%" height={350}>
@@ -112,13 +112,13 @@ export default function Dashboard() {
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(value) => `${value / 1000}K €`}
+                    tickFormatter={(value) => `${value}`}
                   />
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--primary) / 0.1)' }} />
                   <Area
                     type="monotone"
-                    dataKey="total"
+                    dataKey="inscriptions"
                     stroke="hsl(var(--primary))"
                     strokeWidth={2}
                     fillOpacity={1}
@@ -130,8 +130,8 @@ export default function Dashboard() {
         </Card>
         <Card className="lg:col-span-2">
            <CardHeader>
-            <CardTitle>Ventes Récentes</CardTitle>
-            <CardDescription>Vous avez réalisé 265 ventes ce mois-ci.</CardDescription>
+            <CardTitle>Inscriptions Récentes</CardTitle>
+            <CardDescription>265 nouvelles inscriptions ce mois-ci.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
@@ -146,7 +146,7 @@ export default function Dashboard() {
                     olivia.martin@email.com
                   </p>
                 </div>
-                <div className="ml-auto font-medium">+1,999.00 €</div>
+                <div className="ml-auto font-medium text-sm text-muted-foreground">Mathématiques</div>
               </div>
               <div className="flex items-center">
                 <Avatar className="h-9 w-9">
@@ -157,7 +157,7 @@ export default function Dashboard() {
                   <p className="text-sm font-medium leading-none">Jackson Lee</p>
                   <p className="text-sm text-muted-foreground">jackson.lee@email.com</p>
                 </div>
-                <div className="ml-auto font-medium">+39.00 €</div>
+                <div className="ml-auto font-medium text-sm text-muted-foreground">Physique</div>
               </div>
               <div className="flex items-center">
                 <Avatar className="h-9 w-9">
@@ -170,7 +170,7 @@ export default function Dashboard() {
                     isabella.nguyen@email.com
                   </p>
                 </div>
-                <div className="ml-auto font-medium">+299.00 €</div>
+                <div className="ml-auto font-medium text-sm text-muted-foreground">Histoire de l'Art</div>
               </div>
               <div className="flex items-center">
                 <Avatar className="h-9 w-9">
@@ -181,7 +181,7 @@ export default function Dashboard() {
                   <p className="text-sm font-medium leading-none">William Kim</p>
                   <p className="text-sm text-muted-foreground">will@email.com</p>
                 </div>
-                <div className="ml-auto font-medium">+99.00 €</div>
+                <div className="ml-auto font-medium text-sm text-muted-foreground">Chimie Organique</div>
               </div>
               <div className="flex items-center">
                 <Avatar className="h-9 w-9">
@@ -192,7 +192,7 @@ export default function Dashboard() {
                   <p className="text-sm font-medium leading-none">Sofia Davis</p>
                   <p className="text-sm text-muted-foreground">sofia.davis@email.com</p>
                 </div>
-                <div className="ml-auto font-medium">+39.00 €</div>
+                <div className="ml-auto font-medium text-sm text-muted-foreground">Biologie</div>
               </div>
             </div>
           </CardContent>
