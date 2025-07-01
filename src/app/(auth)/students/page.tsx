@@ -84,21 +84,21 @@ export default function StudentsPage() {
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
+    setSearchTerm('');
     setSelectedClass('all');
     setSelectedSection('all');
     setSelectedOption('all');
   }
 
   const getUniqueValues = (key: 'classe' | 'section' | 'option') => {
-      const relevantStudents = activeTab === 'Tous' 
-        ? allStudents 
-        : allStudents.filter(s => s.level === activeTab);
+      let relevantData = activeTab === 'Tous' ? allStudents : allStudents.filter(s => s.level === activeTab);
       
-      if (key === 'option' && selectedSection !== 'all') {
-        return [...new Set(relevantStudents.filter(s => s.section === selectedSection && s.option).map(s => s.option as string))];
+      if (key === 'option' && selectedSection !== 'all' && activeTab === 'Secondaire') {
+        relevantData = relevantData.filter(s => s.section === selectedSection);
       }
-
-      return [...new Set(relevantStudents.filter(s => s[key]).map(s => s[key] as string))];
+      
+      const values = relevantData.map(s => s[key]).filter(Boolean);
+      return [...new Set(values)] as string[];
   };
 
   const classes = getUniqueValues('classe');
@@ -107,7 +107,11 @@ export default function StudentsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Tabs defaultValue="Tous" onValueChange={handleTabChange} className="w-full">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold tracking-tight">Gestion des Élèves</h1>
+        <p className="text-muted-foreground">Recherchez, filtrez et gérez les informations des élèves.</p>
+      </div>
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <div className="flex items-center">
           <TabsList>
             <TabsTrigger value="Tous">Tous</TabsTrigger>
@@ -131,9 +135,9 @@ export default function StudentsPage() {
                     </span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="sm:max-w-2xl bg-background">
+                <SheetContent className="sm:max-w-3xl bg-background">
                   <SheetHeader>
-                    <SheetTitle>Ajouter un Nouvel Élève</SheetTitle>
+                    <SheetTitle>Inscrire un Nouvel Élève</SheetTitle>
                     <SheetDescription>
                       Remplissez le formulaire pour ajouter un nouvel élève au système.
                     </SheetDescription>
@@ -182,7 +186,7 @@ export default function StudentsPage() {
                       )}
                     </>
                   )}
-                  {activeTab !== 'Tous' && (
+                  {(activeTab !== 'Tous') && (
                     <Select value={selectedClass} onValueChange={setSelectedClass}>
                       <SelectTrigger className="w-full sm:w-auto h-9">
                         <SelectValue placeholder="Classe" />
