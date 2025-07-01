@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CalendarIcon, Trash2, Upload, PlusCircle, X } from "lucide-react";
+import { CalendarIcon, Trash2, Upload, PlusCircle, X, LoaderCircle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Badge } from './ui/badge';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { extractCvInfo, type ExtractCvInfoOutput } from '@/ai/flows/extract-cv-info-flow';
 
 const levels = ['Maternelle', 'Primaire', 'Secondaire'];
 const classesByLevel = {
@@ -53,6 +55,7 @@ const formSchema = z.object({
   lastName: z.string().min(1, { message: "Le nom de famille est requis." }),
   email: z.string().min(1, { message: "L'adresse e-mail est requise." }).email({ message: "Adresse e-mail invalide." }),
   phone: z.string().min(1, { message: "Le numéro de téléphone est requis." }),
+  address: z.string().optional(),
   experience: z.string().optional(),
   assignments: z.array(assignmentSchema).min(1, { message: "Au moins une assignation est requise." }),
 });
@@ -62,11 +65,15 @@ export function TeacherRegistrationForm() {
   const [documents, setDocuments] = React.useState<Array<{ file: File; description: string }>>([]);
   const [photoPreview, setPhotoPreview] = React.useState<string | null>(null);
   const photoInputRef = React.useRef<HTMLInputElement>(null);
+  const cvInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const [currentAssignment, setCurrentAssignment] = React.useState<Partial<Assignment>>({});
   const [availableClasses, setAvailableClasses] = React.useState<string[]>([]);
   const [availableCourses, setAvailableCourses] = React.useState<string[]>([]);
+  
+  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [analysisResult, setAnalysisResult] = React.useState<ExtractCvInfoOutput | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -76,6 +83,7 @@ export function TeacherRegistrationForm() {
       lastName: "",
       email: "",
       phone: "",
+      address: "",
       experience: "",
       assignments: [],
     },
@@ -111,6 +119,63 @@ export function TeacherRegistrationForm() {
     setDocuments([]);
     setPhotoPreview(null);
     setCurrentAssignment({});
+  };
+
+  const handleCvUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          variant: "destructive",
+          title: "Fichier trop volumineux",
+          description: "La taille du CV ne doit pas dépasser 5 Mo.",
+        });
+        return;
+    }
+
+    setIsAnalyzing(true);
+    setAnalysisResult(null);
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+        try {
+            const cvDataUri = reader.result as string;
+            const result = await extractCvInfo({ cvDataUri });
+            
+            form.setValue("experience", result.professionalExperience, { shouldValidate: true });
+            if (result.address) {
+                form.setValue("address", result.address, { shouldValidate: true });
+            }
+            setAnalysisResult(result);
+            toast({
+                title: "Analyse terminée",
+                description: "Les informations du CV ont été extraites.",
+            });
+        } catch (error) {
+            console.error("CV analysis failed:", error);
+            toast({
+                variant: "destructive",
+                title: "Échec de l'analyse",
+                description: "Impossible d'extraire les informations du CV. Veuillez remplir les champs manuellement.",
+            });
+        } finally {
+            setIsAnalyzing(false);
+            if (cvInputRef.current) {
+                cvInputRef.current.value = "";
+            }
+        }
+    };
+    reader.onerror = (error) => {
+        console.error("File reading error:", error);
+        toast({
+            variant: "destructive",
+            title: "Erreur de lecture",
+            description: "Impossible de lire le fichier sélectionné.",
+        });
+        setIsAnalyzing(false);
+    };
   };
   
   const handleAddAssignment = () => {
@@ -248,21 +313,63 @@ export function TeacherRegistrationForm() {
                  <FormField control={form.control} name="email" render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="prof@example.cd" {...field} /></FormControl><FormMessage /></FormItem>)} />
                  <FormField control={form.control} name="phone" render={({ field }) => (<FormItem><FormLabel>Téléphone</FormLabel><FormControl><Input type="tel" placeholder="+243 81 234 5678" {...field} /></FormControl><FormMessage /></FormItem>)} />
               </div>
+               <FormField control={form.control} name="address" render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Adresse</FormLabel>
+                    <FormControl><Input placeholder="123 Av. des Huileries, Gombe, Kinshasa" {...field} /></FormControl>
+                    <FormMessage />
+                </FormItem>
+              )} />
             </div>
 
             <Separator />
             
             <div className="grid gap-4">
-              <h3 className="font-semibold text-lg">Expérience et Qualifications</h3>
+              <h3 className="font-semibold text-lg">Qualifications et CV</h3>
+
+              <div className="p-4 border rounded-lg border-dashed grid gap-4">
+                  <div className="grid gap-1.5">
+                      <h4 className="font-semibold">Analyse Intelligente du CV</h4>
+                      <p className="text-sm text-muted-foreground">Gagnez du temps. Uploadez le CV pour remplir automatiquement les champs d'expérience et d'adresse.</p>
+                  </div>
+                  <Input ref={cvInputRef} id="cv-upload" type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={handleCvUpload}/>
+                  
+                  {isAnalyzing ? (
+                      <Button disabled className="w-full md:w-auto">
+                          <LoaderCircle className="animate-spin mr-2 h-4 w-4" />
+                          Analyse en cours...
+                      </Button>
+                  ) : (
+                      <Button type="button" variant="outline" onClick={() => cvInputRef.current?.click()} className="w-full md:w-auto">
+                          <Upload className="mr-2 h-4 w-4" />
+                          Analyser un CV
+                      </Button>
+                  )}
+
+                  {analysisResult && analysisResult.missingInformation.length > 0 && (
+                      <Alert variant="destructive">
+                          <AlertTitle>Informations manquantes détectées</AlertTitle>
+                          <AlertDescription>
+                              <p>L'IA n'a pas trouvé les informations suivantes dans le CV. Veuillez les vérifier ou les compléter manuellement :</p>
+                              <ul className="list-disc pl-5 mt-2">
+                                  {analysisResult.missingInformation.map((info, index) => (
+                                      <li key={index}>{info}</li>
+                                  ))}
+                              </ul>
+                          </AlertDescription>
+                      </Alert>
+                  )}
+              </div>
+
               <FormField control={form.control} name="experience" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Expériences passées (optionnel)</FormLabel>
-                    <FormControl><Textarea placeholder="Décrivez les expériences professionnelles pertinentes..." {...field} rows={5} /></FormControl>
+                    <FormLabel>Expériences passées</FormLabel>
+                    <FormControl><Textarea placeholder="Décrivez les expériences professionnelles pertinentes ou analysez un CV pour remplir ce champ..." {...field} rows={8} /></FormControl>
                     <FormMessage />
                   </FormItem>
               )} />
               <div className="grid gap-2">
-                <Label htmlFor="documents-upload">Diplômes et attestations</Label>
+                <Label htmlFor="documents-upload">Autres documents (Diplômes, attestations)</Label>
                 <Input id="documents-upload" type="file" multiple onChange={handleFileChange} className="bg-input" />
                 <p className="text-sm text-muted-foreground">Formats : PDF, JPG, PNG.</p>
               </div>
