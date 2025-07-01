@@ -11,8 +11,6 @@ export function LoginForm() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd have validation and an API call here.
-    // On success, you would redirect.
     router.push('/dashboard');
   };
 
@@ -20,7 +18,7 @@ export function LoginForm() {
     <form onSubmit={handleLogin}>
       <div className="grid gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="email">Email or ID</Label>
+          <Label htmlFor="email">Email ou Identifiant</Label>
           <Input
             id="email"
             type="email"
@@ -30,18 +28,18 @@ export function LoginForm() {
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Mot de passe</Label>
             <Link
               href="#"
               className="ml-auto inline-block text-sm underline"
             >
-              Forgot your password?
+              Mot de passe oublié ?
             </Link>
           </div>
           <Input id="password" type="password" required />
         </div>
         <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-          Login
+          Connexion
         </Button>
       </div>
     </form>

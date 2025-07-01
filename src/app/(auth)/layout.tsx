@@ -40,28 +40,28 @@ export default function DashboardLayout({
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
               >
                 <Home className="h-4 w-4" />
-                Dashboard
+                Tableau de bord
               </Link>
               <Link
                 href="/students"
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
               >
                 <Users className="h-4 w-4" />
-                Students
+                Élèves
               </Link>
               <Link
                 href="/teachers"
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
               >
                 <BookUser className="h-4 w-4" />
-                Teachers
+                Professeurs
               </Link>
               <Link
                 href="/courses"
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
               >
                 <BookOpen className="h-4 w-4" />
-                Courses
+                Cours
               </Link>
             </nav>
           </div>
@@ -77,7 +77,7 @@ export default function DashboardLayout({
                 className="shrink-0 md:hidden"
               >
                 <PanelLeft className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
+                <span className="sr-only">Ouvrir le menu de navigation</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col">
@@ -98,28 +98,28 @@ export default function DashboardLayout({
                   className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                 >
                   <Home className="h-5 w-5" />
-                  Dashboard
+                  Tableau de bord
                 </Link>
                 <Link
                   href="/students"
                   className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                 >
                   <Users className="h-5 w-5" />
-                  Students
+                  Élèves
                 </Link>
                 <Link
                   href="/teachers"
                   className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                 >
                   <BookUser className="h-5 w-5" />
-                  Teachers
+                  Professeurs
                 </Link>
                 <Link
                   href="/courses"
                   className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                 >
                   <BookOpen className="h-5 w-5" />
-                  Courses
+                  Cours
                 </Link>
               </nav>
             </SheetContent>
@@ -131,16 +131,16 @@ export default function DashboardLayout({
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">
                 <CircleUser className="h-5 w-5" />
-                <span className="sr-only">Toggle user menu</span>
+                <span className="sr-only">Ouvrir le menu utilisateur</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
+              <DropdownMenuItem>Paramètres</DropdownMenuItem>
+              <DropdownMenuItem>Aide</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              <DropdownMenuItem>Déconnexion</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </header>

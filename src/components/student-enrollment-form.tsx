@@ -9,6 +9,7 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { fr } from 'date-fns/locale';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from './ui/scroll-area';
 
@@ -19,18 +20,18 @@ export function StudentEnrollmentForm() {
 
   const renderClassOptions = () => {
     if (section === 'kindergarten') {
-      return ['1st Kindergarten', '2nd Kindergarten', '3rd Kindergarten'].map(c => <SelectItem key={c} value={c.toLowerCase().replace(/ /g, '-')}>{c}</SelectItem>)
+      return ['1ère Maternelle', '2ème Maternelle', '3ème Maternelle'].map(c => <SelectItem key={c} value={c.toLowerCase().replace(/ /g, '-')}>{c}</SelectItem>)
     }
     if (section === 'primary') {
-      return ['1st Primary', '2nd Primary', '3rd Primary', '4th Primary', '5th Primary', '6th Primary'].map(c => <SelectItem key={c} value={c.toLowerCase().replace(/ /g, '-')}>{c}</SelectItem>)
+      return ['1ère Primaire', '2ème Primaire', '3ème Primaire', '4ème Primaire', '5ème Primaire', '6ème Primaire'].map(c => <SelectItem key={c} value={c.toLowerCase().replace(/ /g, '-')}>{c}</SelectItem>)
     }
     if (level === 'base') {
-      return ['7th Base', '8th Base'].map(c => <SelectItem key={c} value={c.toLowerCase().replace(/ /g, '-')}>{c}</SelectItem>)
+      return ['7ème Base', '8ème Base'].map(c => <SelectItem key={c} value={c.toLowerCase().replace(/ /g, '-')}>{c}</SelectItem>)
     }
     if (level === 'humanities') {
-       return ['1st Humanities', '2nd Humanities', '3rd Humanities', '4th Humanities'].map(c => <SelectItem key={c} value={c.toLowerCase().replace(/ /g, '-')}>{c}</SelectItem>)
+       return ['1ère Humanités', '2ème Humanités', '3ème Humanités', '4ème Humanités'].map(c => <SelectItem key={c} value={c.toLowerCase().replace(/ /g, '-')}>{c}</SelectItem>)
     }
-    return <SelectItem value="placeholder" disabled>Select section first</SelectItem>;
+    return <SelectItem value="placeholder" disabled>Sélectionnez d'abord la section</SelectItem>;
   }
 
 
@@ -39,14 +40,14 @@ export function StudentEnrollmentForm() {
       <ScrollArea className="h-[calc(100vh-8rem)]">
         <form className="grid gap-6 px-4">
           <div className="grid gap-3">
-            <h3 className="font-semibold text-lg">Student Information</h3>
+            <h3 className="font-semibold text-lg">Informations de l'élève</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="full-name">Full Name</Label>
+                <Label htmlFor="full-name">Nom complet</Label>
                 <Input id="full-name" placeholder="Nom, Postnom, Prénom" />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="dob">Date of Birth</Label>
+                <Label htmlFor="dob">Date de naissance</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -57,7 +58,7 @@ export function StudentEnrollmentForm() {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                      {date ? format(date, "PPP", { locale: fr }) : <span>Choisir une date</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -66,50 +67,51 @@ export function StudentEnrollmentForm() {
                       selected={date}
                       onSelect={setDate}
                       initialFocus
+                      locale={fr}
                     />
                   </PopoverContent>
                 </Popover>
               </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="pob">Place of Birth</Label>
-              <Input id="pob" placeholder="City, Country" />
+              <Label htmlFor="pob">Lieu de naissance</Label>
+              <Input id="pob" placeholder="Ville, Pays" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email Address (Optional)</Label>
-                <Input id="email" type="email" placeholder="student@example.com" />
+                <Label htmlFor="email">Adresse e-mail (Facultatif)</Label>
+                <Input id="email" type="email" placeholder="eleve@example.com" />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="phone">Phone Number (WhatsApp)</Label>
+                <Label htmlFor="phone">Numéro de téléphone (WhatsApp)</Label>
                 <Input id="phone" type="tel" placeholder="+243 ... "/>
               </div>
             </div>
              <div className="grid gap-2">
-                <Label htmlFor="previous-school">Previous School</Label>
+                <Label htmlFor="previous-school">École précédente</Label>
                 <Input id="previous-school" placeholder="Institut Maarif" />
               </div>
           </div>
           
           <div className="grid gap-3">
-            <h3 className="font-semibold text-lg">Class Assignment</h3>
+            <h3 className="font-semibold text-lg">Assignation de classe</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="grid gap-2">
                   <Label htmlFor="section">Section</Label>
                   <Select onValueChange={setSection}>
-                    <SelectTrigger><SelectValue placeholder="Select section" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Sélectionner la section" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="kindergarten">Kindergarten</SelectItem>
-                      <SelectItem value="primary">Primary</SelectItem>
-                      <SelectItem value="secondary">Secondary</SelectItem>
+                      <SelectItem value="kindergarten">Maternelle</SelectItem>
+                      <SelectItem value="primary">Primaire</SelectItem>
+                      <SelectItem value="secondary">Secondaire</SelectItem>
                     </SelectContent>
                   </Select>
               </div>
               {section === 'secondary' && (
                 <div className="grid gap-2">
-                  <Label htmlFor="level">Level</Label>
+                  <Label htmlFor="level">Niveau</Label>
                   <Select onValueChange={setLevel}>
-                    <SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Sélectionner le niveau" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="base">Éducation de Base</SelectItem>
                       <SelectItem value="humanities">Humanités</SelectItem>
@@ -121,22 +123,22 @@ export function StudentEnrollmentForm() {
                  <div className="grid gap-2">
                     <Label htmlFor="option">Option</Label>
                     <Select>
-                        <SelectTrigger><SelectValue placeholder="Select option" /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Sélectionner l'option" /></SelectTrigger>
                         <SelectContent>
-                        <SelectItem value="math-physics">Math-Physics</SelectItem>
-                        <SelectItem value="biochem">Bio-Chemistry</SelectItem>
-                        <SelectItem value="latin-philo">Latin-Philosophy</SelectItem>
-                        <SelectItem value="commercial">Commercial</SelectItem>
-                        <SelectItem value="electronics">Electronics</SelectItem>
+                        <SelectItem value="math-physique">Math-Physique</SelectItem>
+                        <SelectItem value="bio-chimie">Bio-Chimie</SelectItem>
+                        <SelectItem value="latin-philo">Latin-Philo</SelectItem>
+                        <SelectItem value="commerciale">Commerciale</SelectItem>
+                        <SelectItem value="electronique">Électronique</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
               )}
             </div>
              <div className="grid gap-2">
-                <Label htmlFor="class">Class</Label>
+                <Label htmlFor="class">Classe</Label>
                  <Select disabled={!section}>
-                    <SelectTrigger><SelectValue placeholder="Select class" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Sélectionner la classe" /></SelectTrigger>
                     <SelectContent>
                       {renderClassOptions()}
                     </SelectContent>
@@ -145,24 +147,24 @@ export function StudentEnrollmentForm() {
           </div>
 
           <div className="grid gap-3">
-            <h3 className="font-semibold text-lg">Parent Information</h3>
+            <h3 className="font-semibold text-lg">Informations des parents</h3>
             <div className="grid gap-2">
-              <Label htmlFor="parent-name">Parent's Full Name</Label>
+              <Label htmlFor="parent-name">Nom complet du parent</Label>
               <Input id="parent-name" placeholder="Nom, Postnom, Prénom" />
             </div>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="parent-email">Parent's Email</Label>
+                <Label htmlFor="parent-email">Email du parent</Label>
                 <Input id="parent-email" type="email" placeholder="parent@example.com" />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="parent-phone">Parent's Phone (WhatsApp)</Label>
+                <Label htmlFor="parent-phone">Téléphone du parent (WhatsApp)</Label>
                 <Input id="parent-phone" type="tel" placeholder="+243 ... "/>
               </div>
             </div>
           </div>
           
-          <Button type="submit" className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground">Enroll Student</Button>
+          <Button type="submit" className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground">Inscrire l'élève</Button>
         </form>
       </ScrollArea>
     </div>

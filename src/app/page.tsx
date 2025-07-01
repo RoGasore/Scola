@@ -9,7 +9,7 @@ export default function LoginPage() {
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold font-headline">ScolaGest</h1>
             <p className="text-balance text-muted-foreground">
-              Enter your credentials to access your account
+              Entrez vos identifiants pour accéder à votre compte
             </p>
           </div>
           <LoginForm />
@@ -21,7 +21,7 @@ export default function LoginPage() {
           alt="Image"
           width="1920"
           height="1080"
-          data-ai-hint="classroom students"
+          data-ai-hint="salle de classe etudiants"
           className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
         />
       </div>

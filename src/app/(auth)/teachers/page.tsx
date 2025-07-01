@@ -11,24 +11,24 @@ export default function TeachersPage() {
   return (
     <div className="grid flex-1 items-start gap-4">
       <div className="flex items-center gap-4">
-        <h1 className="text-lg font-semibold md:text-2xl font-headline">Teachers</h1>
+        <h1 className="text-lg font-semibold md:text-2xl font-headline">Professeurs</h1>
         <div className="ml-auto flex items-center gap-2">
           <Button size="sm" variant="outline" className="h-8 gap-1">
             <File className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Export</span>
+            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Exporter</span>
           </Button>
           <Sheet>
             <SheetTrigger asChild>
               <Button size="sm" className="h-8 gap-1 bg-primary hover:bg-primary/90 text-primary-foreground">
                 <PlusCircle className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Add Teacher</span>
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Ajouter un professeur</span>
               </Button>
             </SheetTrigger>
             <SheetContent className="sm:max-w-lg">
               <SheetHeader>
-                <SheetTitle>Register New Teacher</SheetTitle>
+                <SheetTitle>Enregistrer un nouveau professeur</SheetTitle>
                 <SheetDescription>
-                  Fill out the form to add a new teacher to the system.
+                  Remplissez le formulaire pour ajouter un nouveau professeur au système.
                 </SheetDescription>
               </SheetHeader>
               <TeacherRegistrationForm />
@@ -38,19 +38,19 @@ export default function TeachersPage() {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Teacher Directory</CardTitle>
+          <CardTitle>Annuaire des professeurs</CardTitle>
           <CardDescription>
-            Manage your teachers and their assignments.
+            Gérez vos professeurs et leurs affectations.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead>Nom</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Main Section</TableHead>
-                <TableHead>Courses Taught</TableHead>
+                <TableHead>Section principale</TableHead>
+                <TableHead>Cours enseignés</TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
               </TableRow>
             </TableHeader>
@@ -58,21 +58,21 @@ export default function TeachersPage() {
               <TableRow>
                 <TableCell className="font-medium">Marie Curie</TableCell>
                 <TableCell>m.curie@scolagest.edu</TableCell>
-                <TableCell><Badge variant="outline">Secondary</Badge></TableCell>
-                <TableCell>Physics, Chemistry</TableCell>
+                <TableCell><Badge variant="outline">Secondaire</Badge></TableCell>
+                <TableCell>Physique, Chimie</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button aria-haspopup="true" size="icon" variant="ghost">
                         <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
+                        <span className="sr-only">Ouvrir le menu</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>View Profile</DropdownMenuItem>
-                      <DropdownMenuItem>Delete</DropdownMenuItem>
+                      <DropdownMenuItem>Modifier</DropdownMenuItem>
+                      <DropdownMenuItem>Voir le profil</DropdownMenuItem>
+                      <DropdownMenuItem>Supprimer</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -80,21 +80,21 @@ export default function TeachersPage() {
                <TableRow>
                 <TableCell className="font-medium">Albert Einstein</TableCell>
                 <TableCell>a.einstein@scolagest.edu</TableCell>
-                <TableCell><Badge variant="outline">Secondary</Badge></TableCell>
-                <TableCell>Mathematics</TableCell>
+                <TableCell><Badge variant="outline">Secondaire</Badge></TableCell>
+                <TableCell>Mathématiques</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button aria-haspopup="true" size="icon" variant="ghost">
                         <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
+                        <span className="sr-only">Ouvrir le menu</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>View Profile</DropdownMenuItem>
-                      <DropdownMenuItem>Delete</DropdownMenuItem>
+                      <DropdownMenuItem>Modifier</DropdownMenuItem>
+                      <DropdownMenuItem>Voir le profil</DropdownMenuItem>
+                      <DropdownMenuItem>Supprimer</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
