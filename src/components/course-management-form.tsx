@@ -135,7 +135,7 @@ export function CourseManagementForm({ initialStructure, onUpdate }: CourseManag
         toast({ variant: 'destructive', title: 'Nom Invalide', description: 'Veuillez entrer un nom pour la nouvelle option.' });
         return;
     }
-    const secondaryYears = ['3ème', '4ème', '5ème', '6ème'];
+    const secondaryYears = ['1ère', '2ème', '3ème', '4ème'];
     const newClasses: Record<string, z.infer<typeof classSchema>> = {};
     secondaryYears.forEach(year => {
         const className = `${year} ${newOptionName}`;

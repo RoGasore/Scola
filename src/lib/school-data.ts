@@ -44,26 +44,42 @@ export const schoolStructure = {
   "Secondaire": {
     "Éducation de base": {
         classes: {
-            "1ère Année": { name: "1ère Année", isActive: true, courses: [{ name: 'Mathématiques', hours: 4 }, { name: 'Français', hours: 4 }, { name: 'Anglais', hours: 3 }] },
-            "2ème Année": { name: "2ème Année", isActive: true, courses: [{ name: 'Mathématiques', hours: 4 }, { name: 'Français', hours: 4 }, { name: 'Physique', hours: 3 }] },
+            "7ème Année": { name: "7ème Année", isActive: true, courses: [{ name: 'Mathématiques', hours: 4 }, { name: 'Français', hours: 4 }, { name: 'Anglais', hours: 3 }] },
+            "8ème Année": { name: "8ème Année", isActive: true, courses: [{ name: 'Mathématiques', hours: 4 }, { name: 'Français', hours: 4 }, { name: 'Physique', hours: 3 }] },
         }
     },
     "Humanités": {
       options: {
         "Latin-Grec": {
           classes: {
+            "1ère Latin-Grec": { name: "1ère Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4 }, { name: 'Grec', hours: 4 }] },
+            "2ème Latin-Grec": { name: "2ème Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4 }, { name: 'Grec', hours: 4 }] },
             "3ème Latin-Grec": { name: "3ème Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4 }, { name: 'Grec', hours: 4 }] },
             "4ème Latin-Grec": { name: "4ème Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4 }, { name: 'Grec', hours: 4 }] },
-            "5ème Latin-Grec": { name: "5ème Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4 }, { name: 'Grec', hours: 4 }] },
-            "6ème Latin-Grec": { name: "6ème Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4 }, { name: 'Grec', hours: 4 }] },
           }
         },
         "Électricité": {
           classes: {
-            "3ème Électricité": { name: "3ème Électricité", isActive: true, courses: [{ name: 'Électricité Générale', hours: 6 }] },
-            "4ème Électricité": { name: "4ème Électricité", isActive: true, courses: [{ name: 'Mesures Électriques', hours: 6 }] },
-            "5ème Électricité": { name: "5ème Électricité", isActive: false, courses: [] },
-            "6ème Électricité": { name: "6ème Électricité", isActive: true, courses: [{ name: 'Électronique Appliquée', hours: 6 }] },
+            "1ère Électricité": { name: "1ère Électricité", isActive: true, courses: [{ name: 'Électricité Générale', hours: 6 }] },
+            "2ème Électricité": { name: "2ème Électricité", isActive: true, courses: [{ name: 'Mesures Électriques', hours: 6 }] },
+            "3ème Électricité": { name: "3ème Électricité", isActive: false, courses: [] },
+            "4ème Électricité": { name: "4ème Électricité", isActive: true, courses: [{ name: 'Électronique Appliquée', hours: 6 }] },
+          }
+        },
+        "Sciences Économiques": {
+          classes: {
+            "1ère Sciences Économiques": { name: "1ère Sciences Économiques", isActive: true, courses: [{ name: 'Économie Politique', hours: 4 }] },
+            "2ème Sciences Économiques": { name: "2ème Sciences Économiques", isActive: true, courses: [{ name: 'Droit', hours: 3 }] },
+            "3ème Sciences Économiques": { name: "3ème Sciences Économiques", isActive: true, courses: [{ name: 'Statistique', hours: 3 }] },
+            "4ème Sciences Économiques": { name: "4ème Sciences Économiques", isActive: true, courses: [{ name: 'Comptabilité', hours: 4 }] },
+          }
+        },
+        "Biochimie": {
+          classes: {
+            "1ère Biochimie": { name: "1ère Biochimie", isActive: true, courses: [{ name: 'Biologie', hours: 4 }] },
+            "2ème Biochimie": { name: "2ème Biochimie", isActive: true, courses: [{ name: 'Chimie Organique', hours: 4 }] },
+            "3ème Biochimie": { name: "3ème Biochimie", isActive: true, courses: [{ name: 'Biochimie', hours: 6 }] },
+            "4ème Biochimie": { name: "4ème Biochimie", isActive: true, courses: [{ name: 'Génétique', hours: 4 }] },
           }
         }
       }

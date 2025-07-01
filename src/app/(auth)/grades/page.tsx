@@ -20,10 +20,10 @@ const gradesData = [
   { id: 2, student: 'Léo Dubois', level: 'Maternelle', classe: '2ème Maternelle', section: null, option: null, subject: 'Langage', grade: '15/20', date: '2024-05-14', evaluator: 'Mme. Hugo' },
   { id: 3, student: 'Chloé Bernard', level: 'Primaire', classe: '1ère Primaire', section: null, option: null, subject: 'Histoire', grade: '19/20', date: '2024-05-13', evaluator: 'M. Vinci' },
   { id: 4, student: 'Hugo Martin', level: 'Primaire', classe: '6ème Primaire', section: null, option: null, subject: 'Physique', grade: '12/20', date: '2024-05-12', evaluator: 'Mme. Curie' },
-  { id: 5, student: 'Manon Lefebvre', level: 'Secondaire', classe: '1ère', section: 'Éducation de base', option: null, subject: 'Anglais', grade: '16/20', date: '2024-05-11', evaluator: 'Mme. Lovelace' },
-  { id: 6, student: 'Lucas Moreau', level: 'Secondaire', classe: '2ème', section: 'Éducation de base', option: null, subject: 'Chimie', grade: '14/20', date: '2024-05-10', evaluator: 'M. Lavoisier' },
-  { id: 7, student: 'Jade Garcia', level: 'Secondaire', classe: '3ème', section: 'Humanités', option: 'Latin-Grec', subject: 'Biologie', grade: '17/20', date: '2024-05-09', evaluator: 'M. Pasteur' },
-  { id: 8, student: 'Louis Roux', level: 'Secondaire', classe: '4ème', section: 'Humanités', option: 'Sciences Économiques', subject: 'Philosophie', grade: 'A', date: '2024-05-08', evaluator: 'M. Descartes' },
+  { id: 5, student: 'Manon Lefebvre', level: 'Secondaire', classe: '7ème Année', section: 'Éducation de base', option: null, subject: 'Anglais', grade: '16/20', date: '2024-05-11', evaluator: 'Mme. Lovelace' },
+  { id: 6, student: 'Lucas Moreau', level: 'Secondaire', classe: '8ème Année', section: 'Éducation de base', option: null, subject: 'Chimie', grade: '14/20', date: '2024-05-10', evaluator: 'M. Lavoisier' },
+  { id: 7, student: 'Jade Garcia', level: 'Secondaire', classe: '1ère Latin-Grec', section: 'Humanités', option: 'Latin-Grec', subject: 'Biologie', grade: '17/20', date: '2024-05-09', evaluator: 'M. Pasteur' },
+  { id: 8, student: 'Louis Roux', level: 'Secondaire', classe: '2ème Sciences Économiques', section: 'Humanités', option: 'Sciences Économiques', subject: 'Philosophie', grade: 'A', date: '2024-05-08', evaluator: 'M. Descartes' },
 ];
 
 const fuseOptions = {
