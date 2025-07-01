@@ -1,7 +1,8 @@
 
 'use client'
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import Fuse from 'fuse.js';
 import { MoreHorizontal, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -26,11 +27,34 @@ const attendanceData = [
   { student: 'Léo Dubois', matricule: 'M24002', classe: '2ème Maternelle', date: '2024-05-19', status: 'Présent' },
 ];
 
+const fuseOptions = {
+  keys: ['student'],
+  threshold: 0.3,
+};
+
 export default function AttendancePage() {
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // TODO: Implement filtering logic
-  const filteredData = attendanceData;
+  const [selectedClass, setSelectedClass] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [filteredData, setFilteredData] = useState(attendanceData);
+
+  const fuse = useMemo(() => new Fuse(attendanceData, fuseOptions), []);
+  const classes = useMemo(() => [...new Set(attendanceData.map(item => item.classe))], []);
+
+  useEffect(() => {
+    const searchResults = searchTerm.trim()
+      ? fuse.search(searchTerm).map(result => result.item)
+      : attendanceData;
+
+    const finalResults = searchResults.filter(item => {
+      const classMatch = selectedClass === 'all' || item.classe === selectedClass;
+      const statusMatch = selectedStatus === 'all' || item.status === selectedStatus;
+      return classMatch && statusMatch;
+    });
+
+    setFilteredData(finalResults);
+  }, [searchTerm, selectedClass, selectedStatus, fuse]);
+
 
   return (
     <div className="flex flex-col gap-4">
@@ -52,26 +76,24 @@ export default function AttendancePage() {
                 />
             </div>
             <div className="flex w-full sm:w-auto sm:ml-auto items-center gap-2 flex-wrap">
-                 <Select>
-                    <SelectTrigger className="w-full sm:w-auto h-9">
+                 <Select value={selectedClass} onValueChange={setSelectedClass}>
+                    <SelectTrigger className="w-full sm:w-[180px] h-9">
                         <SelectValue placeholder="Filtrer par classe" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">Toutes les classes</SelectItem>
-                        <SelectItem value="Maternelle">Maternelle</SelectItem>
-                        <SelectItem value="Primaire">Primaire</SelectItem>
-                        <SelectItem value="Secondaire">Secondaire</SelectItem>
+                        {classes.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                     </SelectContent>
                 </Select>
-                 <Select>
-                    <SelectTrigger className="w-full sm:w-auto h-9">
+                 <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                    <SelectTrigger className="w-full sm:w-[180px] h-9">
                         <SelectValue placeholder="Filtrer par statut" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">Tous les statuts</SelectItem>
-                        <SelectItem value="present">Présent</SelectItem>
-                        <SelectItem value="absent">Absent</SelectItem>
-                        <SelectItem value="late">En retard</SelectItem>
+                        <SelectItem value="Présent">Présent</SelectItem>
+                        <SelectItem value="Absent">Absent</SelectItem>
+                        <SelectItem value="En retard">En retard</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
@@ -90,7 +112,7 @@ export default function AttendancePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredData.map((record, index) => (
+              {filteredData.length > 0 ? filteredData.map((record, index) => (
                 <TableRow key={`${record.matricule}-${record.date}`}>
                   <TableCell><Checkbox aria-label={`Sélectionner la ligne ${index + 1}`} /></TableCell>
                   <TableCell className="font-medium">{record.student}</TableCell>
@@ -122,13 +144,19 @@ export default function AttendancePage() {
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              ))}
+              )) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center">
+                    Aucun résultat.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
         <CardFooter>
            <div className="text-xs text-muted-foreground">
-            Affichage de <strong>1-10</strong> sur <strong>{attendanceData.length}</strong> enregistrements
+            Affichage de <strong>{filteredData.length}</strong> sur <strong>{attendanceData.length}</strong> enregistrements
           </div>
            <div className="ml-auto">
             <Pagination>

@@ -1,7 +1,8 @@
 
 'use client'
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import Fuse from 'fuse.js';
 import { MoreHorizontal, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -14,21 +15,46 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 
 const gradesData = [
-  { id: 1, student: 'Alice Petit', subject: 'Mathématiques', grade: '18/20', date: '2024-05-15', evaluator: 'M. Dupont' },
-  { id: 2, student: 'Léo Dubois', subject: 'Français', grade: '15/20', date: '2024-05-14', evaluator: 'Mme. Hugo' },
-  { id: 3, student: 'Chloé Bernard', subject: 'Histoire', grade: '19/20', date: '2024-05-13', evaluator: 'M. Vinci' },
-  { id: 4, student: 'Hugo Martin', subject: 'Physique', grade: '12/20', date: '2024-05-12', evaluator: 'Mme. Curie' },
-  { id: 5, student: 'Manon Lefebvre', subject: 'Anglais', grade: '16/20', date: '2024-05-11', evaluator: 'Mme. Lovelace' },
-  { id: 6, student: 'Lucas Moreau', subject: 'Chimie', grade: '14/20', date: '2024-05-10', evaluator: 'M. Lavoisier' },
-  { id: 7, student: 'Jade Garcia', subject: 'Biologie', grade: '17/20', date: '2024-05-09', evaluator: 'M. Pasteur' },
-  { id: 8, student: 'Louis Roux', subject: 'Philosophie', grade: 'A', date: '2024-05-08', evaluator: 'M. Descartes' },
+  { id: 1, student: 'Alice Petit', classe: '1ère Maternelle', subject: 'Psychomotricité', grade: '18/20', date: '2024-05-15', evaluator: 'M. Dupont' },
+  { id: 2, student: 'Léo Dubois', classe: '2ème Maternelle', subject: 'Langage', grade: '15/20', date: '2024-05-14', evaluator: 'Mme. Hugo' },
+  { id: 3, student: 'Chloé Bernard', classe: '1ère Primaire', subject: 'Histoire', grade: '19/20', date: '2024-05-13', evaluator: 'M. Vinci' },
+  { id: 4, student: 'Hugo Martin', classe: '6ème Primaire', subject: 'Physique', grade: '12/20', date: '2024-05-12', evaluator: 'Mme. Curie' },
+  { id: 5, student: 'Manon Lefebvre', classe: '1ère', subject: 'Anglais', grade: '16/20', date: '2024-05-11', evaluator: 'Mme. Lovelace' },
+  { id: 6, student: 'Lucas Moreau', classe: '2ème', subject: 'Chimie', grade: '14/20', date: '2024-05-10', evaluator: 'M. Lavoisier' },
+  { id: 7, student: 'Jade Garcia', classe: '3ème', subject: 'Biologie', grade: '17/20', date: '2024-05-09', evaluator: 'M. Pasteur' },
+  { id: 8, student: 'Louis Roux', classe: '4ème', subject: 'Philosophie', grade: 'A', date: '2024-05-08', evaluator: 'M. Descartes' },
 ];
+
+
+const fuseOptions = {
+  keys: ['student', 'subject'],
+  threshold: 0.3,
+};
 
 export default function GradesPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedClass, setSelectedClass] = useState('all');
+  const [selectedSubject, setSelectedSubject] = useState('all');
+  const [filteredData, setFilteredData] = useState(gradesData);
+
+  const fuse = useMemo(() => new Fuse(gradesData, fuseOptions), []);
+  const classes = useMemo(() => [...new Set(gradesData.map(item => item.classe))], []);
+  const subjects = useMemo(() => [...new Set(gradesData.map(item => item.subject))], []);
   
-  // TODO: Implement filtering logic
-  const filteredData = gradesData;
+  useEffect(() => {
+    const searchResults = searchTerm.trim()
+      ? fuse.search(searchTerm).map(result => result.item)
+      : gradesData;
+
+    const finalResults = searchResults.filter(item => {
+      const classMatch = selectedClass === 'all' || item.classe === selectedClass;
+      const subjectMatch = selectedSubject === 'all' || item.subject === selectedSubject;
+      return classMatch && subjectMatch;
+    });
+
+    setFilteredData(finalResults);
+  }, [searchTerm, selectedClass, selectedSubject, fuse]);
+
 
   return (
     <div className="flex flex-col gap-4">
@@ -50,26 +76,22 @@ export default function GradesPage() {
                 />
             </div>
             <div className="flex w-full sm:w-auto sm:ml-auto items-center gap-2 flex-wrap">
-                 <Select>
-                    <SelectTrigger className="w-full sm:w-auto h-9">
+                 <Select value={selectedClass} onValueChange={setSelectedClass}>
+                    <SelectTrigger className="w-full sm:w-[180px] h-9">
                         <SelectValue placeholder="Filtrer par classe" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">Toutes les classes</SelectItem>
-                        <SelectItem value="Maternelle">Maternelle</SelectItem>
-                        <SelectItem value="Primaire">Primaire</SelectItem>
-                        <SelectItem value="Secondaire">Secondaire</SelectItem>
+                        {classes.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                     </SelectContent>
                 </Select>
-                 <Select>
-                    <SelectTrigger className="w-full sm:w-auto h-9">
+                 <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                    <SelectTrigger className="w-full sm:w-[180px] h-9">
                         <SelectValue placeholder="Filtrer par matière" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">Toutes les matières</SelectItem>
-                        <SelectItem value="maths">Mathématiques</SelectItem>
-                        <SelectItem value="physique">Physique</SelectItem>
-                        <SelectItem value="histoire">Histoire</SelectItem>
+                        {subjects.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                     </SelectContent>
                 </Select>
             </div>
@@ -81,18 +103,20 @@ export default function GradesPage() {
               <TableRow>
                  <TableHead className="h-12 w-12 sm:w-auto"><Checkbox aria-label="Tout sélectionner" /></TableHead>
                 <TableHead>Élève</TableHead>
+                <TableHead className="hidden sm:table-cell">Classe</TableHead>
                 <TableHead className="hidden sm:table-cell">Matière</TableHead>
                 <TableHead>Note</TableHead>
                 <TableHead className="hidden md:table-cell">Date</TableHead>
-                <TableHead className="hidden sm:table-cell">Évaluateur</TableHead>
+                <TableHead className="hidden lg:table-cell">Évaluateur</TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredData.map((grade, index) => (
+              {filteredData.length > 0 ? filteredData.map((grade, index) => (
                 <TableRow key={grade.id}>
                   <TableCell><Checkbox aria-label={`Sélectionner la ligne ${index + 1}`} /></TableCell>
                   <TableCell className="font-medium">{grade.student}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{grade.classe}</TableCell>
                   <TableCell className="hidden sm:table-cell">{grade.subject}</TableCell>
                   <TableCell>
                     <Badge variant={parseInt(grade.grade) >= 15 ? "default" : parseInt(grade.grade) >= 10 ? "secondary" : "destructive"} className={
@@ -104,7 +128,7 @@ export default function GradesPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">{grade.date}</TableCell>
-                  <TableCell className="hidden sm:table-cell">{grade.evaluator}</TableCell>
+                  <TableCell className="hidden lg:table-cell">{grade.evaluator}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -122,13 +146,19 @@ export default function GradesPage() {
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              ))}
+              )) : (
+                <TableRow>
+                  <TableCell colSpan={8} className="h-24 text-center">
+                    Aucun résultat.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
         <CardFooter>
            <div className="text-xs text-muted-foreground">
-            Affichage de <strong>1-8</strong> sur <strong>{gradesData.length}</strong> notes
+            Affichage de <strong>{filteredData.length}</strong> sur <strong>{gradesData.length}</strong> notes
           </div>
            <div className="ml-auto">
             <Pagination>
