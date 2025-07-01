@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react';
+import Fuse from 'fuse.js';
 import { File, PlusCircle, MoreHorizontal, Search, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -12,6 +13,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTr
 import { Input } from '@/components/ui/input';
 import { CourseManagementForm } from '@/components/course-management-form';
 import { schoolStructure, flattenStructureToCourses, getLevels, getClassesForLevel, getSectionsForSecondary, getOptionsForHumanites } from '@/lib/school-data';
+import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationEllipsis, PaginationNext } from '@/components/ui/pagination';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const fuseOptions = {
     keys: ['name', 'professeur', 'id', 'className', 'option'],
@@ -167,7 +171,7 @@ export default function CoursesPage() {
                   </TableRow>
               </TableHeader>
               <TableBody>
-                  {filteredData.map((course, index) => (
+                  {filteredData.length > 0 ? (filteredData.map((course, index) => (
                   <TableRow key={index}>
                       <TableCell className="font-medium">{course.name}</TableCell>
                       <TableCell>{course.professeur || 'N/A'}</TableCell>
@@ -195,7 +199,13 @@ export default function CoursesPage() {
                       </DropdownMenu>
                       </TableCell>
                   </TableRow>
-                  ))}
+                  ))) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-24 text-center">
+                        Aucun résultat.
+                      </TableCell>
+                    </TableRow>
+                  )}
               </TableBody>
               </Table>
           </CardContent>
@@ -226,3 +236,5 @@ export default function CoursesPage() {
     </div>
   )
 }
+
+    
