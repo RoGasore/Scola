@@ -10,7 +10,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const ExtractCvInfoInputSchema = z.object({
+const ExtractCvInfoInputSchema = z.object({
   cvDataUri: z
     .string()
     .describe(
@@ -19,7 +19,7 @@ export const ExtractCvInfoInputSchema = z.object({
 });
 export type ExtractCvInfoInput = z.infer<typeof ExtractCvInfoInputSchema>;
 
-export const ExtractCvInfoOutputSchema = z.object({
+const ExtractCvInfoOutputSchema = z.object({
   professionalExperience: z.string().describe("A summary of the teacher's professional experience, formatted for a textarea. Use bullet points for different roles."),
   address: z.string().describe("The full address of the teacher, if found in the CV. Otherwise, an empty string."),
   missingInformation: z.array(z.string()).describe("A list of important fields that are missing from the CV. Check for: full name, email, phone number, and address."),
