@@ -48,7 +48,9 @@ const assignmentSchema = z.object({
 type Assignment = z.infer<typeof assignmentSchema>;
 
 const formSchema = z.object({
-  fullName: z.string().min(3, { message: "Le nom complet est requis." }),
+  firstName: z.string().min(1, { message: "Le prénom est requis." }),
+  middleName: z.string().optional(),
+  lastName: z.string().min(1, { message: "Le nom de famille est requis." }),
   email: z.string().min(1, { message: "L'adresse e-mail est requise." }).email({ message: "Adresse e-mail invalide." }),
   phone: z.string().min(1, { message: "Le numéro de téléphone est requis." }),
   experience: z.string().optional(),
@@ -69,7 +71,9 @@ export function TeacherRegistrationForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: "",
+      firstName: "",
+      middleName: "",
+      lastName: "",
       email: "",
       phone: "",
       experience: "",
@@ -204,18 +208,46 @@ export function TeacherRegistrationForm() {
             <div className="grid gap-4">
               <h3 className="font-semibold text-lg">Informations Personnelles</h3>
               <div className="flex items-center gap-6">
-                <Avatar className="h-24 w-24"><AvatarImage src={photoPreview || undefined} alt="Avatar prof" /><AvatarFallback className="text-3xl">P</AvatarFallback></Avatar>
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src={photoPreview || undefined} alt="Avatar prof" />
+                  <AvatarFallback className="text-3xl">
+                    {form.watch("firstName")?.[0] || "P"}
+                    {form.watch("lastName")?.[0] || ""}
+                  </AvatarFallback>
+                </Avatar>
                 <div className="grid gap-2">
                   <Button type="button" variant="outline" onClick={() => photoInputRef.current?.click()}><Upload className="mr-2 h-4 w-4" />Joindre une photo</Button>
                   <Input ref={photoInputRef} id="photo-upload" type="file" className="hidden" accept="image/*" onChange={handlePhotoChange}/>
                   <p className="text-xs text-muted-foreground">PNG, JPG. Max 2Mo.</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <FormField control={form.control} name="fullName" render={({ field }) => (<FormItem><FormLabel>Nom Complet</FormLabel><FormControl><Input placeholder="Ex: Jean-Luc Picard" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                 <FormField control={form.control} name="email" render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="prof@example.cd" {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField control={form.control} name="firstName" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Prénom</FormLabel>
+                    <FormControl><Input placeholder="Jean-Luc" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="middleName" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Post-nom (optionnel)</FormLabel>
+                    <FormControl><Input placeholder="Muntu" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="lastName" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nom</FormLabel>
+                    <FormControl><Input placeholder="Picard" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
               </div>
-              <FormField control={form.control} name="phone" render={({ field }) => (<FormItem><FormLabel>Téléphone</FormLabel><FormControl><Input type="tel" placeholder="+243 81 234 5678" {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <FormField control={form.control} name="email" render={({ field }) => (<FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" placeholder="prof@example.cd" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                 <FormField control={form.control} name="phone" render={({ field }) => (<FormItem><FormLabel>Téléphone</FormLabel><FormControl><Input type="tel" placeholder="+243 81 234 5678" {...field} /></FormControl><FormMessage /></FormItem>)} />
+              </div>
             </div>
 
             <Separator />
