@@ -4,12 +4,11 @@
 import {
   Home,
   LineChart,
-  Package,
   Package2,
   PanelLeft,
   Search,
-  ShoppingCart,
-  Users2,
+  BookOpen,
+  Users,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -53,22 +52,29 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const getLinkClass = (path: string) => {
+    return pathname === path
+      ? 'bg-muted text-primary'
+      : 'text-muted-foreground hover:text-primary';
+  };
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] bg-background">
       <div className="hidden border-r bg-muted/40 md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary"><path d="M15 12c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3z"></path><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"></path></svg>
-              <span>BankDash</span>
+               <Package2 className="h-6 w-6 text-primary"/>
+              <span>ScolaGest</span>
             </Link>
           </div>
           <div className="flex-1">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-              <NavLink href="/dashboard" icon={Home}>Dashboard</NavLink>
-              <NavLink href="/courses" icon={ShoppingCart}>Orders</NavLink>
-              <NavLink href="/students" icon={Users2}>Customers</NavLink>
-              <NavLink href="/teachers" icon={LineChart}>Analytics</NavLink>
+              <NavLink href="/dashboard" icon={Home}>Tableau de bord</NavLink>
+              <NavLink href="/courses" icon={BookOpen}>Cours</NavLink>
+              <NavLink href="/students" icon={Users}>Élèves</NavLink>
+              <NavLink href="/teachers" icon={LineChart}>Professeurs</NavLink>
             </nav>
           </div>
         </div>
@@ -83,23 +89,23 @@ export default function DashboardLayout({
                 className="shrink-0 md:hidden"
               >
                 <PanelLeft className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
+                <span className="sr-only">Ouvrir le menu de navigation</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col">
               <SheetHeader>
                 <SheetTitle>
                    <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-primary"><path d="M15 12c0 1.657-1.343 3-3 3s-3-1.343-3-3 1.343-3 3-3 3 1.343 3 3z"></path><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"></path></svg>
-                    <span>BankDash</span>
+                    <Package2 className="h-6 w-6 text-primary"/>
+                    <span>ScolaGest</span>
                   </Link>
                 </SheetTitle>
               </SheetHeader>
               <nav className="grid gap-2 text-lg font-medium">
-                  <Link href="/dashboard" className="flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-primary"><Home className="h-5 w-5" />Dashboard</Link>
-                  <Link href="/courses" className="flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-primary"><ShoppingCart className="h-5 w-5" />Orders</Link>
-                  <Link href="/students" className="flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-primary"><Users2 className="h-5 w-5" />Customers</Link>
-                  <Link href="/teachers" className="flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-primary"><LineChart className="h-5 w-5" />Analytics</Link>
+                  <Link href="/dashboard" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/dashboard')}`}><Home className="h-5 w-5" />Tableau de bord</Link>
+                  <Link href="/courses" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/courses')}`}><BookOpen className="h-5 w-5" />Cours</Link>
+                  <Link href="/students" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/students')}`}><Users className="h-5 w-5" />Élèves</Link>
+                  <Link href="/teachers" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/teachers')}`}><LineChart className="h-5 w-5" />Professeurs</Link>
               </nav>
             </SheetContent>
           </Sheet>
@@ -108,7 +114,7 @@ export default function DashboardLayout({
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Search..."
+                  placeholder="Rechercher..."
                   className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
                 />
               </div>
@@ -117,18 +123,18 @@ export default function DashboardLayout({
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
                     <Avatar className="h-8 w-8">
-                        <AvatarImage src="https://placehold.co/40x40.png" alt="@shadcn" data-ai-hint="femme" />
+                        <AvatarImage src="https://placehold.co/40x40.png" alt="Avatar" data-ai-hint="femme" />
                         <AvatarFallback>JD</AvatarFallback>
                     </Avatar>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem>Paramètres</DropdownMenuItem>
               <DropdownMenuItem>Support</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              <DropdownMenuItem>Déconnexion</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </header>

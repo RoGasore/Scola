@@ -12,46 +12,46 @@ export function TeacherRegistrationForm() {
       <ScrollArea className="h-[calc(100vh-8rem)]">
         <form className="grid gap-6 px-4">
           <div className="grid gap-3">
-            <h3 className="font-semibold text-lg">Staff Information</h3>
+            <h3 className="font-semibold text-lg">Informations du Personnel</h3>
             <div className="grid grid-cols-1 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="full-name">Full Name</Label>
-                <Input id="full-name" placeholder="Jane Smith" required />
+                <Label htmlFor="full-name">Nom Complet</Label>
+                <Input id="full-name" placeholder="Jeanne Moreau" required />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input id="email" type="email" placeholder="staff@example.com" required />
+                <Label htmlFor="email">Adresse Email</Label>
+                <Input id="email" type="email" placeholder="prof@example.com" required />
               </div>
                <div className="grid gap-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input id="phone" type="tel" placeholder="+1 ... " required />
+                <Label htmlFor="phone">Numéro de téléphone</Label>
+                <Input id="phone" type="tel" placeholder="+33 ... " required />
               </div>
             </div>
           </div>
           
           <div className="grid gap-3">
-            <h3 className="font-semibold text-lg">Role and Department</h3>
+            <h3 className="font-semibold text-lg">Rôle et Département</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                <div className="grid gap-2">
-                  <Label htmlFor="department">Department</Label>
+                  <Label htmlFor="department">Département</Label>
                   <Select>
-                    <SelectTrigger><SelectValue placeholder="Select Department" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Sélectionner un département" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="sales">Sales</SelectItem>
-                      <SelectItem value="support">Support</SelectItem>
-                      <SelectItem value="billing">Billing</SelectItem>
-                      <SelectItem value="management">Management</SelectItem>
+                      <SelectItem value="mathematiques">Mathématiques</SelectItem>
+                      <SelectItem value="sciences">Sciences</SelectItem>
+                      <SelectItem value="lettres">Lettres</SelectItem>
+                      <SelectItem value="histoire-geo">Histoire-Géographie</SelectItem>
                     </SelectContent>
                   </Select>
               </div>
                <div className="grid gap-2">
-                  <Label htmlFor="role">Role</Label>
-                  <Input id="role" placeholder="Sales Manager" required />
+                  <Label htmlFor="role">Rôle</Label>
+                  <Input id="role" placeholder="Professeur de Mathématiques" required />
               </div>
             </div>
           </div>
           
-          <Button type="submit" className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground">Add Staff Member</Button>
+          <Button type="submit" className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground">Ajouter un membre du personnel</Button>
         </form>
       </ScrollArea>
     </div>

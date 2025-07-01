@@ -29,18 +29,18 @@ export function LoginForm() {
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Mot de passe</Label>
             <Link
               href="#"
               className="ml-auto inline-block text-sm text-primary/80 hover:text-primary"
             >
-              Forgot password?
+              Mot de passe oublié ?
             </Link>
           </div>
           <Input id="password" type="password" required className="bg-input" />
         </div>
         <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
-          Login
+          Se connecter
         </Button>
       </div>
     </form>

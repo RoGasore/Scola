@@ -3,19 +3,18 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, Sector } from 'recharts'
-import { Skeleton } from '@/components/ui/skeleton'
 import React, { useState } from 'react'
 
-const trafficData = [
-  { name: 'Direct', value: 400, fill: 'hsl(var(--chart-1))' },
-  { name: 'Referral', value: 300, fill: 'hsl(var(--chart-2))' },
-  { name: 'Organic', value: 300, fill: 'hsl(var(--chart-3))' },
-  { name: 'Social', value: 200, fill: 'hsl(var(--chart-4))' },
+const departmentData = [
+  { name: 'Mathématiques', value: 8, fill: 'hsl(var(--chart-1))' },
+  { name: 'Sciences', value: 6, fill: 'hsl(var(--chart-2))' },
+  { name: 'Lettres', value: 7, fill: 'hsl(var(--chart-3))' },
+  { name: 'Histoire', value: 4, fill: 'hsl(var(--chart-4))' },
 ];
 
-const dailySalesData = [
-  { name: 'Mon', sales: 4000 }, { name: 'Tue', sales: 3000 }, { name: 'Wed', sales: 2000 },
-  { name: 'Thu', sales: 2780 }, { name: 'Fri', sales: 1890 }, { name: 'Sat', sales: 2390 }, { name: 'Sun', sales: 3490 },
+const dailyActivityData = [
+  { name: 'Lun', activité: 22 }, { name: 'Mar', activité: 35 }, { name: 'Mer', activité: 40 },
+  { name: 'Jeu', activité: 30 }, { name: 'Ven', activité: 45 }, { name: 'Sam', activité: 15 }, { name: 'Dim', activité: 5 },
 ];
 
 const renderActiveShape = (props: any) => {
@@ -56,9 +55,9 @@ const renderActiveShape = (props: any) => {
       />
       <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
       <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
-      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="hsl(var(--foreground))" className="text-sm">{`Value ${value}`}</text>
+      <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="hsl(var(--foreground))" className="text-sm">{`${value} profs`}</text>
       <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={18} textAnchor={textAnchor} fill="hsl(var(--muted-foreground))" className="text-xs">
-        {`(Rate ${(percent * 100).toFixed(2)}%)`}
+        {`(${(percent * 100).toFixed(2)}%)`}
       </text>
     </g>
   );
@@ -73,11 +72,11 @@ export default function AnalyticsPage() {
 
   return (
     <div className="grid flex-1 items-start gap-4">
-      <h1 className="text-2xl font-semibold">Analytics</h1>
+      <h1 className="text-2xl font-semibold">Analyse des Professeurs</h1>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Website Traffic Sources</CardTitle>
+            <CardTitle>Répartition par Département</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -85,7 +84,7 @@ export default function AnalyticsPage() {
                 <Pie
                   activeIndex={activeIndex}
                   activeShape={renderActiveShape}
-                  data={trafficData}
+                  data={departmentData}
                   cx="50%"
                   cy="50%"
                   innerRadius={70}
@@ -94,7 +93,7 @@ export default function AnalyticsPage() {
                   dataKey="value"
                   onMouseEnter={onPieEnter}
                 >
-                  {trafficData.map((entry, index) => (
+                  {departmentData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
@@ -104,11 +103,11 @@ export default function AnalyticsPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Daily Sales</CardTitle>
+            <CardTitle>Activité Hebdomadaire</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={dailySalesData}>
+              <BarChart data={dailyActivityData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
                 <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
@@ -120,7 +119,7 @@ export default function AnalyticsPage() {
                   }}
                 />
                 <Legend iconSize={10} />
-                <Bar dataKey="sales" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="activité" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
