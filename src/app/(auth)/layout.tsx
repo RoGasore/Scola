@@ -9,6 +9,8 @@ import {
   Search,
   BookOpen,
   Users,
+  GraduationCap,
+  CalendarCheck
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -26,10 +28,14 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
 
 function NavLink({ href, icon: Icon, children }: { href: string; icon: React.ElementType, children: React.ReactNode }) {
   const pathname = usePathname();
-  const isActive = pathname === href;
+  const isActive = pathname.startsWith(href);
 
   return (
     <Link
@@ -53,11 +59,26 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { setTheme, theme } = useTheme();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const getLinkClass = (path: string) => {
-    return pathname === path
+    return pathname.startsWith(path)
       ? 'bg-muted text-primary'
       : 'text-muted-foreground hover:text-primary';
   };
+
+  const handleThemeChange = (checked: boolean) => {
+    setTheme(checked ? 'dark' : 'light');
+  };
+
+  if (!isMounted) {
+    return null; // ou un skeleton/loader
+  }
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] bg-background">
@@ -69,13 +90,26 @@ export default function DashboardLayout({
               <span>ScolaGest</span>
             </Link>
           </div>
-          <div className="flex-1">
+          <div className="flex-1 overflow-auto py-2">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
               <NavLink href="/dashboard" icon={Home}>Tableau de bord</NavLink>
               <NavLink href="/courses" icon={BookOpen}>Cours</NavLink>
               <NavLink href="/students" icon={Users}>Élèves</NavLink>
+              <NavLink href="/grades" icon={GraduationCap}>Notes</NavLink>
+              <NavLink href="/attendance" icon={CalendarCheck}>Présences</NavLink>
               <NavLink href="/teachers" icon={LineChart}>Professeurs</NavLink>
             </nav>
+          </div>
+          <div className="mt-auto p-4">
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="theme-switch-desktop" 
+                  checked={theme === 'dark'}
+                  onCheckedChange={handleThemeChange}
+                  aria-label="Changer de thème"
+                />
+                <Label htmlFor="theme-switch-desktop">Mode Sombre</Label>
+              </div>
           </div>
         </div>
       </div>
@@ -105,8 +139,21 @@ export default function DashboardLayout({
                   <Link href="/dashboard" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/dashboard')}`}><Home className="h-5 w-5" />Tableau de bord</Link>
                   <Link href="/courses" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/courses')}`}><BookOpen className="h-5 w-5" />Cours</Link>
                   <Link href="/students" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/students')}`}><Users className="h-5 w-5" />Élèves</Link>
+                  <Link href="/grades" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/grades')}`}><GraduationCap className="h-5 w-5" />Notes</Link>
+                  <Link href="/attendance" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/attendance')}`}><CalendarCheck className="h-5 w-5" />Présences</Link>
                   <Link href="/teachers" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/teachers')}`}><LineChart className="h-5 w-5" />Professeurs</Link>
               </nav>
+               <div className="mt-auto p-4">
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="theme-switch-mobile" 
+                    checked={theme === 'dark'}
+                    onCheckedChange={handleThemeChange}
+                    aria-label="Changer de thème"
+                  />
+                  <Label htmlFor="theme-switch-mobile">Mode Sombre</Label>
+                </div>
+              </div>
             </SheetContent>
           </Sheet>
           <div className="w-full flex-1">

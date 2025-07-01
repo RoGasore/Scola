@@ -46,16 +46,17 @@ export default function DashboardLoading() {
           </CardContent>
         </Card>
       </div>
-      <div className="grid gap-4 md:gap-8 lg:grid-cols-5">
-        <Card className="lg:col-span-3">
-            <CardHeader>
-                <Skeleton className="h-6 w-32" />
+      <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
+        <Card className="xl:col-span-2">
+            <CardHeader className="flex flex-row items-center justify-between">
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-8 w-32" />
             </CardHeader>
             <CardContent>
-                <Skeleton className="h-[300px] w-full" />
+                <Skeleton className="h-[350px] w-full" />
             </CardContent>
         </Card>
-         <Card className="lg:col-span-2">
+         <Card>
             <CardHeader>
                 <Skeleton className="h-6 w-32" />
                 <Skeleton className="h-4 w-48" />
@@ -85,8 +86,28 @@ export default function DashboardLoading() {
                     </div>
                     <Skeleton className="ml-auto h-5 w-20" />
                 </div>
+                 <div className="flex items-center gap-4">
+                    <Skeleton className="h-9 w-9 rounded-full" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-40" />
+                    </div>
+                    <Skeleton className="ml-auto h-5 w-20" />
+                </div>
             </CardContent>
         </Card>
+      </div>
+      <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
+        <Card className="xl:col-span-2">
+            <CardHeader className="flex flex-row items-center justify-between">
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-8 w-32" />
+            </CardHeader>
+            <CardContent>
+                <Skeleton className="h-[350px] w-full" />
+            </CardContent>
+        </Card>
+        <div />
       </div>
     </>
   );

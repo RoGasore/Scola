@@ -1,20 +1,27 @@
 
 'use client'
 
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, TrendingUp, Activity, ClipboardCheck, ArrowUpRight, FileSignature, ClipboardList } from 'lucide-react';
-import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { Users, TrendingUp, FileSignature, ClipboardList, CalendarCheck, GraduationCap } from 'lucide-react';
+import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Brush } from 'recharts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { format, getDaysInMonth, startOfMonth, addMonths, getMonth, getYear } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
-const generateChartData = () => [
-  { month: "Jan", note: Math.floor(Math.random() * 4) + 12 },
-  { month: "Fév", note: Math.floor(Math.random() * 4) + 13 },
-  { month: "Mar", note: Math.floor(Math.random() * 4) + 11 },
-  { month: "Avr", note: Math.floor(Math.random() * 4) + 14 },
-  { month: "Mai", note: Math.floor(Math.random() * 4) + 15 },
-  { month: "Juin", note: Math.floor(Math.random() * 4) + 14 },
-];
+const generateDailyData = (monthDate, dataKey, min, max) => {
+  const daysInMonth = getDaysInMonth(monthDate);
+  const data = [];
+  for (let i = 1; i <= daysInMonth; i++) {
+    data.push({
+      jour: i,
+      [dataKey]: parseFloat((Math.random() * (max - min) + min).toFixed(1))
+    });
+  }
+  return data;
+};
 
 const recentAssessments = [
     { name: 'Olivia Martin', email: 'olivia.martin@email.com', subject: 'Mathématiques', grade: '17/20', avatar: 'femme' },
@@ -24,29 +31,36 @@ const recentAssessments = [
     { name: 'Sofia Davis', email: 'sofia.davis@email.com', subject: 'Biologie', grade: '16/20', avatar: 'femme hispanique' },
 ];
 
+const monthOptions = Array.from({ length: 12 }, (_, i) => {
+    const date = new Date(2024, i, 1);
+    return {
+        value: date.toISOString(),
+        label: format(date, 'MMMM yyyy', { locale: fr })
+    };
+});
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label, dataKey, unit }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="p-2 bg-background/80 backdrop-blur-sm border border-border rounded-lg shadow-lg">
-        <p className="label text-sm text-muted-foreground">{`${label}`}</p>
-        <p className="intro text-base font-bold text-primary">{`Note moyenne: ${payload[0].value}/20`}</p>
+        <p className="label text-sm text-muted-foreground">{`Jour ${label}`}</p>
+        <p className="intro text-base font-bold text-primary">{`${dataKey}: ${payload[0].value}${unit}`}</p>
       </div>
     );
   }
-
   return null;
 };
 
+
 export default function Dashboard() {
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [gradesMonth, setGradesMonth] = useState(new Date().toISOString());
+  const [attendanceMonth, setAttendanceMonth] = useState(new Date().toISOString());
 
-  useEffect(() => {
-    setChartData(generateChartData());
-  }, []);
-
+  const gradesData = useMemo(() => generateDailyData(new Date(gradesMonth), 'note', 10, 18), [gradesMonth]);
+  const attendanceData = useMemo(() => generateDailyData(new Date(attendanceMonth), 'présence', 85, 99), [attendanceMonth]);
+  
   return (
-    <>
+    <div className="flex flex-col gap-6">
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -89,50 +103,79 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-      <div className="grid gap-4 md:gap-8 lg:grid-cols-5">
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Évolution des notes moyennes</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <ResponsiveContainer width="100%" height={350}>
-               <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="month"
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    domain={[10, 20]}
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => `${value}`}
-                  />
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--primary) / 0.1)' }} />
-                  <Area
-                    type="monotone"
-                    dataKey="note"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorTotal)"
-                  />
-                </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-        <Card className="lg:col-span-2">
+
+      <div className="grid gap-4 md:gap-8 lg:grid-cols-1 xl:grid-cols-3">
+        <div className="xl:col-span-2 grid gap-4">
+            <Card>
+                <CardHeader className="flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>Évolution des notes moyennes</CardTitle>
+                        <CardDescription>Note moyenne par jour pour le mois sélectionné.</CardDescription>
+                    </div>
+                    <Select value={gradesMonth} onValueChange={setGradesMonth}>
+                        <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            {monthOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </CardHeader>
+                <CardContent className="pl-2">
+                    <ResponsiveContainer width="100%" height={350}>
+                        <AreaChart data={gradesData}>
+                        <defs>
+                            <linearGradient id="colorGrades" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4}/>
+                                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                            </linearGradient>
+                        </defs>
+                        <XAxis dataKey="jour" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis domain={[10, 20]} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}`} />
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <Tooltip content={<CustomTooltip dataKey="Note Moyenne" unit="/20" />} cursor={{ fill: 'hsl(var(--primary) / 0.1)' }}/>
+                        <Area type="monotone" dataKey="note" stroke="hsl(var(--primary))" strokeWidth={2} fillOpacity={1} fill="url(#colorGrades)" />
+                        <Brush dataKey="jour" height={30} stroke="hsl(var(--primary))" travellerWidth={20} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </CardContent>
+                <Link href="/grades" className="absolute inset-0" aria-label="Voir le détail des notes"></Link>
+            </Card>
+
+            <Card>
+                <CardHeader className="flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>Taux de présence mensuel</CardTitle>
+                        <CardDescription>Présence moyenne par jour pour le mois sélectionné.</CardDescription>
+                    </div>
+                     <Select value={attendanceMonth} onValueChange={setAttendanceMonth}>
+                        <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            {monthOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </CardHeader>
+                <CardContent className="pl-2">
+                    <ResponsiveContainer width="100%" height={350}>
+                        <AreaChart data={attendanceData}>
+                        <defs>
+                            <linearGradient id="colorAttendance" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.4}/>
+                                <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0}/>
+                            </linearGradient>
+                        </defs>
+                        <XAxis dataKey="jour" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis domain={[80, 100]} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <Tooltip content={<CustomTooltip dataKey="Présence" unit="%" />} cursor={{ fill: 'hsl(var(--chart-2) / 0.1)' }} />
+                        <Area type="monotone" dataKey="présence" stroke="hsl(var(--chart-2))" strokeWidth={2} fillOpacity={1} fill="url(#colorAttendance)" />
+                        <Brush dataKey="jour" height={30} stroke="hsl(var(--chart-2))" travellerWidth={20} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </CardContent>
+                 <Link href="/attendance" className="absolute inset-0" aria-label="Voir le détail des présences"></Link>
+            </Card>
+        </div>
+
+        <Card>
            <CardHeader>
             <CardTitle>Dernières Évaluations</CardTitle>
             <CardDescription>Notes des dernières évaluations rendues.</CardDescription>
@@ -158,6 +201,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-    </>
+    </div>
   );
 }
