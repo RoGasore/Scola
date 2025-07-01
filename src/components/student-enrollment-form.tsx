@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from './ui/scroll-area';
+import { Separator } from './ui/separator';
 
 // These would typically come from a database or a config file
 const levels = ['Maternelle', 'Primaire', 'Secondaire'];
@@ -34,20 +35,21 @@ export function StudentEnrollmentForm() {
     <div className="py-4">
       <ScrollArea className="h-[calc(100vh-8rem)]">
         <form className="grid gap-6 px-4">
+          
           <div className="grid gap-4">
-            <h3 className="font-semibold text-lg">Informations Personnelles</h3>
+            <h3 className="font-semibold text-lg">Informations Personnelles de l'Élève</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="first-name">Prénom</Label>
-                <Input id="first-name" placeholder="Jean" />
+                <Input id="first-name" placeholder="Moïse" />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="middle-name">Post-nom</Label>
-                <Input id="middle-name" placeholder="Claude" />
+                <Input id="middle-name" placeholder="Tshombe" />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="last-name">Nom</Label>
-                <Input id="last-name" placeholder="Dupont" />
+                <Input id="last-name" placeholder="Kapenda" />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -73,31 +75,46 @@ export function StudentEnrollmentForm() {
                       onSelect={setDate}
                       initialFocus
                       locale={fr}
+                      captionLayout="dropdown-buttons"
+                      fromYear={1990}
+                      toYear={new Date().getFullYear()}
                     />
                   </PopoverContent>
                 </Popover>
               </div>
-               <div className="grid gap-2">
-                <Label htmlFor="address">Adresse</Label>
-                <Input id="address" placeholder="123 Rue Principale, Paris" />
+              <div className="grid gap-2">
+                <Label htmlFor="place-of-birth">Lieu de naissance</Label>
+                <Input id="place-of-birth" placeholder="Kinshasa" />
               </div>
             </div>
+             <div className="grid gap-2">
+                <Label htmlFor="address">Adresse du domicile</Label>
+                <Input id="address" placeholder="123 Av. des Huileries, Gombe, Kinshasa" />
+              </div>
           </div>
 
+          <Separator />
+          
           <div className="grid gap-4">
-            <h3 className="font-semibold text-lg">Informations de Contact</h3>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h3 className="font-semibold text-lg">Informations des Parents / Tuteurs</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Adresse e-mail</Label>
-                <Input id="email" type="email" placeholder="eleve@example.com" />
+                <Label htmlFor="parent-name">Nom complet du parent/tuteur</Label>
+                <Input id="parent-name" placeholder="Marie-Claire Kalonji" />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="phone">Numéro de téléphone</Label>
-                <Input id="phone" type="tel" placeholder="+33 ... "/>
+                <Label htmlFor="parent-phone">Téléphone du parent</Label>
+                <Input id="parent-phone" type="tel" placeholder="+243 99 876 5432"/>
               </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="parent-email">Adresse e-mail du parent</Label>
+              <Input id="parent-email" type="email" placeholder="parent@example.cd" />
             </div>
           </div>
           
+          <Separator />
+
           <div className="grid gap-4">
             <h3 className="font-semibold text-lg">Informations Scolaires</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -149,18 +166,29 @@ export function StudentEnrollmentForm() {
               </div>
             )}
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="status">Statut</Label>
-                <Select>
-                  <SelectTrigger><SelectValue placeholder="Sélectionner le statut" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Actif</SelectItem>
-                    <SelectItem value="inactive">Inactif</SelectItem>
-                    <SelectItem value="pending">En attente</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="grid gap-2">
+              <Label htmlFor="status">Statut de l'inscription</Label>
+              <Select>
+                <SelectTrigger><SelectValue placeholder="Sélectionner le statut" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Actif</SelectItem>
+                  <SelectItem value="pending">En attente</SelectItem>
+                  <SelectItem value="transferred">Transféré</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <Separator />
+          
+          <div className="grid gap-4">
+            <h3 className="font-semibold text-lg">Documents Requis</h3>
+            <div className="grid gap-2">
+              <Label htmlFor="report-cards">Copies des bulletins précédents</Label>
+              <Input id="report-cards" type="file" multiple />
+              <p className="text-sm text-muted-foreground">
+                Formats acceptés : PDF, JPG, PNG.
+              </p>
             </div>
           </div>
           
