@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react';
@@ -20,6 +19,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Badge } from './ui/badge';
+import { Label } from '@/components/ui/label';
 
 const levels = ['Maternelle', 'Primaire', 'Secondaire'];
 const classesByLevel = {
