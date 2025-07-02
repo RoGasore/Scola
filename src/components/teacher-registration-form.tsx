@@ -21,6 +21,7 @@ import { Badge } from './ui/badge';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { extractCvInfo, type ExtractCvInfoOutput } from '@/ai/flows/extract-cv-info-flow';
+import { sendEmail } from '@/ai/flows/send-email-flow';
 import { getLevels, getClassesForLevel, getCoursesForClass, getSectionsForSecondary, getOptionsForHumanites } from '@/lib/school-data';
 import {
   AlertDialog,
@@ -108,18 +109,50 @@ export function TeacherRegistrationForm() {
   }, [selectedAssignmentClass]);
 
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
 
-    setTimeout(() => {
-        const generatedMatricule = generateTeacherMatricule();
-        const generatedPassword = Math.random().toString(36).slice(-8);
+    const generatedMatricule = generateTeacherMatricule();
+    const generatedPassword = Math.random().toString(36).slice(-8);
 
-        console.log("New Teacher:", { ...values, matricule: generatedMatricule, password: generatedPassword });
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2>Bienvenue chez ScolaGest !</h2>
+        <p>Bonjour ${values.firstName},</p>
+        <p>Votre compte professeur a été créé avec succès. Voici vos identifiants pour vous connecter à la plateforme :</p>
+        <ul style="list-style-type: none; padding: 0;">
+          <li style="margin-bottom: 10px;"><strong>Matricule (Identifiant) :</strong> <code style="background-color: #f4f4f4; padding: 2px 5px; border-radius: 3px;">${generatedMatricule}</code></li>
+          <li style="margin-bottom: 10px;"><strong>Mot de passe :</strong> <code style="background-color: #f4f4f4; padding: 2px 5px; border-radius: 3px;">${generatedPassword}</code></li>
+        </ul>
+        <p>Nous vous recommandons de conserver ces informations en lieu sûr.</p>
+        <p>Cordialement,</p>
+        <p><strong>L'équipe ScolaGest</strong></p>
+      </div>
+    `;
+
+    const emailResult = await sendEmail({
+        to: values.email,
+        subject: `Vos identifiants de connexion ScolaGest`,
+        html: emailHtml,
+    });
+
+    if ('error' in emailResult) {
+        toast({
+            variant: "destructive",
+            title: "Échec de l'envoi de l'e-mail",
+            description: emailResult.error,
+        });
+    } else {
+        toast({
+            title: "Email envoyé !",
+            description: `Les identifiants ont été envoyés à ${values.email}.`,
+            className: "bg-green-500 text-white",
+        });
         setCredentials({ matricule: generatedMatricule, password: generatedPassword });
-        setIsSubmitting(false);
+    }
 
-    }, 1500)
+    console.log("New Teacher:", { ...values, matricule: generatedMatricule, password: generatedPassword });
+    setIsSubmitting(false);
   };
 
   const handleDialogClose = () => {
@@ -503,8 +536,7 @@ export function TeacherRegistrationForm() {
           <AlertDialogHeader>
             <AlertDialogTitle>Inscription Terminée !</AlertDialogTitle>
             <AlertDialogDescription>
-              Les informations de connexion pour {form.getValues('firstName')} {form.getValues('lastName')} ont été générées. 
-              Un e-mail simulé a été envoyé au professeur. Veuillez noter ces informations.
+              Le compte a été créé. Les identifiants ont été envoyés à l'adresse e-mail du professeur. Veuillez conserver une copie de ces informations.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="grid gap-2 text-sm bg-muted p-4 rounded-md border">

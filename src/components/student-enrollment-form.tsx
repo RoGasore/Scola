@@ -22,6 +22,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { getLevels, getClassesForLevel, getSectionsForSecondary, getOptionsForHumanites } from '@/lib/school-data';
+import { sendEmail } from '@/ai/flows/send-email-flow';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,7 +48,7 @@ const formSchema = z.object({
   address: z.string().min(1, { message: "L'adresse est requise." }),
   parentName: z.string().min(1, { message: "Le nom du parent est requis." }),
   parentPhone: z.string().min(1, { message: "Le téléphone du parent est requis." }),
-  parentEmail: z.string().email({ message: "Adresse e-mail invalide." }).optional().or(z.literal("")),
+  parentEmail: z.string().email({ message: "Adresse e-mail invalide." }).min(1, { message: "L'email du parent est requis pour l'envoi des identifiants." }),
   level: z.string({ required_error: "Le niveau est requis." }),
   class: z.string().min(1, { message: "La classe est requise." }),
   section: z.string().optional(),
@@ -122,18 +123,50 @@ export function StudentEnrollmentForm() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     
-    setTimeout(() => {
-        const generatedMatricule = generateMatricule(values);
-        const generatedPassword = Math.random().toString(36).slice(-8);
+    const generatedMatricule = generateMatricule(values);
+    const generatedPassword = Math.random().toString(36).slice(-8);
 
-        console.log("New Student:", { ...values, matricule: generatedMatricule, password: generatedPassword, documents, photo: photoPreview ? 'Photo Selected' : 'No Photo' });
-        
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2>Bienvenue chez ScolaGest !</h2>
+        <p>Bonjour ${values.parentName},</p>
+        <p>Le compte pour l'élève <strong>${values.firstName} ${values.lastName}</strong> a été créé avec succès. Voici ses identifiants pour se connecter à la plateforme :</p>
+        <ul style="list-style-type: none; padding: 0;">
+          <li style="margin-bottom: 10px;"><strong>Matricule (Identifiant) :</strong> <code style="background-color: #f4f4f4; padding: 2px 5px; border-radius: 3px;">${generatedMatricule}</code></li>
+          <li style="margin-bottom: 10px;"><strong>Mot de passe :</strong> <code style="background-color: #f4f4f4; padding: 2px 5px; border-radius: 3px;">${generatedPassword}</code></li>
+        </ul>
+        <p>Nous vous recommandons de conserver ces informations en lieu sûr.</p>
+        <p>Cordialement,</p>
+        <p><strong>L'équipe ScolaGest</strong></p>
+      </div>
+    `;
+
+    const emailResult = await sendEmail({
+        to: values.parentEmail,
+        subject: `Identifiants de connexion ScolaGest pour ${values.firstName} ${values.lastName}`,
+        html: emailHtml,
+    });
+
+    if ('error' in emailResult) {
+        toast({
+            variant: "destructive",
+            title: "Échec de l'envoi de l'e-mail",
+            description: emailResult.error,
+        });
+    } else {
+        toast({
+            title: "Email envoyé !",
+            description: `Les identifiants ont été envoyés à ${values.parentEmail}.`,
+            className: "bg-green-500 text-white",
+        });
         setCredentials({ matricule: generatedMatricule, password: generatedPassword });
-        setIsSubmitting(false);
-    }, 1500);
+    }
+
+    console.log("New Student:", { ...values, matricule: generatedMatricule, password: generatedPassword, documents, photo: photoPreview ? 'Photo Selected' : 'No Photo' });
+    setIsSubmitting(false);
   };
 
   const handleDialogClose = () => {
@@ -338,7 +371,7 @@ export function StudentEnrollmentForm() {
               </div>
               <FormField control={form.control} name="parentEmail" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Adresse e-mail du parent (optionnel)</FormLabel>
+                    <FormLabel>Adresse e-mail du parent</FormLabel>
                     <FormControl><Input type="email" placeholder="parent@example.cd" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -473,8 +506,7 @@ export function StudentEnrollmentForm() {
           <AlertDialogHeader>
             <AlertDialogTitle>Inscription Terminée !</AlertDialogTitle>
             <AlertDialogDescription>
-              Les informations de connexion pour {form.getValues('firstName')} {form.getValues('lastName')} ont été générées. 
-              Un e-mail simulé a été envoyé à l'utilisateur. Veuillez noter ces informations.
+              Le compte a été créé. Les identifiants ont été envoyés à l'adresse e-mail du parent. Veuillez conserver une copie de ces informations.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="grid gap-2 text-sm bg-muted p-4 rounded-md border">
