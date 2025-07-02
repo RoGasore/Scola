@@ -19,7 +19,6 @@ import type { Student } from '@/types';
 import BulletinsLoading from './loading';
 import { useToast } from '@/hooks/use-toast';
 import { BulletinView } from '@/components/bulletin-view';
-import { getBulletinDataForStudent } from '@/services/bulletins';
 import { getAcademicTerms } from '@/services/academic';
 
 // A generic component for navigating through the hierarchy
@@ -106,29 +105,32 @@ export default function BulletinsPage() {
 
         const zip = new JSZip();
         const term = terms.find(t => t.id === selectedTermId);
-        if (!term) return;
+        if (!term) {
+            setIsExporting(false);
+            toast({ variant: 'destructive', title: 'Erreur', description: 'Période sélectionnée invalide.' });
+            return;
+        };
 
-        const bulletinDataPromises = studentsToExport.map(student => getBulletinDataForStudent(student.id!, selectedTermId));
-        const allBulletinData = await Promise.all(bulletinDataPromises);
-
-        for (const data of allBulletinData) {
-            if (data) {
-                const { student } = data;
-                const pdf = new jsPDF();
-                pdf.text(`Bulletin de ${student.firstName} ${student.lastName}`, 10, 10);
-                pdf.text(`Classe: ${student.classe}`, 10, 20);
-                pdf.text(`Période: ${term.name}`, 10, 30);
-                const pdfBlob = pdf.output('blob');
-                
-                let pathPrefix = '';
-                if (student.level === 'Primaire' || student.level === 'Maternelle') {
-                    pathPrefix = `${student.level}/${student.classe}/`;
-                } else if (student.level === 'Secondaire') {
-                    pathPrefix = `${student.level}/${student.section || ''}/${student.option || ''}/${student.classe}/`.replace(/\/+/g, '/');
-                }
-                
-                zip.file(`${pathPrefix}Bulletin_${student.lastName}_${student.firstName}.pdf`, pdfBlob);
+        // The logic for PDF generation is a placeholder.
+        // In a real implementation, we would use html2canvas on the BulletinView component.
+        // For now, we generate a simple text-based PDF.
+        for (const student of studentsToExport) {
+            const pdf = new jsPDF();
+            pdf.text(`Bulletin de ${student.firstName} ${student.lastName}`, 10, 10);
+            pdf.text(`Classe: ${student.classe}`, 10, 20);
+            pdf.text(`Période: ${term.name}`, 10, 30);
+            // This is a placeholder for the actual bulletin content
+            pdf.text("Contenu du bulletin à implémenter.", 10, 40);
+            const pdfBlob = pdf.output('blob');
+            
+            let pathPrefix = '';
+            if (student.level === 'Primaire' || student.level === 'Maternelle') {
+                pathPrefix = `${student.level}/${student.classe}/`;
+            } else if (student.level === 'Secondaire') {
+                pathPrefix = `${student.level}/${student.section || ''}/${student.option || ''}/${student.classe}/`.replace(/\/+/g, '/');
             }
+            
+            zip.file(`${pathPrefix}Bulletin_${student.lastName}_${student.firstName}.pdf`, pdfBlob);
         }
         
         const zipBlob = await zip.generateAsync({ type: 'blob' });
