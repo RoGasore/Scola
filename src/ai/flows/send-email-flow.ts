@@ -21,7 +21,9 @@ export type SendEmailInput = z.infer<typeof SendEmailInputSchema>;
 // For production, it's recommended to use environment variables for the API key.
 const resendApiKey = "re_jJWoAYkp_2evEJ82XdpqCrd8jbEqqhZA2";
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
-const fromAddress = `ScolaGest <onboarding@resend.dev>`;
+// You can set your verified domain in an environment variable.
+// For now, it defaults to the Resend test address.
+const fromAddress = process.env.EMAIL_FROM_ADDRESS || `ScolaGest <onboarding@resend.dev>`;
 
 export async function sendEmail(input: SendEmailInput): Promise<{ id: string } | { error: string }> {
   return sendEmailFlow(input);
