@@ -1,3 +1,6 @@
+
+'use client';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -5,6 +8,12 @@ import { Separator } from '@/components/ui/separator';
 import { FileText, Clock, BarChart, Bell, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+import { useEffect, useState } from 'react';
+import type { Student, Communique } from '@/types';
+import { getStudentByMatricule, getStudents } from '@/services/students';
+import { getRecentAnnouncements } from '@/services/communiques';
+import StudentDashboardLoading from './loading';
 
 
 const upcomingAssignments = [
@@ -25,17 +34,68 @@ const scheduleToday = [
     { time: "12:00 - 12:50", course: "Gymnastique", teacher: "M. Armstrong", room: "Gymnase" },
 ];
 
-const recentAnnouncements = [
-    { id: 'COM001', author: { name: 'Direction Scolaire', avatar: 'school building' }, subject: "Rappel : Réunion Parents-Professeurs", time: "il y a 2 jours" },
-    { id: 'COM002', author: { name: 'M. Dupont (Prof. de Sport)', avatar: 'homme noir' }, subject: "Information : Journée sportive annuelle", time: "il y a 10 jours" },
-];
-
 export default function StudentDashboard() {
+  const [student, setStudent] = useState<Student | null>(null);
+  const [announcements, setAnnouncements] = useState<Communique[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadDashboardData() {
+        setIsLoading(true);
+        try {
+            // In a real app with authentication, you'd get the current user's matricule.
+            // For now, we try a default one, and if not found, we take the first student in the DB.
+            let studentData = await getStudentByMatricule('E24-M1-001');
+
+            if (!studentData) {
+                const allStudents = await getStudents();
+                if (allStudents.length > 0) {
+                    studentData = allStudents[0];
+                }
+            }
+            
+            const announcementsData = await getRecentAnnouncements();
+            setStudent(studentData);
+            setAnnouncements(announcementsData);
+        } catch (error) {
+            console.error("Failed to load dashboard data:", error);
+            // In a real app, you might set an error state here
+        } finally {
+            setIsLoading(false);
+        }
+    }
+    loadDashboardData();
+  }, []);
+
+  if (isLoading) {
+      return <StudentDashboardLoading />;
+  }
+
+  if (!student) {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Bienvenue sur votre Espace Élève</CardTitle>
+                <CardDescription>Profil élève non trouvé.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <p>Il semble qu'aucun profil élève n'ait encore été créé dans la base de données.</p>
+                <p className="text-muted-foreground text-sm mt-2">Un administrateur doit d'abord inscrire des élèves pour que leurs tableaux de bord soient accessibles.</p>
+                <Button asChild className="mt-4">
+                    <Link href="/">Retour à la page de connexion</Link>
+                </Button>
+            </CardContent>
+        </Card>
+    );
+  }
+
+  const studentName = student.firstName;
+
   return (
     <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Bonjour, Léo !</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Bonjour, {studentName} !</h1>
                 <p className="text-muted-foreground">Voici un résumé de votre journée et de vos activités scolaires.</p>
             </div>
         </div>
@@ -148,7 +208,7 @@ export default function StudentDashboard() {
                 </CardHeader>
                 <CardContent>
                    <ul className="space-y-4">
-                        {recentAnnouncements.map((communique) => (
+                        {announcements.map((communique) => (
                             <li key={communique.id}>
                                 <Link href="#" className="flex items-center gap-4 p-2 -m-2 rounded-lg hover:bg-muted">
                                     <Avatar className="h-10 w-10 border">

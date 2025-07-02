@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -12,47 +12,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from "@/hooks/use-toast";
-import { format, subDays } from 'date-fns';
 import { Paperclip, Trash2, Send, MessageSquare, ThumbsUp, Eye } from 'lucide-react';
-
-const pastCommuniquesData = [
-  {
-    id: 'COM001',
-    author: {
-        name: 'Direction Scolaire',
-        avatar: 'school building'
-    },
-    subject: "Rappel : Réunion Parents-Professeurs",
-    recipients: ['Parents'],
-    date: format(subDays(new Date(), 2), 'dd/MM/yyyy HH:mm'),
-    status: { read: 85, unread: 15 },
-    content: "<p>Chers parents,</p><p>Ceci est un rappel amical pour la réunion parents-professeurs qui aura lieu ce <strong>vendredi à 17h00</strong>. Votre présence est vivement souhaitée pour discuter des progrès de votre enfant et des objectifs pour le reste de l'année.</p><p>Cordialement,</p><p>La Direction</p>",
-    attachments: [{ name: 'Ordre_du_jour.pdf', size: '128 KB' }],
-    comments: [
-      { id: 1, user: { name: 'Parent de Léo Dubois', avatar: 'homme congolais' }, text: 'Bien reçu, merci. Serons-nous en mesure de rencontrer le professeur de mathématiques ?', time: 'il y a 2h' },
-      { id: 2, user: { name: 'Direction Scolaire', avatar: 'school building' }, text: 'Oui, tous les professeurs titulaires seront disponibles pendant les deux premières heures.', time: 'il y a 1h' },
-    ]
-  },
-  {
-    id: 'COM002',
-    author: {
-        name: 'M. Dupont (Prof. de Sport)',
-        avatar: 'homme noir'
-    },
-    subject: "Information : Journée sportive annuelle",
-    recipients: ['Élèves', 'Parents'],
-    date: format(subDays(new Date(), 10), 'dd/MM/yyyy HH:mm'),
-    status: { read: 92, unread: 8 },
-    content: "<p>Bonjour à tous,</p><p>La journée sportive annuelle se tiendra le <strong>30 juillet</strong>. N'oubliez pas vos tenues de sport ! Des médailles seront décernées aux vainqueurs de chaque épreuve.</p><p>Préparez-vous !</p>",
-    attachments: [],
-    comments: [
-        { id: 1, user: { name: 'Lucas Moreau', avatar: 'homme congolais' }, text: 'Super ! Hâte de participer au tournoi de foot.', time: 'il y a 8 jours' },
-    ]
-  },
-];
+import { getRecentAnnouncements } from '@/services/communiques';
+import type { Communique } from '@/types';
+import CommuniquesLoading from './loading';
 
 
-function CommuniquePost({ communique }: { communique: (typeof pastCommuniquesData)[0] }) {
+function CommuniquePost({ communique }: { communique: Communique }) {
     const [newComment, setNewComment] = useState('');
     return (
         <Card>
@@ -143,6 +109,18 @@ export default function CommuniquesPage() {
     const [audiences, setAudiences] = useState({ parents: false, eleves: false, professeurs: false });
     const [attachedFiles, setAttachedFiles] = useState<{ name: string }[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [pastCommuniques, setPastCommuniques] = useState<Communique[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        async function loadCommuniques() {
+            setIsLoading(true);
+            const data = await getRecentAnnouncements();
+            setPastCommuniques(data);
+            setIsLoading(false);
+        }
+        loadCommuniques();
+    }, []);
 
     const handleAudienceChange = (audience: keyof typeof audiences) => {
         setAudiences(prev => ({ ...prev, [audience]: !prev[audience] }));
@@ -255,9 +233,13 @@ export default function CommuniquesPage() {
 
             <div className="space-y-6">
                 <h2 className="text-2xl font-bold">Fil d'actualité</h2>
-                {pastCommuniquesData.map(communique => (
-                    <CommuniquePost key={communique.id} communique={communique} />
-                ))}
+                 {isLoading ? (
+                    <CommuniquesLoading />
+                ) : (
+                    pastCommuniques.map(communique => (
+                        <CommuniquePost key={communique.id} communique={communique} />
+                    ))
+                )}
             </div>
         </div>
     );

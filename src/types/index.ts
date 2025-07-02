@@ -25,3 +25,23 @@ export interface Student {
     avatar: string; // AI hint for placeholder generation
     cover: string; // AI hint
 }
+
+export interface Communique {
+    id: string;
+    author: {
+        name: string;
+        avatar: string;
+    };
+    subject: string;
+    recipients: string[];
+    date: string;
+    status: { read: number; unread: number };
+    content: string;
+    attachments: { name: string; size: string }[];
+    comments: {
+        id: number;
+        user: { name: string; avatar: string };
+        text: string;
+        time: string;
+    }[];
+}
