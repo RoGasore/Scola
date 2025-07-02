@@ -1,4 +1,11 @@
 
+
+const defaultCourse = {
+  professeur: 'N/A',
+  room: 'N/A',
+  description: ''
+};
+
 export const schoolStructure = {
   "Maternelle": {
     classes: {
@@ -6,83 +13,54 @@ export const schoolStructure = {
         name: "1ère Maternelle",
         isActive: true,
         courses: [
-          { name: "Psychomotricité", hours: 3, professeur: 'Mme. Kanza', room: 'Salle Polyvalente' },
-          { name: "Éveil Artistique", hours: 2, professeur: 'Mme. Kanza', room: 'Atelier 1' },
-          { name: "Langage", hours: 4, professeur: 'Mme. Kanza', room: 'Salle 1' },
+          { name: "Psychomotricité", hours: 3, ...defaultCourse, domain: 'Développement Personnel', maxima: { p1: 10, p2: 10, exam: 20 } },
+          { name: "Éveil Artistique", hours: 2, ...defaultCourse, domain: 'Arts', maxima: { p1: 10, p2: 10, exam: 20 } },
+          { name: "Langage", hours: 4, ...defaultCourse, domain: 'Langues', maxima: { p1: 10, p2: 10, exam: 20 } },
         ]
       },
-      "2ème Maternelle": {
+       "2ème Maternelle": {
         name: "2ème Maternelle",
         isActive: true,
         courses: [
-          { name: "Graphisme", hours: 3, professeur: 'Mme. Lema', room: 'Salle 2' },
-          { name: "Découverte du Monde", hours: 3, professeur: 'Mme. Lema', room: 'Jardin' },
-          { name: "Pré-lecture", hours: 4, professeur: 'Mme. Lema', room: 'Salle 2' },
-        ]
-      },
-      "3ème Maternelle": {
-        name: "3ème Maternelle",
-        isActive: true,
-        courses: [
-          { name: "Pré-écriture", hours: 4, professeur: 'M. Tshimanga', room: 'Salle 3' },
-          { name: "Pré-mathématiques", hours: 4, professeur: 'M. Tshimanga', room: 'Salle 3' },
-          { name: "Activités ludiques", hours: 2, professeur: 'M. Tshimanga', room: 'Salle Polyvalente' },
+          { name: "Graphisme", hours: 3, ...defaultCourse, domain: 'Arts', maxima: { p1: 10, p2: 10, exam: 20 } },
+          { name: "Découverte du Monde", hours: 3, ...defaultCourse, domain: 'Univers Social et Environnement', maxima: { p1: 10, p2: 10, exam: 20 } },
+          { name: "Pré-lecture", hours: 4, ...defaultCourse, domain: 'Langues', maxima: { p1: 10, p2: 10, exam: 20 } },
         ]
       },
     }
   },
   "Primaire": {
     classes: {
-      "1ère Primaire": { name: "1ère Primaire", isActive: true, courses: [{ name: 'Français', hours: 5, professeur: 'Mme. Diallo' }, { name: 'Mathématiques', hours: 5, professeur: 'M. Ngoyi' }] },
-      "2ème Primaire": { name: "2ème Primaire", isActive: true, courses: [{ name: 'Français', hours: 5, professeur: 'Mme. Diallo' }, { name: 'Mathématiques', hours: 5, professeur: 'M. Ngoyi' }] },
-      "3ème Primaire": { name: "3ème Primaire", isActive: true, courses: [{ name: 'Français', hours: 4, professeur: 'Mme. Diallo' }, { name: 'Mathématiques', hours: 4, professeur: 'M. Ngoyi' }, { name: 'Sciences', hours: 2, professeur: 'Mme. Curie' }] },
-      "4ème Primaire": { name: "4ème Primaire", isActive: true, courses: [{ name: 'Français', hours: 4, professeur: 'Mme. Diallo' }, { name: 'Mathématiques', hours: 4, professeur: 'M. Ngoyi' }, { name: 'Sciences', hours: 2, professeur: 'Mme. Curie' }] },
-      "5ème Primaire": { name: "5ème Primaire", isActive: true, courses: [{ name: 'Français', hours: 4, professeur: 'M. Hugo' }, { name: 'Mathématiques', hours: 4, professeur: 'M. Dupont' }, { name: 'Histoire', hours: 2, professeur: 'M. Kabila' }] },
-      "6ème Primaire": { name: "6ème Primaire", isActive: true, courses: [{ name: 'Français', hours: 4, professeur: 'M. Hugo' }, { name: 'Mathématiques', hours: 4, professeur: 'M. Dupont' }, { name: 'Géographie', hours: 2, professeur: 'M. Kabila' }] },
+      "6ème Primaire": { 
+          name: "6ème Primaire", 
+          isActive: true, 
+          courses: [
+              { name: 'Français', hours: 4, ...defaultCourse, domain: 'Langues', maxima: { p1: 20, p2: 20, exam: 40 } },
+              { name: 'Mathématiques', hours: 4, ...defaultCourse, domain: 'Sciences', subDomain: 'Mathématiques', maxima: { p1: 20, p2: 20, exam: 40 } },
+              { name: 'Géographie', hours: 2, ...defaultCourse, domain: 'Univers Social et Environnement', maxima: { p1: 10, p2: 10, exam: 20 } }
+          ] 
+      },
     }
   },
   "Secondaire": {
     "Éducation de base": {
         classes: {
-            "7ème Année": { name: "7ème Année", isActive: true, courses: [{ name: 'Mathématiques', hours: 4, professeur: 'M. Dupont' }, { name: 'Français', hours: 4, professeur: 'M. Hugo' }, { name: 'Anglais', hours: 3, professeur: 'Mme. Diallo' }, { name: 'Histoire', hours: 2, professeur: 'M. Kabila' }, { name: 'Géographie', hours: 2, professeur: 'M. Kabila' }] },
-            "8ème Année": { name: "8ème Année", isActive: true, courses: [{ name: 'Mathématiques', hours: 4, professeur: 'M. Dupont' }, { name: 'Français', hours: 4, professeur: 'M. Hugo' }, { name: 'Physique', hours: 3, professeur: 'Mme. Curie' }, { name: 'Chimie', hours: 2, professeur: 'Mme. Curie' }, { name: 'Biologie', hours: 2, professeur: 'M. Pasteur' }] },
+            "7ème Année": { 
+                name: "7ème Année", 
+                isActive: true, 
+                courses: [
+                    { name: 'Algèbre', hours: 2, ...defaultCourse, domain: 'Sciences', subDomain: 'Mathématiques', maxima: { p1: 10, p2: 10, exam: 20 } },
+                    { name: 'Arithmétique', hours: 2, ...defaultCourse, domain: 'Sciences', subDomain: 'Mathématiques', maxima: { p1: 10, p2: 10, exam: 20 } },
+                    { name: 'Anatomie', hours: 2, ...defaultCourse, domain: 'Sciences', subDomain: 'Sciences de la Vie et de la Terre (SVT)', maxima: { p1: 10, p2: 10, exam: 20 } },
+                    { name: 'Français', hours: 4, ...defaultCourse, domain: 'Langues', maxima: { p1: 30, p2: 30, exam: 40 } },
+                    { name: 'Anglais', hours: 3, ...defaultCourse, domain: 'Langues', maxima: { p1: 15, p2: 15, exam: 20 } },
+                    { name: 'Histoire', hours: 2, ...defaultCourse, domain: 'Univers Social et Environnement', maxima: { p1: 10, p2: 10, exam: 20 } },
+                ] 
+            },
         }
     },
     "Humanités": {
-      options: {
-        "Latin-Grec": {
-          classes: {
-            "1ère Latin-Grec": { name: "1ère Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4, professeur: 'M. Rousseau' }, { name: 'Grec', hours: 4, professeur: 'M. Rousseau' }, { name: 'Français', hours: 3, professeur: 'M. Hugo' }] },
-            "2ème Latin-Grec": { name: "2ème Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4, professeur: 'M. Rousseau' }, { name: 'Grec', hours: 4, professeur: 'M. Rousseau' }, { name: 'Philosophie', hours: 2, professeur: 'M. Descartes' }] },
-            "3ème Latin-Grec": { name: "3ème Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4, professeur: 'M. Rousseau' }, { name: 'Grec', hours: 4, professeur: 'M. Rousseau' }, { name: 'Histoire de l’art', hours: 2, professeur: 'M. Vinci' }] },
-            "4ème Latin-Grec": { name: "4ème Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4, professeur: 'M. Rousseau' }, { name: 'Grec', hours: 4, professeur: 'M. Rousseau' }, { name: 'Civilisation antique', hours: 2, professeur: 'M. Vinci' }] },
-          }
-        },
-        "Électricité": {
-          classes: {
-            "1ère Électricité": { name: "1ère Électricité", isActive: true, courses: [{ name: 'Électricité Générale', hours: 6, professeur: 'M. Ampère' }, { name: 'Schémas', hours: 4, professeur: 'M. Ampère' }] },
-            "2ème Électricité": { name: "2ème Électricité", isActive: true, courses: [{ name: 'Mesures Électriques', hours: 6, professeur: 'M. Ampère' }, { name: 'Technologie', hours: 4, professeur: 'M. Ampère' }] },
-            "3ème Électricité": { name: "3ème Électricité", isActive: false, courses: [] },
-            "4ème Électricité": { name: "4ème Électricité", isActive: true, courses: [{ name: 'Électronique Appliquée', hours: 6, professeur: 'M. Ampère' }, { name: 'Automatisme', hours: 4, professeur: 'M. Ampère' }] },
-          }
-        },
-        "Sciences Économiques": {
-          classes: {
-            "1ère Sciences Économiques": { name: "1ère Sciences Économiques", isActive: true, courses: [{ name: 'Économie Politique', hours: 4, professeur: 'M. Smith' }, { name: 'Comptabilité', hours: 4, professeur: 'M. Smith' }] },
-            "2ème Sciences Économiques": { name: "2ème Sciences Économiques", isActive: true, courses: [{ name: 'Droit', hours: 3, professeur: 'M. Montesquieu' }, { name: 'Comptabilité', hours: 4, professeur: 'M. Smith' }] },
-            "3ème Sciences Économiques": { name: "3ème Sciences Économiques", isActive: true, courses: [{ name: 'Statistique', hours: 3, professeur: 'M. Gauss' }, { name: 'Marketing', hours: 3, professeur: 'M. Smith' }] },
-            "4ème Sciences Économiques": { name: "4ème Sciences Économiques", isActive: true, courses: [{ name: 'Gestion financière', hours: 4, professeur: 'M. Smith' }, { name: 'Économie internationale', hours: 2, professeur: 'M. Smith' }] },
-          }
-        },
-        "Biochimie": {
-          classes: {
-            "1ère Biochimie": { name: "1ère Biochimie", isActive: true, courses: [{ name: 'Biologie', hours: 4, professeur: 'M. Pasteur' }, { name: 'Chimie générale', hours: 4, professeur: 'M. Lavoisier' }] },
-            "2ème Biochimie": { name: "2ème Biochimie", isActive: true, courses: [{ name: 'Chimie Organique', hours: 4, professeur: 'M. Lavoisier' }, { name: 'Microbiologie', hours: 4, professeur: 'M. Pasteur' }] },
-            "3ème Biochimie": { name: "3ème Biochimie", isActive: true, courses: [{ name: 'Biochimie', hours: 6, professeur: 'M. Pasteur' }, { name: 'Physique biologique', hours: 3, professeur: 'Mme. Curie' }] },
-            "4ème Biochimie": { name: "4ème Biochimie", isActive: true, courses: [{ name: 'Génétique', hours: 4, professeur: 'M. Mendel' }, { name: 'Immunologie', hours: 4, professeur: 'M. Pasteur' }] },
-          }
-        }
-      }
+      options: {}
     }
   }
 };
@@ -141,37 +119,42 @@ export const getCoursesForClass = (className?: string): string[] => {
         return [];
     }
     
+    let courses: any[] = [];
+
     // Check Maternelle
     // @ts-ignore
     if (schoolStructure.Maternelle.classes[className]) {
         // @ts-ignore
-        return schoolStructure.Maternelle.classes[className].courses.map(c => c.name);
+        courses = schoolStructure.Maternelle.classes[className].courses;
     }
     
     // Check Primaire
     // @ts-ignore
-    if (schoolStructure.Primaire.classes[className]) {
+    else if (schoolStructure.Primaire.classes[className]) {
         // @ts-ignore
-        return schoolStructure.Primaire.classes[className].courses.map(c => c.name);
+        courses = schoolStructure.Primaire.classes[className].courses;
     }
 
     // Check Secondaire - Éducation de base
     // @ts-ignore
-    if (schoolStructure.Secondaire['Éducation de base'].classes[className]) {
+    else if (schoolStructure.Secondaire['Éducation de base'].classes[className]) {
         // @ts-ignore
-        return schoolStructure.Secondaire['Éducation de base'].classes[className].courses.map(c => c.name);
+        courses = schoolStructure.Secondaire['Éducation de base'].classes[className].courses;
     }
     
     // Check Secondaire - Humanités
-    for (const option of Object.values(schoolStructure.Secondaire.Humanités.options)) {
-        // @ts-ignore
-        if (option.classes[className]) {
+    else {
+        for (const option of Object.values(schoolStructure.Secondaire.Humanités.options)) {
             // @ts-ignore
-            return option.classes[className].courses.map(c => c.name);
+            if (option.classes[className]) {
+                // @ts-ignore
+                courses = option.classes[className].courses;
+                break;
+            }
         }
     }
     
-    return [];
+    return courses.map(c => c.name);
 };
 
 

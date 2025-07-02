@@ -1,3 +1,4 @@
+
 import { db } from '@/lib/firebase';
 import type { AcademicTerm } from '@/types';
 import { collection, getDocs, query, where, doc, writeBatch, addDoc } from "firebase/firestore";
@@ -11,8 +12,12 @@ export async function getAcademicTerms(): Promise<AcademicTerm[]> {
     querySnapshot.forEach((doc) => {
         terms.push({ id: doc.id, ...doc.data() } as AcademicTerm);
     });
-    // Sort by semester then period
-    return terms.sort((a, b) => a.semester - b.semester || a.period - b.period);
+    // Sort by start date
+    return terms.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+}
+
+export function getAcademicTermsForYear(allTerms: AcademicTerm[], year: number): AcademicTerm[] {
+    return allTerms.filter(term => new Date(term.startDate).getFullYear() === year);
 }
 
 export async function getCurrentAcademicTerm(): Promise<AcademicTerm | null> {

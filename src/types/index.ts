@@ -1,4 +1,5 @@
 
+
 export type StudentStatus = 'Actif' | 'Inactif' | 'En attente' | 'Transféré';
 
 export interface Student {
@@ -66,6 +67,9 @@ export interface Course {
     level: string;
     description: string;
     room: string;
+    domain: string;
+    subDomain?: string;
+    maxima: { p1: number, p2: number, exam: number }; // Maxima for 1st & 2nd period + exam per semester
 }
 
 export interface AcademicTerm {
@@ -81,7 +85,7 @@ export interface AcademicTerm {
 export interface Grade {
     id: string;
     course: string;
-    type: 'Interrogation' | 'Examen' | 'Devoir' | 'Participation' | 'Observation';
+    type: 'P1' | 'P2' | 'Examen'; // Period 1, Period 2, or Exam
     date: string; // ISO String
     grade: string; // e.g., "18/20", "A", "Très Bien", "Acquis", "Excellent"
     professeur: string;
@@ -100,4 +104,46 @@ export interface ScheduleItem {
 
 export interface Schedule {
     [day: string]: ScheduleItem[];
+}
+
+// Types for the detailed bulletin
+export type BulletinCourse = Course & {
+    grades: {
+        s1: { p1: Grade | null, p2: Grade | null, exam: Grade | null },
+        s2: { p1: Grade | null, p2: Grade | null, exam: Grade | null }
+    },
+    totals: {
+        s1: number,
+        s2: number,
+        tg: number
+    }
+};
+
+export type BulletinSubDomain = {
+    name: string;
+    courses: BulletinCourse[];
+    totals: {
+        maxima: { s1: number, s2: number, tg: number },
+        student: { s1: number, s2: number, tg: number }
+    }
+};
+
+export type BulletinDomain = {
+    name: string;
+    subDomains: BulletinSubDomain[];
+    totals: {
+        maxima: { s1: number, s2: number, tg: number },
+        student: { s1: number, s2: number, tg: number }
+    }
+};
+
+export interface BulletinData {
+    student: Student;
+    term: AcademicTerm;
+    domains: BulletinDomain[];
+    grandTotals: {
+        maxima: { s1: number, s2: number, tg: number },
+        student: { s1: number, s2: number, tg: number }
+    };
+    percentage: string;
 }
