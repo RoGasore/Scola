@@ -13,12 +13,17 @@ import {
   Quote,
   Code,
   Paintbrush,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
 import * as React from 'react';
 import { Color } from '@tiptap/extension-color';
 import TextStyle from '@tiptap/extension-text-style';
+import TextAlign from '@tiptap/extension-text-align';
 import { Button } from '@/components/ui/button';
 
 const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
@@ -86,6 +91,38 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
       </Button>
 
       <Separator orientation="vertical" className="h-8" />
+
+      <Toggle
+        size="sm"
+        pressed={editor.isActive({ textAlign: 'left' })}
+        onPressedChange={() => editor.chain().focus().setTextAlign('left').run()}
+      >
+        <AlignLeft className="h-4 w-4" />
+      </Toggle>
+      <Toggle
+        size="sm"
+        pressed={editor.isActive({ textAlign: 'center' })}
+        onPressedChange={() => editor.chain().focus().setTextAlign('center').run()}
+      >
+        <AlignCenter className="h-4 w-4" />
+      </Toggle>
+      <Toggle
+        size="sm"
+        pressed={editor.isActive({ textAlign: 'right' })}
+        onPressedChange={() => editor.chain().focus().setTextAlign('right').run()}
+      >
+        <AlignRight className="h-4 w-4" />
+      </Toggle>
+      <Toggle
+        size="sm"
+        pressed={editor.isActive({ textAlign: 'justify' })}
+        onPressedChange={() => editor.chain().focus().setTextAlign('justify').run()}
+      >
+        <AlignJustify className="h-4 w-4" />
+      </Toggle>
+
+      <Separator orientation="vertical" className="h-8" />
+
       <Toggle
         size="sm"
         pressed={editor.isActive('bulletList')}
@@ -142,6 +179,9 @@ export const RichTextEditor = ({ content, onChange, placeholder }: RichTextEdito
       }),
       TextStyle,
       Color,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
     ],
     content: content,
     editorProps: {
