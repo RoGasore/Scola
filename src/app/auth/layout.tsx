@@ -93,7 +93,7 @@ export default function DashboardLayout({
           </div>
           <div className="flex-1 overflow-auto py-2">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-              <NavLink href="/auth/dashboard" icon={Home}>Tableau de bord</NavLink>
+              <NavLink href="/auth/dashboard" icon={Home}>Tableau de bord Admin</NavLink>
               <NavLink href="/auth/communiques" icon={MessageSquare}>Communiqués</NavLink>
               <NavLink href="/auth/courses" icon={BookOpen}>Cours</NavLink>
               <NavLink href="/auth/students" icon={Users}>Élèves</NavLink>
@@ -138,7 +138,7 @@ export default function DashboardLayout({
                 </SheetTitle>
               </SheetHeader>
               <nav className="grid gap-2 text-lg font-medium">
-                  <Link href="/auth/dashboard" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/dashboard')}`}><Home className="h-5 w-5" />Tableau de bord</Link>
+                  <Link href="/auth/dashboard" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/dashboard')}`}><Home className="h-5 w-5" />T. de bord Admin</Link>
                   <Link href="/auth/communiques" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/communiques')}`}><MessageSquare className="h-5 w-5" />Communiqués</Link>
                   <Link href="/auth/courses" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/courses')}`}><BookOpen className="h-5 w-5" />Cours</Link>
                   <Link href="/auth/students" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/students')}`}><Users className="h-5 w-5" />Élèves</Link>
