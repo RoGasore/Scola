@@ -3,14 +3,15 @@
 
 import {
   Home,
-  LineChart,
-  Package2,
   PanelLeft,
   Search,
   BookOpen,
   Users,
   GraduationCap,
-  CalendarCheck
+  CalendarCheck,
+  Package2,
+  Briefcase,
+  MessageSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -93,11 +94,12 @@ export default function DashboardLayout({
           <div className="flex-1 overflow-auto py-2">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
               <NavLink href="/auth/dashboard" icon={Home}>Tableau de bord</NavLink>
+              <NavLink href="/auth/communiques" icon={MessageSquare}>Communiqués</NavLink>
               <NavLink href="/auth/courses" icon={BookOpen}>Cours</NavLink>
               <NavLink href="/auth/students" icon={Users}>Élèves</NavLink>
               <NavLink href="/auth/grades" icon={GraduationCap}>Notes</NavLink>
               <NavLink href="/auth/attendance" icon={CalendarCheck}>Présences</NavLink>
-              <NavLink href="/auth/teachers" icon={LineChart}>Professeurs</NavLink>
+              <NavLink href="/auth/teachers" icon={Briefcase}>Professeurs</NavLink>
             </nav>
           </div>
           <div className="mt-auto p-4">
@@ -137,11 +139,12 @@ export default function DashboardLayout({
               </SheetHeader>
               <nav className="grid gap-2 text-lg font-medium">
                   <Link href="/auth/dashboard" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/dashboard')}`}><Home className="h-5 w-5" />Tableau de bord</Link>
+                  <Link href="/auth/communiques" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/communiques')}`}><MessageSquare className="h-5 w-5" />Communiqués</Link>
                   <Link href="/auth/courses" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/courses')}`}><BookOpen className="h-5 w-5" />Cours</Link>
                   <Link href="/auth/students" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/students')}`}><Users className="h-5 w-5" />Élèves</Link>
                   <Link href="/auth/grades" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/grades')}`}><GraduationCap className="h-5 w-5" />Notes</Link>
                   <Link href="/auth/attendance" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/attendance')}`}><CalendarCheck className="h-5 w-5" />Présences</Link>
-                  <Link href="/auth/teachers" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/teachers')}`}><LineChart className="h-5 w-5" />Professeurs</Link>
+                  <Link href="/auth/teachers" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/teachers')}`}><Briefcase className="h-5 w-5" />Professeurs</Link>
               </nav>
                <div className="mt-auto p-4">
                 <div className="flex items-center space-x-2">
