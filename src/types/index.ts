@@ -17,7 +17,7 @@ export interface Student {
     parentName: string;
     parentPhone: string;
     parentEmail: string;
-    level: string;
+    level: 'Maternelle' | 'Primaire' | 'Secondaire';
     classe: string;
     section?: string;
     option?: string;
@@ -85,7 +85,7 @@ export interface AcademicTerm {
 export interface Grade {
     id: string;
     course: string;
-    type: 'P1' | 'P2' | 'Examen'; // Period 1, Period 2, or Exam
+    type: string; // Now a generic string: "Interrogation", "Examen Semestriel", "P1", etc.
     date: string; // ISO String
     grade: string; // e.g., "18/20", "A", "Très Bien", "Acquis", "Excellent"
     professeur: string;

@@ -149,11 +149,11 @@ export default function SettingsPage() {
                                     </div>
                                     <div className="grid grid-cols-4 items-center gap-4">
                                         <Label htmlFor="semester" className="text-right">Semestre</Label>
-                                        <Select onValueChange={(v) => setNewSemester(Number(v))}><SelectTrigger className="col-span-3"><SelectValue placeholder="Sélectionner..."/></SelectTrigger><SelectContent><SelectItem value="1">1er Semestre</SelectItem><SelectItem value="2">2ème Semestre</SelectItem></SelectContent></Select>
+                                        <Select onValueChange={(v) => setNewSemester(Number(v))}><SelectTrigger className="col-span-3"><SelectValue placeholder="Sélectionner..."/></SelectTrigger><SelectContent><SelectItem value="1">1er Semestre</SelectItem><SelectItem value="2">2ème Semestre</SelectItem><SelectItem value="3">3ème Semestre</SelectItem></SelectContent></Select>
                                     </div>
                                      <div className="grid grid-cols-4 items-center gap-4">
                                         <Label htmlFor="period" className="text-right">Période</Label>
-                                        <Select onValueChange={(v) => setNewPeriod(Number(v))}><SelectTrigger className="col-span-3"><SelectValue placeholder="Sélectionner..."/></SelectTrigger><SelectContent>{[1,2,3,4].map(p=><SelectItem key={p} value={String(p)}>Période {p}</SelectItem>)}</SelectContent></Select>
+                                        <Select onValueChange={(v) => setNewPeriod(Number(v))}><SelectTrigger className="col-span-3"><SelectValue placeholder="Sélectionner..."/></SelectTrigger><SelectContent>{[1,2,3,4,5,6].map(p=><SelectItem key={p} value={String(p)}>Période {p}</SelectItem>)}</SelectContent></Select>
                                     </div>
                                     <div className="grid grid-cols-4 items-center gap-4">
                                         <Label htmlFor="start-date" className="text-right">Date de début</Label>

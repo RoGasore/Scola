@@ -5,9 +5,9 @@ import { subMonths, formatISO } from 'date-fns';
 // Mock data, in a real app this would come from Firestore
 const allGrades: { [matriculeOrId: string]: Grade[] } = {
   'E24-M1-001': [
-    { id: 'GRD001', course: 'Psychomotricité', type: 'Participation', date: formatISO(subMonths(new Date(), 3)), grade: '18/20', professeur: 'Mme. Kanza', semester: 1, period: 1, termId: 'term1' },
+    { id: 'GRD001', course: 'Psychomotricité', type: 'Observation', date: formatISO(subMonths(new Date(), 3)), grade: '18/20', professeur: 'Mme. Kanza', semester: 1, period: 1, termId: 'term1' },
     { id: 'GRD002', course: 'Langage', type: 'Interrogation', date: formatISO(subMonths(new Date(), 2)), grade: '15/20', professeur: 'Mme. Kanza', semester: 1, period: 2, termId: 'term2' },
-    { id: 'GRD009', course: 'Psychomotricité', type: 'Observation', date: formatISO(subMonths(new Date(), 1)), grade: '19/20', professeur: 'Mme. Kanza', semester: 2, period: 3, termId: 'term3' },
+    { id: 'GRD009', course: 'Psychomotricité', type: 'Examen Fin de Semestre', date: formatISO(subMonths(new Date(), 1)), grade: '19/20', professeur: 'Mme. Kanza', semester: 2, period: 3, termId: 'term3' },
   ],
   'default': [
     { id: 'GRD003', course: 'Mathématiques', type: 'Interrogation', date: formatISO(subMonths(new Date(), 4)), grade: '17/20', professeur: 'M. Dupont', semester: 1, period: 1, termId: 'term1' },

@@ -23,6 +23,11 @@ export async function getBulletinDataForStudent(studentId: string, termId: strin
         ]);
 
         if (!student) throw new Error("Student not found");
+        if (student.level !== 'Secondaire') {
+            console.warn(`Bulletin generation for level '${student.level}' is not yet implemented.`);
+            return null; // For now, only handle Secondary level
+        }
+
         const term = allTerms.find(t => t.id === termId);
         if (!term) throw new Error("Term not found");
         
@@ -56,16 +61,19 @@ export async function getBulletinDataForStudent(studentId: string, termId: strin
 
         const bulletinCourses: BulletinCourse[] = courseDetails.map(course => {
             const courseGrades = allGrades.filter(g => g.course === course.name);
-            const getGrade = (semester: number, type: 'P1' | 'P2' | 'Examen') => {
-                 const relevantTerm = yearTerms.find(t => t.semester === semester && (type === 'Examen' ? [1,2].includes(t.period) : t.period === (type === 'P1' ? 1 : 2) || (type === 'P2' ? 3: 4)));
-                 return courseGrades.find(g => g.semester === semester && g.period === relevantTerm?.period) || null;
+            const getGradeForPeriod = (semester: number, period: number) => {
+                 return courseGrades.find(g => g.semester === semester && g.period === period) || null;
             }
-            const s1p1 = parseGrade(getGrade(1, 'P1')?.grade || '');
-            const s1p2 = parseGrade(getGrade(1, 'P2')?.grade || '');
-            const s1exam = parseGrade(getGrade(1, 'Examen')?.grade || '');
-            const s2p1 = parseGrade(getGrade(2, 'P1')?.grade || '');
-            const s2p2 = parseGrade(getGrade(2, 'P2')?.grade || '');
-            const s2exam = parseGrade(getGrade(2, 'Examen')?.grade || '');
+            const getGradeForExam = (semester: number) => {
+                 return courseGrades.find(g => g.semester === semester && g.type.toLowerCase().includes('examen')) || null;
+            }
+
+            const s1p1 = parseGrade(getGradeForPeriod(1, 1)?.grade || '');
+            const s1p2 = parseGrade(getGradeForPeriod(1, 2)?.grade || '');
+            const s1exam = parseGrade(getGradeForExam(1)?.grade || '');
+            const s2p1 = parseGrade(getGradeForPeriod(2, 3)?.grade || '');
+            const s2p2 = parseGrade(getGradeForPeriod(2, 4)?.grade || '');
+            const s2exam = parseGrade(getGradeForExam(2)?.grade || '');
             
             const totalS1 = s1p1 + s1p2 + s1exam;
             const totalS2 = s2p1 + s2p2 + s2exam;
@@ -73,8 +81,8 @@ export async function getBulletinDataForStudent(studentId: string, termId: strin
             return {
                 ...course,
                 grades: {
-                    s1: { p1: getGrade(1, 'P1'), p2: getGrade(1, 'P2'), exam: getGrade(1, 'Examen') },
-                    s2: { p1: getGrade(2, 'P1'), p2: getGrade(2, 'P2'), exam: getGrade(2, 'Examen') },
+                    s1: { p1: getGradeForPeriod(1, 1), p2: getGradeForPeriod(1, 2), exam: getGradeForExam(1) },
+                    s2: { p1: getGradeForPeriod(2, 3), p2: getGradeForPeriod(2, 4), exam: getGradeForExam(2) },
                 },
                 totals: { s1: totalS1, s2: totalS2, tg: totalS1 + totalS2 }
             }
