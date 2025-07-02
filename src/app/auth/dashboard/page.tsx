@@ -3,8 +3,8 @@
 
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Users, TrendingUp, FileSignature, ClipboardList, Send, Bold, Italic, Underline, List, ListOrdered, Paperclip, Trash2, Eye } from 'lucide-react';
-import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { Users, TrendingUp, FileSignature, ClipboardList, Send, Paperclip, Trash2, Eye } from 'lucide-react';
+import { AreaChart, Area, ResponsiveContainer, YAxis, Tooltip, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import * as RechartsPrimitive from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -212,13 +212,7 @@ export default function Dashboard() {
               <CardContent className="grid gap-4">
                   <div className="border rounded-md">
                       <div className="p-2 border-b">
-                          <div className="flex items-center gap-1">
-                              <Button variant="ghost" size="icon"><Bold /></Button>
-                              <Button variant="ghost" size="icon"><Italic /></Button>
-                              <Button variant="ghost" size="icon"><Underline /></Button>
-                              <Button variant="ghost" size="icon"><List /></Button>
-                              <Button variant="ghost" size="icon"><ListOrdered /></Button>
-                          </div>
+                          <p className="text-xs text-muted-foreground">Un éditeur de texte riche sera bientôt disponible.</p>
                       </div>
                       <Textarea 
                         placeholder="Écrivez votre message ici..." 
@@ -427,7 +421,6 @@ export default function Dashboard() {
                   <h4 className="font-semibold mb-2">Activité de lecture (dernières 24h)</h4>
                    <ResponsiveContainer width="100%" height={150}>
                         <BarChart data={[{name: 'Activité', lectures: 45}]}>
-                          <XAxis dataKey="name" hide />
                           <YAxis />
                           <Tooltip />
                           <Bar dataKey="lectures" fill="hsl(var(--primary))" barSize={40} />
@@ -454,3 +447,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+    
