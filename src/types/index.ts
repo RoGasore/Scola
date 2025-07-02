@@ -68,6 +68,16 @@ export interface Course {
     room: string;
 }
 
+export interface AcademicTerm {
+    id: string;
+    name: string;
+    semester: number;
+    period: number;
+    startDate: string; // ISO String
+    endDate: string; // ISO String
+    isCurrent: boolean;
+}
+
 export interface Grade {
     id: string;
     course: string;
@@ -76,6 +86,9 @@ export interface Grade {
     grade: string; // e.g., "18/20", "A", "Très Bien"
     professeur: string;
     comment?: string;
+    termId: string; // Link to AcademicTerm
+    semester: number;
+    period: number;
 }
 
 export interface ScheduleItem {
