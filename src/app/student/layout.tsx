@@ -3,7 +3,6 @@
 import {
   Home,
   PanelLeft,
-  Search,
   BookOpen,
   GraduationCap,
   Calendar,
@@ -25,12 +24,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 function NavLink({ href, icon: Icon, children }: { href: string; icon: React.ElementType, children: React.ReactNode }) {
   const pathname = usePathname();
-  const isActive = pathname.startsWith(href);
+  const isActive = pathname === href;
 
   return (
     <Link
@@ -56,7 +54,7 @@ export default function StudentLayout({
   const pathname = usePathname();
 
   const getLinkClass = (path: string) => {
-    return pathname.startsWith(path)
+    return pathname === path
       ? 'bg-muted text-primary'
       : 'text-muted-foreground hover:text-primary';
   };
@@ -68,7 +66,7 @@ export default function StudentLayout({
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/student/dashboard" className="flex items-center gap-2 font-semibold">
                <Package2 className="h-6 w-6 text-primary"/>
-              <span>ScolaGest</span>
+              <span>Espace Élève</span>
             </Link>
           </div>
           <div className="flex-1 overflow-auto py-2">
@@ -100,7 +98,7 @@ export default function StudentLayout({
                 <SheetTitle>
                    <Link href="/student/dashboard" className="flex items-center gap-2 font-semibold">
                     <Package2 className="h-6 w-6 text-primary"/>
-                    <span>ScolaGest</span>
+                    <span>Espace Élève</span>
                   </Link>
                 </SheetTitle>
               </SheetHeader>
@@ -132,7 +130,7 @@ export default function StudentLayout({
               <DropdownMenuSeparator />
               <DropdownMenuItem><Settings className="mr-2"/>Paramètres</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Déconnexion</DropdownMenuItem>
+               <DropdownMenuItem asChild><Link href="/">Déconnexion</Link></DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </header>

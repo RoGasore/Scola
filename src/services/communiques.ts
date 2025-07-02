@@ -10,8 +10,9 @@ const communiquesData: Communique[] = [
         avatar: 'school building'
     },
     subject: "Rappel : Réunion Parents-Professeurs",
-    recipients: ['Parents'],
+    recipients: ['Parents', 'Tous'],
     date: format(subDays(new Date(), 2), 'dd/MM/yyyy HH:mm'),
+    time: "il y a 2 jours",
     status: { read: 85, unread: 15 },
     content: "<p>Chers parents,</p><p>Ceci est un rappel amical pour la réunion parents-professeurs qui aura lieu ce <strong>vendredi à 17h00</strong>. Votre présence est vivement souhaitée pour discuter des progrès de votre enfant et des objectifs pour le reste de l'année.</p><p>Cordialement,</p><p>La Direction</p>",
     attachments: [{ name: 'Ordre_du_jour.pdf', size: '128 KB' }],
@@ -27,8 +28,9 @@ const communiquesData: Communique[] = [
         avatar: 'homme noir'
     },
     subject: "Information : Journée sportive annuelle",
-    recipients: ['Élèves', 'Parents'],
+    recipients: ['Élèves', 'Parents', 'Tous'],
     date: format(subDays(new Date(), 10), 'dd/MM/yyyy HH:mm'),
+    time: "il y a 10 jours",
     status: { read: 92, unread: 8 },
     content: "<p>Bonjour à tous,</p><p>La journée sportive annuelle se tiendra le <strong>30 juillet</strong>. N'oubliez pas vos tenues de sport ! Des médailles seront décernées aux vainqueurs de chaque épreuve.</p><p>Préparez-vous !</p>",
     attachments: [],
@@ -36,15 +38,37 @@ const communiquesData: Communique[] = [
         { id: 1, user: { name: 'Lucas Moreau', avatar: 'homme congolais' }, text: 'Super ! Hâte de participer au tournoi de foot.', time: 'il y a 8 jours' },
     ]
   },
+   {
+    id: 'COM003',
+    author: {
+        name: 'Administration ScolaGest',
+        avatar: 'administration office'
+    },
+    subject: "Mise à jour de la plateforme",
+    recipients: ['Professeurs'],
+    date: format(subDays(new Date(), 1), 'dd/MM/yyyy HH:mm'),
+    time: "il y a 1 jour",
+    status: { read: 98, unread: 2 },
+    content: "<p>Chers professeurs,</p><p>Une mise à jour de la plateforme ScolaGest sera déployée ce soir à 22h00. Une interruption de service de 15 minutes est à prévoir. La nouvelle version inclura des améliorations pour l'encodage des notes.</p><p>Merci pour votre compréhension.</p>",
+    attachments: [],
+    comments: []
+  },
 ];
 
 
 // In a real app, this would fetch from a 'communiques' collection in Firestore.
-// For now, it simulates an async data fetch of static data.
-export async function getRecentAnnouncements(): Promise<Communique[]> {
-    // Return a sorted copy of the data by date
-    const sortedData = [...communiquesData].sort((a, b) => {
-      // A simple date parsing logic is needed since the format is dd/MM/yyyy HH:mm
+export async function getRecentAnnouncements(role: 'admin' | 'student' | 'teacher' = 'admin'): Promise<Communique[]> {
+    
+    let filteredData = communiquesData;
+
+    if (role === 'student') {
+        filteredData = communiquesData.filter(c => c.recipients.includes('Élèves') || c.recipients.includes('Tous'));
+    } else if (role === 'teacher') {
+        filteredData = communiquesData.filter(c => c.recipients.includes('Professeurs') || c.recipients.includes('Tous'));
+    }
+    // Admin sees all
+
+    const sortedData = [...filteredData].sort((a, b) => {
       const [dayA, monthA, yearA] = a.date.split(' ')[0].split('/').map(Number);
       const [hourA, minuteA] = a.date.split(' ')[1].split(':').map(Number);
       const dateA = new Date(yearA, monthA - 1, dayA, hourA, minuteA);
@@ -55,5 +79,6 @@ export async function getRecentAnnouncements(): Promise<Communique[]> {
 
       return dateB.getTime() - dateA.getTime();
     });
+
     return Promise.resolve(sortedData);
 }

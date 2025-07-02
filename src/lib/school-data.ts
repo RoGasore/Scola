@@ -6,80 +6,80 @@ export const schoolStructure = {
         name: "1ère Maternelle",
         isActive: true,
         courses: [
-          { name: "Psychomotricité", hours: 3 },
-          { name: "Éveil Artistique", hours: 2 },
-          { name: "Langage", hours: 4 },
+          { name: "Psychomotricité", hours: 3, professeur: 'Mme. Kanza', room: 'Salle Polyvalente' },
+          { name: "Éveil Artistique", hours: 2, professeur: 'Mme. Kanza', room: 'Atelier 1' },
+          { name: "Langage", hours: 4, professeur: 'Mme. Kanza', room: 'Salle 1' },
         ]
       },
       "2ème Maternelle": {
         name: "2ème Maternelle",
         isActive: true,
         courses: [
-          { name: "Graphisme", hours: 3 },
-          { name: "Découverte du Monde", hours: 3 },
-          { name: "Pré-lecture", hours: 4 },
+          { name: "Graphisme", hours: 3, professeur: 'Mme. Lema', room: 'Salle 2' },
+          { name: "Découverte du Monde", hours: 3, professeur: 'Mme. Lema', room: 'Jardin' },
+          { name: "Pré-lecture", hours: 4, professeur: 'Mme. Lema', room: 'Salle 2' },
         ]
       },
       "3ème Maternelle": {
         name: "3ème Maternelle",
         isActive: true,
         courses: [
-          { name: "Pré-écriture", hours: 4 },
-          { name: "Pré-mathématiques", hours: 4 },
-          { name: "Activités ludiques", hours: 2 },
+          { name: "Pré-écriture", hours: 4, professeur: 'M. Tshimanga', room: 'Salle 3' },
+          { name: "Pré-mathématiques", hours: 4, professeur: 'M. Tshimanga', room: 'Salle 3' },
+          { name: "Activités ludiques", hours: 2, professeur: 'M. Tshimanga', room: 'Salle Polyvalente' },
         ]
       },
     }
   },
   "Primaire": {
     classes: {
-      "1ère Primaire": { name: "1ère Primaire", isActive: true, courses: [{ name: 'Français', hours: 5 }, { name: 'Mathématiques', hours: 5 }] },
-      "2ème Primaire": { name: "2ème Primaire", isActive: true, courses: [{ name: 'Français', hours: 5 }, { name: 'Mathématiques', hours: 5 }] },
-      "3ème Primaire": { name: "3ème Primaire", isActive: true, courses: [{ name: 'Français', hours: 4 }, { name: 'Mathématiques', hours: 4 }, { name: 'Sciences', hours: 2 }] },
-      "4ème Primaire": { name: "4ème Primaire", isActive: true, courses: [{ name: 'Français', hours: 4 }, { name: 'Mathématiques', hours: 4 }, { name: 'Sciences', hours: 2 }] },
-      "5ème Primaire": { name: "5ème Primaire", isActive: true, courses: [{ name: 'Français', hours: 4 }, { name: 'Mathématiques', hours: 4 }, { name: 'Histoire', hours: 2 }] },
-      "6ème Primaire": { name: "6ème Primaire", isActive: true, courses: [{ name: 'Français', hours: 4 }, { name: 'Mathématiques', hours: 4 }, { name: 'Géographie', hours: 2 }] },
+      "1ère Primaire": { name: "1ère Primaire", isActive: true, courses: [{ name: 'Français', hours: 5, professeur: 'Mme. Diallo' }, { name: 'Mathématiques', hours: 5, professeur: 'M. Ngoyi' }] },
+      "2ème Primaire": { name: "2ème Primaire", isActive: true, courses: [{ name: 'Français', hours: 5, professeur: 'Mme. Diallo' }, { name: 'Mathématiques', hours: 5, professeur: 'M. Ngoyi' }] },
+      "3ème Primaire": { name: "3ème Primaire", isActive: true, courses: [{ name: 'Français', hours: 4, professeur: 'Mme. Diallo' }, { name: 'Mathématiques', hours: 4, professeur: 'M. Ngoyi' }, { name: 'Sciences', hours: 2, professeur: 'Mme. Curie' }] },
+      "4ème Primaire": { name: "4ème Primaire", isActive: true, courses: [{ name: 'Français', hours: 4, professeur: 'Mme. Diallo' }, { name: 'Mathématiques', hours: 4, professeur: 'M. Ngoyi' }, { name: 'Sciences', hours: 2, professeur: 'Mme. Curie' }] },
+      "5ème Primaire": { name: "5ème Primaire", isActive: true, courses: [{ name: 'Français', hours: 4, professeur: 'M. Hugo' }, { name: 'Mathématiques', hours: 4, professeur: 'M. Dupont' }, { name: 'Histoire', hours: 2, professeur: 'M. Kabila' }] },
+      "6ème Primaire": { name: "6ème Primaire", isActive: true, courses: [{ name: 'Français', hours: 4, professeur: 'M. Hugo' }, { name: 'Mathématiques', hours: 4, professeur: 'M. Dupont' }, { name: 'Géographie', hours: 2, professeur: 'M. Kabila' }] },
     }
   },
   "Secondaire": {
     "Éducation de base": {
         classes: {
-            "7ème Année": { name: "7ème Année", isActive: true, courses: [{ name: 'Mathématiques', hours: 4 }, { name: 'Français', hours: 4 }, { name: 'Anglais', hours: 3 }, { name: 'Histoire', hours: 2 }, { name: 'Géographie', hours: 2 }] },
-            "8ème Année": { name: "8ème Année", isActive: true, courses: [{ name: 'Mathématiques', hours: 4 }, { name: 'Français', hours: 4 }, { name: 'Physique', hours: 3 }, { name: 'Chimie', hours: 2 }, { name: 'Biologie', hours: 2 }] },
+            "7ème Année": { name: "7ème Année", isActive: true, courses: [{ name: 'Mathématiques', hours: 4, professeur: 'M. Dupont' }, { name: 'Français', hours: 4, professeur: 'M. Hugo' }, { name: 'Anglais', hours: 3, professeur: 'Mme. Diallo' }, { name: 'Histoire', hours: 2, professeur: 'M. Kabila' }, { name: 'Géographie', hours: 2, professeur: 'M. Kabila' }] },
+            "8ème Année": { name: "8ème Année", isActive: true, courses: [{ name: 'Mathématiques', hours: 4, professeur: 'M. Dupont' }, { name: 'Français', hours: 4, professeur: 'M. Hugo' }, { name: 'Physique', hours: 3, professeur: 'Mme. Curie' }, { name: 'Chimie', hours: 2, professeur: 'Mme. Curie' }, { name: 'Biologie', hours: 2, professeur: 'M. Pasteur' }] },
         }
     },
     "Humanités": {
       options: {
         "Latin-Grec": {
           classes: {
-            "1ère Latin-Grec": { name: "1ère Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4 }, { name: 'Grec', hours: 4 }, { name: 'Français', hours: 3 }] },
-            "2ème Latin-Grec": { name: "2ème Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4 }, { name: 'Grec', hours: 4 }, { name: 'Philosophie', hours: 2 }] },
-            "3ème Latin-Grec": { name: "3ème Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4 }, { name: 'Grec', hours: 4 }, { name: 'Histoire de l’art', hours: 2 }] },
-            "4ème Latin-Grec": { name: "4ème Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4 }, { name: 'Grec', hours: 4 }, { name: 'Civilisation antique', hours: 2 }] },
+            "1ère Latin-Grec": { name: "1ère Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4, professeur: 'M. Rousseau' }, { name: 'Grec', hours: 4, professeur: 'M. Rousseau' }, { name: 'Français', hours: 3, professeur: 'M. Hugo' }] },
+            "2ème Latin-Grec": { name: "2ème Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4, professeur: 'M. Rousseau' }, { name: 'Grec', hours: 4, professeur: 'M. Rousseau' }, { name: 'Philosophie', hours: 2, professeur: 'M. Descartes' }] },
+            "3ème Latin-Grec": { name: "3ème Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4, professeur: 'M. Rousseau' }, { name: 'Grec', hours: 4, professeur: 'M. Rousseau' }, { name: 'Histoire de l’art', hours: 2, professeur: 'M. Vinci' }] },
+            "4ème Latin-Grec": { name: "4ème Latin-Grec", isActive: true, courses: [{ name: 'Latin', hours: 4, professeur: 'M. Rousseau' }, { name: 'Grec', hours: 4, professeur: 'M. Rousseau' }, { name: 'Civilisation antique', hours: 2, professeur: 'M. Vinci' }] },
           }
         },
         "Électricité": {
           classes: {
-            "1ère Électricité": { name: "1ère Électricité", isActive: true, courses: [{ name: 'Électricité Générale', hours: 6 }, { name: 'Schémas', hours: 4 }] },
-            "2ème Électricité": { name: "2ème Électricité", isActive: true, courses: [{ name: 'Mesures Électriques', hours: 6 }, { name: 'Technologie', hours: 4 }] },
+            "1ère Électricité": { name: "1ère Électricité", isActive: true, courses: [{ name: 'Électricité Générale', hours: 6, professeur: 'M. Ampère' }, { name: 'Schémas', hours: 4, professeur: 'M. Ampère' }] },
+            "2ème Électricité": { name: "2ème Électricité", isActive: true, courses: [{ name: 'Mesures Électriques', hours: 6, professeur: 'M. Ampère' }, { name: 'Technologie', hours: 4, professeur: 'M. Ampère' }] },
             "3ème Électricité": { name: "3ème Électricité", isActive: false, courses: [] },
-            "4ème Électricité": { name: "4ème Électricité", isActive: true, courses: [{ name: 'Électronique Appliquée', hours: 6 }, { name: 'Automatisme', hours: 4 }] },
+            "4ème Électricité": { name: "4ème Électricité", isActive: true, courses: [{ name: 'Électronique Appliquée', hours: 6, professeur: 'M. Ampère' }, { name: 'Automatisme', hours: 4, professeur: 'M. Ampère' }] },
           }
         },
         "Sciences Économiques": {
           classes: {
-            "1ère Sciences Économiques": { name: "1ère Sciences Économiques", isActive: true, courses: [{ name: 'Économie Politique', hours: 4 }, { name: 'Comptabilité', hours: 4 }] },
-            "2ème Sciences Économiques": { name: "2ème Sciences Économiques", isActive: true, courses: [{ name: 'Droit', hours: 3 }, { name: 'Comptabilité', hours: 4 }] },
-            "3ème Sciences Économiques": { name: "3ème Sciences Économiques", isActive: true, courses: [{ name: 'Statistique', hours: 3 }, { name: 'Marketing', hours: 3 }] },
-            "4ème Sciences Économiques": { name: "4ème Sciences Économiques", isActive: true, courses: [{ name: 'Gestion financière', hours: 4 }, { name: 'Économie internationale', hours: 2 }] },
+            "1ère Sciences Économiques": { name: "1ère Sciences Économiques", isActive: true, courses: [{ name: 'Économie Politique', hours: 4, professeur: 'M. Smith' }, { name: 'Comptabilité', hours: 4, professeur: 'M. Smith' }] },
+            "2ème Sciences Économiques": { name: "2ème Sciences Économiques", isActive: true, courses: [{ name: 'Droit', hours: 3, professeur: 'M. Montesquieu' }, { name: 'Comptabilité', hours: 4, professeur: 'M. Smith' }] },
+            "3ème Sciences Économiques": { name: "3ème Sciences Économiques", isActive: true, courses: [{ name: 'Statistique', hours: 3, professeur: 'M. Gauss' }, { name: 'Marketing', hours: 3, professeur: 'M. Smith' }] },
+            "4ème Sciences Économiques": { name: "4ème Sciences Économiques", isActive: true, courses: [{ name: 'Gestion financière', hours: 4, professeur: 'M. Smith' }, { name: 'Économie internationale', hours: 2, professeur: 'M. Smith' }] },
           }
         },
         "Biochimie": {
           classes: {
-            "1ère Biochimie": { name: "1ère Biochimie", isActive: true, courses: [{ name: 'Biologie', hours: 4 }, { name: 'Chimie générale', hours: 4 }] },
-            "2ème Biochimie": { name: "2ème Biochimie", isActive: true, courses: [{ name: 'Chimie Organique', hours: 4 }, { name: 'Microbiologie', hours: 4 }] },
-            "3ème Biochimie": { name: "3ème Biochimie", isActive: true, courses: [{ name: 'Biochimie', hours: 6 }, { name: 'Physique biologique', hours: 3 }] },
-            "4ème Biochimie": { name: "4ème Biochimie", isActive: true, courses: [{ name: 'Génétique', hours: 4 }, { name: 'Immunologie', hours: 4 }] },
+            "1ère Biochimie": { name: "1ère Biochimie", isActive: true, courses: [{ name: 'Biologie', hours: 4, professeur: 'M. Pasteur' }, { name: 'Chimie générale', hours: 4, professeur: 'M. Lavoisier' }] },
+            "2ème Biochimie": { name: "2ème Biochimie", isActive: true, courses: [{ name: 'Chimie Organique', hours: 4, professeur: 'M. Lavoisier' }, { name: 'Microbiologie', hours: 4, professeur: 'M. Pasteur' }] },
+            "3ème Biochimie": { name: "3ème Biochimie", isActive: true, courses: [{ name: 'Biochimie', hours: 6, professeur: 'M. Pasteur' }, { name: 'Physique biologique', hours: 3, professeur: 'Mme. Curie' }] },
+            "4ème Biochimie": { name: "4ème Biochimie", isActive: true, courses: [{ name: 'Génétique', hours: 4, professeur: 'M. Mendel' }, { name: 'Immunologie', hours: 4, professeur: 'M. Pasteur' }] },
           }
         }
       }

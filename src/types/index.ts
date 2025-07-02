@@ -26,6 +26,17 @@ export interface Student {
     cover: string; // AI hint
 }
 
+export interface Teacher {
+    id: string;
+    name: string;
+    email: string;
+    avatar: string;
+    department: string;
+    assignments: string[];
+    status: 'Actif' | 'En congé';
+    hireDate: string;
+}
+
 export interface Communique {
     id: string;
     author: {
@@ -33,8 +44,9 @@ export interface Communique {
         avatar: string;
     };
     subject: string;
-    recipients: string[];
+    recipients: Array<'Parents' | 'Élèves' | 'Professeurs' | 'Tous'>;
     date: string;
+    time?: string;
     status: { read: number; unread: number };
     content: string;
     attachments: { name: string; size: string }[];
@@ -44,4 +56,35 @@ export interface Communique {
         text: string;
         time: string;
     }[];
+}
+
+
+export interface Course {
+    name: string;
+    professeur: string;
+    className: string;
+    level: string;
+    description: string;
+    room: string;
+}
+
+export interface Grade {
+    id: string;
+    course: string;
+    type: 'Interrogation' | 'Examen' | 'Devoir' | 'Participation';
+    date: string; // ISO String
+    grade: string; // e.g., "18/20", "A", "Très Bien"
+    professeur: string;
+    comment?: string;
+}
+
+export interface ScheduleItem {
+    time: string; // "08:00 - 09:50"
+    course: string;
+    professeur: string;
+    room: string;
+}
+
+export interface Schedule {
+    [day: string]: ScheduleItem[];
 }
