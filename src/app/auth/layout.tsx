@@ -13,6 +13,7 @@ import {
   Briefcase,
   MessageSquare,
   Settings,
+  FileText,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -99,6 +100,7 @@ export default function DashboardLayout({
               <NavLink href="/auth/courses" icon={BookOpen}>Cours</NavLink>
               <NavLink href="/auth/students" icon={Users}>Élèves</NavLink>
               <NavLink href="/auth/grades" icon={GraduationCap}>Notes</NavLink>
+              <NavLink href="/auth/bulletins" icon={FileText}>Bulletins</NavLink>
               <NavLink href="/auth/attendance" icon={CalendarCheck}>Présences</NavLink>
               <NavLink href="/auth/teachers" icon={Briefcase}>Professeurs</NavLink>
               <NavLink href="/auth/settings" icon={Settings}>Paramètres</NavLink>
@@ -145,6 +147,7 @@ export default function DashboardLayout({
                   <Link href="/auth/courses" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/courses')}`}><BookOpen className="h-5 w-5" />Cours</Link>
                   <Link href="/auth/students" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/students')}`}><Users className="h-5 w-5" />Élèves</Link>
                   <Link href="/auth/grades" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/grades')}`}><GraduationCap className="h-5 w-5" />Notes</Link>
+                  <Link href="/auth/bulletins" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/bulletins')}`}><FileText className="h-5 w-5" />Bulletins</Link>
                   <Link href="/auth/attendance" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/attendance')}`}><CalendarCheck className="h-5 w-5" />Présences</Link>
                   <Link href="/auth/teachers" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/teachers')}`}><Briefcase className="h-5 w-5" />Professeurs</Link>
                    <Link href="/auth/settings" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/settings')}`}><Settings className="h-5 w-5" />Paramètres</Link>

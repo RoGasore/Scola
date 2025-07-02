@@ -8,7 +8,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Search, TrendingUp } from 'lucide-react';
+import { Search, TrendingUp, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 import { getGradesForStudent } from '@/services/grades';
 import { getAcademicTerms } from '@/services/academic';
@@ -17,6 +19,7 @@ import StudentGradesLoading from './loading';
 import { getStudentByMatricule, getStudents } from '@/services/students';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { BulletinView } from '@/components/bulletin-view';
 
 // Helper function to calculate average, handling various grade formats
 const calculateAverage = (grades: Grade[]): string => {
@@ -54,8 +57,7 @@ export default function StudentGradesPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Filters
-  const [selectedSemester, setSelectedSemester] = useState<string>('all');
-  const [selectedPeriod, setSelectedPeriod] = useState<string>('all');
+  const [selectedTermId, setSelectedTermId] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -75,7 +77,13 @@ export default function StudentGradesPage() {
                 getAcademicTerms()
             ]);
             setAllGrades(studentGrades);
-            setTerms(academicTerms.sort((a,b) => a.name.localeCompare(b.name)));
+            
+            const sortedTerms = academicTerms.sort((a, b) => a.name.localeCompare(b.name));
+            setTerms(sortedTerms);
+             if (sortedTerms.length > 0) {
+                const currentTerm = sortedTerms.find(t => t.isCurrent) || sortedTerms[0];
+                setSelectedTermId(currentTerm.id);
+            }
         }
       } catch (error) {
         console.error("Failed to load grades data:", error);
@@ -89,12 +97,13 @@ export default function StudentGradesPage() {
   const filteredGrades = useMemo(() => {
     let grades = allGrades;
 
-    if (selectedSemester !== 'all') {
-      grades = grades.filter(g => g.semester === parseInt(selectedSemester));
+    if (selectedTermId) {
+        const selectedTerm = terms.find(t => t.id === selectedTermId);
+        if (selectedTerm) {
+            grades = grades.filter(g => g.semester === selectedTerm.semester && g.period === selectedTerm.period);
+        }
     }
-    if (selectedPeriod !== 'all') {
-      grades = grades.filter(g => g.period === parseInt(selectedPeriod));
-    }
+
     if (searchTerm) {
         grades = grades.filter(g => 
             g.course.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -103,7 +112,7 @@ export default function StudentGradesPage() {
         );
     }
     return grades;
-  }, [allGrades, selectedSemester, selectedPeriod, searchTerm]);
+  }, [allGrades, selectedTermId, searchTerm, terms]);
   
   const gradesByCourse = useMemo(() => groupBy(filteredGrades, grade => grade.course), [filteredGrades]);
   const overallAverage = useMemo(() => calculateAverage(filteredGrades), [filteredGrades]);
@@ -117,11 +126,6 @@ export default function StudentGradesPage() {
     return 'bg-red-500/80 text-white';
   };
   
-  const availablePeriods = useMemo(() => {
-      if (selectedSemester === 'all') return terms;
-      return terms.filter(t => t.semester === parseInt(selectedSemester));
-  }, [terms, selectedSemester]);
-
   if (isLoading) {
     return <StudentGradesLoading />;
   }
@@ -143,19 +147,38 @@ export default function StudentGradesPage() {
                           <TrendingUp className="h-6 w-6 text-primary" />
                       </div>
                       <div>
-                          <p className="text-sm text-muted-foreground">Moyenne Générale</p>
+                          <p className="text-sm text-muted-foreground">Moyenne de la période</p>
                           <p className="text-2xl font-bold">{overallAverage}</p>
                       </div>
                   </div>
                    <div className="flex items-center gap-2 flex-wrap">
-                        <Select value={selectedSemester} onValueChange={setSelectedSemester}>
-                            <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Semestre" /></SelectTrigger>
-                            <SelectContent><SelectItem value="all">Tous les semestres</SelectItem><SelectItem value="1">1er Semestre</SelectItem><SelectItem value="2">2ème Semestre</SelectItem></SelectContent>
+                        <Select value={selectedTermId} onValueChange={setSelectedTermId}>
+                            <SelectTrigger className="w-full sm:w-[200px]"><SelectValue placeholder="Choisir une période..." /></SelectTrigger>
+                            <SelectContent>
+                                {terms.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
+                            </SelectContent>
                         </Select>
-                         <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                            <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Période" /></SelectTrigger>
-                            <SelectContent><SelectItem value="all">Toutes les périodes</SelectItem>{availablePeriods.map(p => <SelectItem key={p.id} value={String(p.period)}>{p.name}</SelectItem>)}</SelectContent>
-                        </Select>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" disabled={!selectedTermId}>
+                                    <FileText className="mr-2"/>
+                                    Voir mon bulletin
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl h-[90vh]">
+                                <DialogHeader>
+                                    <DialogTitle>Bulletin de {student?.firstName}</DialogTitle>
+                                    <DialogDescription>
+                                        Période: {terms.find(t => t.id === selectedTermId)?.name}
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="h-full overflow-y-auto p-2">
+                                    {student && selectedTermId && (
+                                        <BulletinView studentId={student.id!} termId={selectedTermId}/>
+                                    )}
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                    </div>
               </div>
           </CardHeader>
@@ -164,7 +187,7 @@ export default function StudentGradesPage() {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                     type="search"
-                    placeholder="Rechercher un cours, une évaluation, un prof..."
+                    placeholder="Rechercher un cours, une évaluation..."
                     className="w-full pl-8"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -176,7 +199,6 @@ export default function StudentGradesPage() {
       <Accordion type="multiple" className="w-full space-y-2">
         {Object.entries(gradesByCourse).length > 0 ? Object.entries(gradesByCourse).map(([course, grades]) => {
             const courseAverage = calculateAverage(grades);
-            const gradesByPeriod = groupBy(grades, g => g.period);
 
             return (
                 <AccordionItem key={course} value={course} className="border-b-0">
@@ -191,36 +213,26 @@ export default function StudentGradesPage() {
                         </div>
                     </AccordionTrigger>
                     <AccordionContent className="px-6 pb-6">
-                      <div className="space-y-4">
-                         {Object.entries(gradesByPeriod).map(([period, periodGrades]) => {
-                             const term = terms.find(t => t.period === Number(period));
-                             return (
-                                <div key={period}>
-                                    <h4 className="font-semibold mb-2">{term?.name || `Période ${period}`}</h4>
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Type</TableHead>
-                                                <TableHead>Date</TableHead>
-                                                <TableHead>Note</TableHead>
-                                                <TableHead>Professeur</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                        {periodGrades.map(grade => (
-                                            <TableRow key={grade.id}>
-                                                <TableCell><Badge variant="outline">{grade.type}</Badge></TableCell>
-                                                <TableCell>{format(new Date(grade.date), 'PPP', { locale: fr })}</TableCell>
-                                                <TableCell><Badge className={getGradeColor(grade.grade)}>{grade.grade}</Badge></TableCell>
-                                                <TableCell>{grade.professeur}</TableCell>
-                                            </TableRow>
-                                        ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                             )
-                         })}
-                      </div>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead>Note</TableHead>
+                                    <TableHead>Professeur</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                            {grades.map(grade => (
+                                <TableRow key={grade.id}>
+                                    <TableCell><Badge variant="outline">{grade.type}</Badge></TableCell>
+                                    <TableCell>{format(new Date(grade.date), 'PPP', { locale: fr })}</TableCell>
+                                    <TableCell><Badge className={getGradeColor(grade.grade)}>{grade.grade}</Badge></TableCell>
+                                    <TableCell>{grade.professeur}</TableCell>
+                                </TableRow>
+                            ))}
+                            </TableBody>
+                        </Table>
                     </AccordionContent>
                    </Card>
                 </AccordionItem>

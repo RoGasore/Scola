@@ -1,12 +1,13 @@
+
 import type { Grade } from '@/types';
 import { subMonths, formatISO } from 'date-fns';
 
 // Mock data, in a real app this would come from Firestore
-const allGrades: { [matricule: string]: Grade[] } = {
+const allGrades: { [matriculeOrId: string]: Grade[] } = {
   'E24-M1-001': [
-    { id: 'GRD001', course: 'Psychomotricité', type: 'Participation', date: formatISO(subMonths(new Date(), 3)), grade: 'Très Bien', professeur: 'Mme. Kanza', semester: 1, period: 1, termId: 'term1' },
-    { id: 'GRD002', course: 'Langage', type: 'Interrogation', date: formatISO(subMonths(new Date(), 2)), grade: 'Acquis', professeur: 'Mme. Kanza', semester: 1, period: 2, termId: 'term2' },
-    { id: 'GRD009', course: 'Psychomotricité', type: 'Observation', date: formatISO(subMonths(new Date(), 1)), grade: 'Excellent', professeur: 'Mme. Kanza', semester: 2, period: 3, termId: 'term3' },
+    { id: 'GRD001', course: 'Psychomotricité', type: 'Participation', date: formatISO(subMonths(new Date(), 3)), grade: '18/20', professeur: 'Mme. Kanza', semester: 1, period: 1, termId: 'term1' },
+    { id: 'GRD002', course: 'Langage', type: 'Interrogation', date: formatISO(subMonths(new Date(), 2)), grade: '15/20', professeur: 'Mme. Kanza', semester: 1, period: 2, termId: 'term2' },
+    { id: 'GRD009', course: 'Psychomotricité', type: 'Observation', date: formatISO(subMonths(new Date(), 1)), grade: '19/20', professeur: 'Mme. Kanza', semester: 2, period: 3, termId: 'term3' },
   ],
   'default': [
     { id: 'GRD003', course: 'Mathématiques', type: 'Interrogation', date: formatISO(subMonths(new Date(), 4)), grade: '17/20', professeur: 'M. Dupont', semester: 1, period: 1, termId: 'term1' },
@@ -19,9 +20,10 @@ const allGrades: { [matricule: string]: Grade[] } = {
 };
 
 // This service simulates fetching grades for a specific student.
-export async function getGradesForStudent(matricule: string): Promise<Grade[]> {
-  // In a real app, you would query Firestore for grades where studentMatricule === matricule
-  const studentGrades = allGrades[matricule] || allGrades['default'];
+export async function getGradesForStudent(studentIdentifier: string, isId: boolean = false): Promise<Grade[]> {
+  // In a real app, you would query Firestore for grades where studentMatricule === matricule or studentId === id
+  // For this mock, we only have matricule-based keys for specific students
+  const studentGrades = allGrades[studentIdentifier] || allGrades['default'];
   
   // Sort by date descending
   studentGrades.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

@@ -1,7 +1,7 @@
 
 import { db } from '@/lib/firebase';
 import type { Student } from '@/types';
-import { collection, addDoc, getDocs, query, where, limit, DocumentData } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, limit, doc, getDoc, DocumentData } from "firebase/firestore";
 
 export async function addStudent(studentData: Omit<Student, 'id'>): Promise<string> {
     try {
@@ -31,6 +31,18 @@ export async function getStudentByMatricule(matricule: string): Promise<Student 
         return null;
     }
     
-    const doc: DocumentData = querySnapshot.docs[0];
-    return { id: doc.id, ...doc.data() } as Student;
+    const docSnap: DocumentData = querySnapshot.docs[0];
+    return { id: docSnap.id, ...docSnap.data() } as Student;
+}
+
+export async function getStudentById(id: string): Promise<Student | null> {
+    const docRef = doc(db, "students", id);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+        console.warn(`No student found with id: ${id}`);
+        return null;
+    }
+
+    return { id: docSnap.id, ...docSnap.data() } as Student;
 }

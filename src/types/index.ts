@@ -2,7 +2,7 @@
 export type StudentStatus = 'Actif' | 'Inactif' | 'En attente' | 'Transféré';
 
 export interface Student {
-    id?: string; // Firestore document ID
+    id: string; // Firestore document ID
     matricule: string;
     password?: string;
     firstName: string;
@@ -81,9 +81,9 @@ export interface AcademicTerm {
 export interface Grade {
     id: string;
     course: string;
-    type: 'Interrogation' | 'Examen' | 'Devoir' | 'Participation';
+    type: 'Interrogation' | 'Examen' | 'Devoir' | 'Participation' | 'Observation';
     date: string; // ISO String
-    grade: string; // e.g., "18/20", "A", "Très Bien"
+    grade: string; // e.g., "18/20", "A", "Très Bien", "Acquis", "Excellent"
     professeur: string;
     comment?: string;
     termId: string; // Link to AcademicTerm
