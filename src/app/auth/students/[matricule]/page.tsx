@@ -4,11 +4,11 @@
 import { useParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Mail, Phone, MapPin, User, GraduationCap, CalendarCheck, KeyRound, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, MapPin, User, GraduationCap, CalendarCheck, KeyRound, Eye, EyeOff, LoaderCircle } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -18,6 +18,9 @@ import type { Student } from '@/types';
 import StudentProfileLoading from './loading';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useToast } from '@/hooks/use-toast';
+import { sendEmail } from '@/ai/flows/send-email-flow';
+
 
 function InfoField({ icon, label, value }: { icon: React.ReactNode, label: string, value?: string | null }) {
     if (!value) return null;
@@ -31,9 +34,11 @@ function InfoField({ icon, label, value }: { icon: React.ReactNode, label: strin
 
 export default function StudentProfilePage() {
     const params = useParams();
+    const { toast } = useToast();
     const [student, setStudent] = useState<Student | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [passwordVisible, setPasswordVisible] = useState(false);
+    const [isResending, setIsResending] = useState(false);
 
     const matricule = useMemo(() => {
         if (!params.matricule) return '';
@@ -61,6 +66,70 @@ export default function StudentProfilePage() {
         
         fetchStudent();
     }, [matricule]);
+
+    const fullName = useMemo(() => {
+        if (!student) return '';
+        return `${student.firstName} ${student.middleName || ''} ${student.lastName}`.trim();
+    }, [student]);
+
+    const handleResendCredentials = async () => {
+        if (!student || !student.password) {
+            toast({
+                variant: "destructive",
+                title: "Erreur",
+                description: "Données de l'élève ou mot de passe manquants.",
+            });
+            return;
+        }
+
+        setIsResending(true);
+
+        const emailHtml = `
+          <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <h2>Rappel : Vos identifiants ScolaGest</h2>
+            <p>Bonjour ${student.parentName},</p>
+            <p>Voici un rappel des identifiants pour que l'élève <strong>${fullName}</strong> puisse se connecter à la plateforme :</p>
+            <ul style="list-style-type: none; padding: 0;">
+              <li style="margin-bottom: 10px;"><strong>Matricule (Identifiant) :</strong> <code style="background-color: #f4f4f4; padding: 2px 5px; border-radius: 3px;">${student.matricule}</code></li>
+              <li style="margin-bottom: 10px;"><strong>Mot de passe :</strong> <code style="background-color: #f4f4f4; padding: 2px 5px; border-radius: 3px;">${student.password}</code></li>
+            </ul>
+            <p>Nous vous recommandons de conserver ces informations en lieu sûr.</p>
+            <p>Cordialement,</p>
+            <p><strong>L'équipe ScolaGest</strong></p>
+          </div>
+        `;
+
+        try {
+            const emailResult = await sendEmail({
+                to: student.parentEmail,
+                subject: `Rappel : Identifiants de connexion ScolaGest pour ${fullName}`,
+                html: emailHtml,
+            });
+
+            if ('error' in emailResult) {
+                toast({
+                    variant: "destructive",
+                    title: "Échec de l'envoi",
+                    description: "L'e-mail de rappel n'a pas pu être envoyé. " + emailResult.error,
+                });
+            } else {
+                toast({
+                    title: "E-mail envoyé !",
+                    description: `Les identifiants ont été renvoyés à ${student.parentEmail}.`,
+                    className: "bg-green-500 text-white",
+                });
+            }
+        } catch (error: any) {
+            console.error("Failed to resend credentials:", error);
+            toast({
+                variant: "destructive",
+                title: "Échec de l'envoi",
+                description: error.message || "Une erreur inconnue est survenue.",
+            });
+        } finally {
+            setIsResending(false);
+        }
+    };
     
     if (isLoading) {
         return <StudentProfileLoading />;
@@ -80,8 +149,7 @@ export default function StudentProfilePage() {
             </div>
         )
     }
-
-    const fullName = `${student.firstName} ${student.middleName || ''} ${student.lastName}`.trim();
+    
     const initials = `${student.firstName?.[0] || ''}${student.lastName?.[0] || ''}`;
 
     return (
@@ -166,6 +234,12 @@ export default function StudentProfilePage() {
                                                 </dd>
                                             </div>
                                         </CardContent>
+                                        <CardFooter>
+                                            <Button onClick={handleResendCredentials} disabled={isResending}>
+                                                {isResending && <LoaderCircle className="mr-2 animate-spin" />}
+                                                Renvoyer les identifiants
+                                            </Button>
+                                        </CardFooter>
                                     </Card>
                                 </section>
                             </div>
