@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import Fuse from 'fuse.js';
 import { File, PlusCircle, MoreHorizontal, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,25 +23,25 @@ import { getLevels, getClassesForLevel, getSectionsForSecondary, getOptionsForHu
 
 const allStudents = [
   // Maternelle
-  { matricule: 'M24001', name: 'Alice Petit', email: 'alice.p@example.com', level: 'Maternelle', classe: '1ère Maternelle', section: null, option: null, status: 'Actif', dateJoined: '2023-09-01', avatar: 'fille congolaise' },
-  { matricule: 'M24002', name: 'Léo Dubois', email: 'leo.d@example.com', level: 'Maternelle', classe: '2ème Maternelle', section: null, option: null, status: 'Actif', dateJoined: '2022-09-01', avatar: 'garçon congolais' },
-  { matricule: 'M24003', name: 'Clara Roy', email: 'clara.r@example.com', level: 'Maternelle', classe: '3ème Maternelle', section: null, option: null, status: 'Actif', dateJoined: '2021-09-01', avatar: 'fille congolaise' },
+  { matricule: 'E23-M1-001', name: 'Alice Petit', email: 'alice.p@example.com', level: 'Maternelle', classe: '1ère Maternelle', section: null, option: null, status: 'Actif', dateJoined: '2023-09-01', avatar: 'fille congolaise' },
+  { matricule: 'E22-M2-001', name: 'Léo Dubois', email: 'leo.d@example.com', level: 'Maternelle', classe: '2ème Maternelle', section: null, option: null, status: 'Actif', dateJoined: '2022-09-01', avatar: 'garçon congolais' },
+  { matricule: 'E21-M3-001', name: 'Clara Roy', email: 'clara.r@example.com', level: 'Maternelle', classe: '3ème Maternelle', section: null, option: null, status: 'Actif', dateJoined: '2021-09-01', avatar: 'fille congolaise' },
 
   // Primaire
-  { matricule: 'P24001', name: 'Chloé Bernard', email: 'chloe.b@example.com', level: 'Primaire', classe: '1ère Primaire', section: null, option: null, status: 'Actif', dateJoined: '2023-09-02', avatar: 'fille congolaise' },
-  { matricule: 'P24002', name: 'Hugo Martin', email: 'hugo.m@example.com', level: 'Primaire', classe: '6ème Primaire', section: null, option: null, status: 'Inactif', dateJoined: '2018-09-02', avatar: 'garçon congolais' },
-  { matricule: 'P24003', name: 'Emma Simon', email: 'emma.s@example.com', level: 'Primaire', classe: '4ème Primaire', section: null, option: null, status: 'Actif', dateJoined: '2020-09-02', avatar: 'fille congolaise' },
+  { matricule: 'E23-P1-001', name: 'Chloé Bernard', email: 'chloe.b@example.com', level: 'Primaire', classe: '1ère Primaire', section: null, option: null, status: 'Actif', dateJoined: '2023-09-02', avatar: 'fille congolaise' },
+  { matricule: 'E18-P6-001', name: 'Hugo Martin', email: 'hugo.m@example.com', level: 'Primaire', classe: '6ème Primaire', section: null, option: null, status: 'Inactif', dateJoined: '2018-09-02', avatar: 'garçon congolais' },
+  { matricule: 'E20-P4-001', name: 'Emma Simon', email: 'emma.s@example.com', level: 'Primaire', classe: '4ème Primaire', section: null, option: null, status: 'Actif', dateJoined: '2020-09-02', avatar: 'fille congolaise' },
 
   // Secondaire - Éducation de base
-  { matricule: 'S24001', name: 'Manon Lefebvre', email: 'manon.l@example.com', level: 'Secondaire', classe: '7ème Année', section: 'Éducation de base', option: null, status: 'Actif', dateJoined: '2023-09-05', avatar: 'femme congolaise' },
-  { matricule: 'S24002', name: 'Lucas Moreau', email: 'lucas.m@example.com', level: 'Secondaire', classe: '8ème Année', section: 'Éducation de base', option: null, status: 'Actif', dateJoined: '2022-09-05', avatar: 'homme congolais' },
+  { matricule: 'E23-S7B-001', name: 'Manon Lefebvre', email: 'manon.l@example.com', level: 'Secondaire', classe: '7ème Année', section: 'Éducation de base', option: null, status: 'Actif', dateJoined: '2023-09-05', avatar: 'femme congolaise' },
+  { matricule: 'E22-S8B-001', name: 'Lucas Moreau', email: 'lucas.m@example.com', level: 'Secondaire', classe: '8ème Année', section: 'Éducation de base', option: null, status: 'Actif', dateJoined: '2022-09-05', avatar: 'homme congolais' },
 
   // Secondaire - Humanités
-  { matricule: 'S24003', name: 'Jade Garcia', email: 'jade.g@example.com', level: 'Secondaire', classe: '1ère Latin-Grec', section: 'Humanités', option: 'Latin-Grec', status: 'Actif', dateJoined: '2021-09-05', avatar: 'femme congolaise' },
-  { matricule: 'S24004', name: 'Louis Roux', email: 'louis.r@example.com', level: 'Secondaire', classe: '2ème Sciences Économiques', section: 'Humanités', option: 'Sciences Économiques', status: 'Actif', dateJoined: '2020-09-05', avatar: 'homme congolais' },
-  { matricule: 'S24005', name: 'Emma Laurent', email: 'emma.l@example.com', level: 'Secondaire', classe: '2ème Électricité', section: 'Humanités', option: 'Électricité', status: 'Inactif', dateJoined: '2020-09-05', avatar: 'femme congolaise' },
-  { matricule: 'S24006', name: 'Arthur Lemoine', email: 'arthur.l@example.com', level: 'Secondaire', classe: '3ème Biochimie', section: 'Humanités', option: 'Biochimie', status: 'Actif', dateJoined: '2019-09-05', avatar: 'homme congolais' },
-  { matricule: 'S24007', name: 'Mohamed Cissé', email: 'mohamed.c@example.com', level: 'Secondaire', classe: '4ème Électricité', section: 'Humanités', option: 'Électricité', status: 'En attente', dateJoined: '2024-08-01', avatar: 'homme africain' },
+  { matricule: 'E21-SLG1-001', name: 'Jade Garcia', email: 'jade.g@example.com', level: 'Secondaire', classe: '1ère Latin-Grec', section: 'Humanités', option: 'Latin-Grec', status: 'Actif', dateJoined: '2021-09-05', avatar: 'femme congolaise' },
+  { matricule: 'E20-SSE2-001', name: 'Louis Roux', email: 'louis.r@example.com', level: 'Secondaire', classe: '2ème Sciences Économiques', section: 'Humanités', option: 'Sciences Économiques', status: 'Actif', dateJoined: '2020-09-05', avatar: 'homme congolais' },
+  { matricule: 'E20-SEL2-001', name: 'Emma Laurent', email: 'emma.l@example.com', level: 'Secondaire', classe: '2ème Électricité', section: 'Humanités', option: 'Électricité', status: 'Inactif', dateJoined: '2020-09-05', avatar: 'femme congolaise' },
+  { matricule: 'E19-SBC3-001', name: 'Arthur Lemoine', email: 'arthur.l@example.com', level: 'Secondaire', classe: '3ème Biochimie', section: 'Humanités', option: 'Biochimie', status: 'Actif', dateJoined: '2019-09-05', avatar: 'homme congolais' },
+  { matricule: 'E24-SEL4-001', name: 'Mohamed Cissé', email: 'mohamed.c@example.com', level: 'Secondaire', classe: '4ème Électricité', section: 'Humanités', option: 'Électricité', status: 'En attente', dateJoined: '2024-08-01', avatar: 'homme africain' },
 ];
 
 const fuseOptions = {
@@ -222,7 +223,7 @@ export default function StudentsPage() {
                                     <AvatarFallback>{student.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback>
                                 </Avatar>
                                 <div className="grid gap-0.5">
-                                    <span className="font-medium">{student.name}</span>
+                                    <Link href={`/auth/students/${encodeURIComponent(student.matricule)}`} className="font-medium hover:underline">{student.name}</Link>
                                     <span className="text-xs text-muted-foreground">{student.email}</span>
                                 </div>
                             </div>
@@ -254,8 +255,10 @@ export default function StudentsPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                               <DropdownMenuItem asChild>
+                                <Link href={`/auth/students/${encodeURIComponent(student.matricule)}`}>Voir le profil</Link>
+                              </DropdownMenuItem>
                               <DropdownMenuItem>Modifier</DropdownMenuItem>
-                              <DropdownMenuItem>Voir le profil</DropdownMenuItem>
                               <DropdownMenuItem>Supprimer</DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

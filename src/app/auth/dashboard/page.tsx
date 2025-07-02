@@ -3,13 +3,14 @@
 
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Users, TrendingUp, FileSignature, ClipboardList } from 'lucide-react';
+import { Users, TrendingUp, FileSignature, ClipboardList, MessageSquare, UserPlus, BookUser } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, YAxis, Tooltip } from 'recharts';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, getDaysInMonth } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const generateDailyData = (monthDate, dataKey, min, max) => {
   const daysInMonth = getDaysInMonth(monthDate);
@@ -30,6 +31,13 @@ const monthOptions = Array.from({ length: 12 }, (_, i) => {
         label: format(date, 'MMMM yyyy', { locale: fr })
     };
 });
+
+const recentActivity = [
+    { icon: <UserPlus />, text: "Nouvel élève inscrit : Léo Dubois.", time: "il y a 5 min", user: { name: 'Admin', avatar: 'femme' } },
+    { icon: <MessageSquare />, text: "Nouveau commentaire sur le communiqué 'Réunion Parents-Professeurs'.", time: "il y a 2 heures", user: { name: 'Parent de Léo', avatar: 'homme congolais' } },
+    { icon: <FileSignature />, text: "Les notes de l'interrogation de Mathématiques ont été publiées.", time: "il y a 8 heures", user: { name: 'M. Dupont', avatar: 'homme noir' } },
+    { icon: <BookUser />, text: "Mme. Diallo a été assignée au cours d'Anglais en 1ère.", time: "il y a 1 jour", user: { name: 'Admin', avatar: 'femme' } },
+]
 
 const CustomTooltip = ({ active, payload, label, dataKey, unit }: any) => {
   if (active && payload && payload.length) {
@@ -96,8 +104,8 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:gap-8 lg:grid-cols-2">
-         <Card>
+      <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
+         <Card className="xl:col-span-2">
             <CardHeader className="flex-row items-center justify-between">
                 <div>
                     <CardTitle>Évolution des notes</CardTitle>
@@ -127,6 +135,29 @@ export default function Dashboard() {
         </Card>
 
         <Card>
+            <CardHeader>
+                <CardTitle>Activité Récente</CardTitle>
+                <CardDescription>Les derniers événements sur la plateforme.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {recentActivity.map((activity, index) => (
+                    <div key={index} className="flex items-start gap-4">
+                        <Avatar className="h-9 w-9">
+                             <AvatarImage src={`https://placehold.co/96x96.png`} data-ai-hint={activity.user.avatar} />
+                             <AvatarFallback>{activity.user.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="space-y-1">
+                            <p className="text-sm">{activity.icon} {activity.text}</p>
+                            <p className="text-xs text-muted-foreground">{activity.time}</p>
+                        </div>
+                    </div>
+                ))}
+            </CardContent>
+        </Card>
+      </div>
+
+       <div className="grid gap-4 md:gap-8 lg:grid-cols-1">
+          <Card>
             <CardHeader className="flex-row items-center justify-between">
                 <div>
                     <CardTitle>Taux de présence</CardTitle>
