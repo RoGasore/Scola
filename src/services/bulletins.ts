@@ -13,8 +13,8 @@ const parseGrade = (grade: string): number => {
     return match ? parseFloat(match[1]) : 0;
 };
 
-// Main function to generate bulletin data
-export async function getBulletinDataForStudent(studentId: string, termId: string): Promise<BulletinData | null> {
+// Main function to generate bulletin data for SECONDARY level students
+export async function getSecondaireBulletinDataForStudent(studentId: string, termId: string): Promise<BulletinData | null> {
     try {
         const [student, allGrades, allTerms] = await Promise.all([
             getStudentById(studentId),
@@ -23,11 +23,7 @@ export async function getBulletinDataForStudent(studentId: string, termId: strin
         ]);
 
         if (!student) throw new Error("Student not found");
-        if (student.level !== 'Secondaire') {
-            console.warn(`Bulletin generation for level '${student.level}' is not yet implemented.`);
-            return null; // For now, only handle Secondary level
-        }
-
+        
         const term = allTerms.find(t => t.id === termId);
         if (!term) throw new Error("Term not found");
         
@@ -153,3 +149,5 @@ export async function getBulletinDataForStudent(studentId: string, termId: strin
         return null;
     }
 }
+
+    

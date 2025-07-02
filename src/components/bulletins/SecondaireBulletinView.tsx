@@ -1,15 +1,76 @@
 
 'use client'
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { BulletinData } from '@/types';
 import { Separator } from '../ui/separator';
+import { getSecondaireBulletinDataForStudent } from '@/services/bulletins';
+import { Skeleton } from '../ui/skeleton';
+
+const BulletinSkeleton = () => (
+    <div className="p-4 border rounded-lg space-y-6 bg-white">
+        <div className="flex justify-between items-start">
+            <Skeleton className="h-12 w-48" />
+            <Skeleton className="h-12 w-48" />
+        </div>
+        <div className="text-center">
+            <Skeleton className="h-6 w-3/4 mx-auto" />
+            <Skeleton className="h-5 w-1/2 mx-auto mt-2" />
+        </div>
+        <Skeleton className="h-px w-full" />
+        <div className="grid grid-cols-2 gap-4">
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-full" />
+        </div>
+        <div className="space-y-2">
+            {[...Array(8)].map((_, i) => (
+                <div key={i} className="flex gap-2">
+                    <Skeleton className="h-8 flex-1" />
+                    <Skeleton className="h-8 w-1/4" />
+                    <Skeleton className="h-8 w-1/4" />
+                </div>
+            ))}
+        </div>
+    </div>
+);
 
 type BulletinViewProps = {
-    bulletinData: BulletinData;
+    studentId: string;
+    termId: string;
 }
 
-export function SecondaireBulletinView({ bulletinData }: BulletinViewProps) {
+export function SecondaireBulletinView({ studentId, termId }: BulletinViewProps) {
+    const [bulletinData, setBulletinData] = useState<BulletinData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!studentId || !termId) return;
+
+        async function fetchData() {
+            setIsLoading(true);
+            setError(null);
+            try {
+                const data = await getSecondaireBulletinDataForStudent(studentId, termId);
+                if (!data) {
+                    throw new Error("Impossible de générer les données du bulletin pour cet élève.");
+                }
+                setBulletinData(data);
+                
+            } catch (e: any) {
+                console.error(e);
+                setError(e.message || "Une erreur est survenue lors du chargement des données du bulletin.");
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchData();
+    }, [studentId, termId]);
+
+    if (isLoading) return <BulletinSkeleton />;
+    if (error) return <div className="text-red-500 text-center p-8">{error}</div>;
     if (!bulletinData) return null;
 
     const { student, term, domains, grandTotals, percentage } = bulletinData;
@@ -167,3 +228,5 @@ export function SecondaireBulletinView({ bulletinData }: BulletinViewProps) {
         </div>
     );
 }
+
+    
