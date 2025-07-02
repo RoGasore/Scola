@@ -10,7 +10,6 @@ import * as RechartsPrimitive from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, getDaysInMonth, subDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
@@ -20,6 +19,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
+import { RichTextEditor } from '@/components/rich-text-editor';
 
 const generateDailyData = (monthDate, dataKey, min, max) => {
   const daysInMonth = getDaysInMonth(monthDate);
@@ -115,7 +115,9 @@ export default function Dashboard() {
   };
 
   const handleSend = () => {
-    if (!message.trim()) {
+    const isMessageEmpty = !message || message.replace(/<[^>]*>?/gm, '').trim().length === 0;
+
+    if (isMessageEmpty) {
       toast({ variant: 'destructive', title: 'Erreur', description: 'Le message ne peut pas être vide.' });
       return;
     }
@@ -210,18 +212,11 @@ export default function Dashboard() {
                   <CardDescription>Rédigez et envoyez un message aux groupes sélectionnés.</CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4">
-                  <div className="border rounded-md">
-                      <div className="p-2 border-b">
-                          <p className="text-xs text-muted-foreground">Un éditeur de texte riche sera bientôt disponible.</p>
-                      </div>
-                      <Textarea 
-                        placeholder="Écrivez votre message ici..." 
-                        rows={8}
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-t-none"
-                      />
-                  </div>
+                  <RichTextEditor
+                    content={message}
+                    onChange={setMessage}
+                    placeholder="Écrivez votre message ici..."
+                  />
                   <div className="grid gap-3">
                       <Label>Pièces jointes</Label>
                       <Input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileChange} />
@@ -447,5 +442,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-    
