@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Genkit flow for sending emails using Resend.
@@ -17,9 +18,9 @@ const SendEmailInputSchema = z.object({
 });
 export type SendEmailInput = z.infer<typeof SendEmailInputSchema>;
 
-// IMPORTANT: This flow relies on the RESEND_API_KEY environment variable.
-// The user must create a .env.local file and add RESEND_API_KEY=...
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+// For production, it's recommended to use environment variables for the API key.
+const resendApiKey = "re_jJWoAYkp_2evEJ82XdpqCrd8jbEqqhZA2";
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 const fromAddress = `ScolaGest <onboarding@resend.dev>`;
 
 export async function sendEmail(input: SendEmailInput): Promise<{ id: string } | { error: string }> {
