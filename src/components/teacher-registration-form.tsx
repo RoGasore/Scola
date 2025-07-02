@@ -22,6 +22,15 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { extractCvInfo, type ExtractCvInfoOutput } from '@/ai/flows/extract-cv-info-flow';
 import { getLevels, getClassesForLevel, getCoursesForClass, getSectionsForSecondary, getOptionsForHumanites } from '@/lib/school-data';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const levels = getLevels();
 const sections = getSectionsForSecondary();
@@ -47,6 +56,13 @@ const formSchema = z.object({
   assignments: z.array(assignmentSchema).min(1, { message: "Au moins une assignation est requise." }),
 });
 
+const generateTeacherMatricule = () => {
+    const school = "SG";
+    const year = new Date().getFullYear().toString().slice(-2);
+    const roleCode = "PR";
+    const sequence = Math.floor(1 + Math.random() * 998).toString().padStart(3, '0');
+    return `${school}${year}-${roleCode}-${sequence}`;
+}
 
 export function TeacherRegistrationForm() {
   const [documents, setDocuments] = React.useState<Array<{ file: File; description: string }>>([]);
@@ -59,6 +75,10 @@ export function TeacherRegistrationForm() {
   
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
   const [analysisResult, setAnalysisResult] = React.useState<ExtractCvInfoOutput | null>(null);
+
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [credentials, setCredentials] = React.useState<{ matricule: string; password: string } | null>(null);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -89,12 +109,21 @@ export function TeacherRegistrationForm() {
 
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log({ ...values, documents, photo: photoPreview ? 'Photo Selected' : 'No Photo' });
-    toast({
-      title: "Enregistrement réussi",
-      description: "Le professeur a été ajouté au système avec succès.",
-      className: "bg-green-500 text-white",
-    });
+    setIsSubmitting(true);
+
+    setTimeout(() => {
+        const generatedMatricule = generateTeacherMatricule();
+        const generatedPassword = Math.random().toString(36).slice(-8);
+
+        console.log("New Teacher:", { ...values, matricule: generatedMatricule, password: generatedPassword });
+        setCredentials({ matricule: generatedMatricule, password: generatedPassword });
+        setIsSubmitting(false);
+
+    }, 1500)
+  };
+
+  const handleDialogClose = () => {
+    setCredentials(null);
     form.reset();
     setDocuments([]);
     setPhotoPreview(null);
@@ -462,10 +491,37 @@ export function TeacherRegistrationForm() {
                 </div>
             </div>
 
-            <Button type="submit" className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">Enregistrer le professeur</Button>
+            <Button type="submit" disabled={isSubmitting} className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
+                {isSubmitting && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
+                Enregistrer le professeur
+            </Button>
           </form>
         </Form>
       </ScrollArea>
+       <AlertDialog open={!!credentials} onOpenChange={(open) => !open && handleDialogClose()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Inscription Terminée !</AlertDialogTitle>
+            <AlertDialogDescription>
+              Les informations de connexion pour {form.getValues('firstName')} {form.getValues('lastName')} ont été générées. 
+              Un e-mail simulé a été envoyé au professeur. Veuillez noter ces informations.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="grid gap-2 text-sm bg-muted p-4 rounded-md border">
+              <div className="flex justify-between">
+                  <span className="font-semibold text-muted-foreground">Matricule :</span>
+                  <span className="font-mono">{credentials?.matricule}</span>
+              </div>
+              <div className="flex justify-between">
+                  <span className="font-semibold text-muted-foreground">Mot de passe :</span>
+                  <span className="font-mono">{credentials?.password}</span>
+              </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handleDialogClose}>Fermer</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CalendarIcon, Trash2, Upload } from "lucide-react";
+import { CalendarIcon, Trash2, Upload, LoaderCircle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { getLevels, getClassesForLevel, getSectionsForSecondary, getOptionsForHumanites } from '@/lib/school-data';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const levels = getLevels();
 const sections = getSectionsForSecondary();
@@ -58,12 +67,42 @@ const formSchema = z.object({
   path: ["option"],
 });
 
+const generateMatricule = (values: z.infer<typeof formSchema>) => {
+    const school = "SG";
+    const year = new Date().getFullYear().toString().slice(-2);
+    const roleCode = "E";
+    const sequence = Math.floor(1 + Math.random() * 998).toString().padStart(3, '0');
+
+    let classIdentifier = '';
+    const level = values.level;
+    const classe = values.class;
+
+    if (level === 'Maternelle' || level === 'Primaire') {
+        const classNum = classe.replace(/\D/g, '');
+        classIdentifier = level.charAt(0) + classNum;
+    } else if (level === 'Secondaire') {
+        if (values.section === 'Éducation de base') {
+            const classNum = classe.replace(/\D/g, '');
+            classIdentifier = `S${classNum}B`;
+        } else if (values.section === 'Humanités') {
+            const classNum = classe.replace(/\D/g, '');
+            const option = values.option || '';
+            const optionCode = option.split(' ').map(w => w[0]).join('').substring(0, 3).toUpperCase();
+            classIdentifier = `S${optionCode}${classNum}`;
+        }
+    }
+    
+    return `${school}${year}-${classIdentifier}-${roleCode}${sequence}`;
+};
+
 
 export function StudentEnrollmentForm() {
   const [documents, setDocuments] = React.useState<Array<{ file: File; description: string }>>([]);
   const [photoPreview, setPhotoPreview] = React.useState<string | null>(null);
   const photoInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [credentials, setCredentials] = React.useState<{ matricule: string; password: string } | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -84,12 +123,21 @@ export function StudentEnrollmentForm() {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log({ ...values, documents, photo: photoPreview ? 'Photo Selected' : 'No Photo' });
-    toast({
-      title: "Inscription réussie",
-      description: "L'élève a été ajouté au système avec succès.",
-      className: "bg-green-500 text-white",
-    });
+    setIsSubmitting(true);
+    
+    setTimeout(() => {
+        const generatedMatricule = generateMatricule(values);
+        const generatedPassword = Math.random().toString(36).slice(-8);
+
+        console.log("New Student:", { ...values, matricule: generatedMatricule, password: generatedPassword, documents, photo: photoPreview ? 'Photo Selected' : 'No Photo' });
+        
+        setCredentials({ matricule: generatedMatricule, password: generatedPassword });
+        setIsSubmitting(false);
+    }, 1500);
+  };
+
+  const handleDialogClose = () => {
+    setCredentials(null);
     form.reset();
     setDocuments([]);
     setPhotoPreview(null);
@@ -106,12 +154,16 @@ export function StudentEnrollmentForm() {
 
   React.useEffect(() => {
     form.setValue("class", "");
-    form.setValue("section", "");
-    form.setValue("option", "");
+    if(selectedLevel !== 'Secondaire') {
+        form.setValue("section", "");
+        form.setValue("option", "");
+    }
   }, [selectedLevel, form]);
 
   React.useEffect(() => {
-     form.setValue("option", "");
+     if(selectedSection !== 'Humanités') {
+        form.setValue("option", "");
+     }
   }, [selectedSection, form]);
 
   const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -409,10 +461,37 @@ export function StudentEnrollmentForm() {
               )}
             </div>
             
-            <Button type="submit" className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">Inscrire l'élève</Button>
+            <Button type="submit" disabled={isSubmitting} className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
+              {isSubmitting && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
+              Inscrire l'élève
+            </Button>
           </form>
         </Form>
       </ScrollArea>
+      <AlertDialog open={!!credentials} onOpenChange={(open) => !open && handleDialogClose()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Inscription Terminée !</AlertDialogTitle>
+            <AlertDialogDescription>
+              Les informations de connexion pour {form.getValues('firstName')} {form.getValues('lastName')} ont été générées. 
+              Un e-mail simulé a été envoyé à l'utilisateur. Veuillez noter ces informations.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="grid gap-2 text-sm bg-muted p-4 rounded-md border">
+              <div className="flex justify-between">
+                  <span className="font-semibold text-muted-foreground">Matricule :</span>
+                  <span className="font-mono">{credentials?.matricule}</span>
+              </div>
+              <div className="flex justify-between">
+                  <span className="font-semibold text-muted-foreground">Mot de passe :</span>
+                  <span className="font-mono">{credentials?.password}</span>
+              </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handleDialogClose}>Fermer</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
