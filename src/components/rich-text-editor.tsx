@@ -12,10 +12,14 @@ import {
   Heading2,
   Quote,
   Code,
+  Paintbrush,
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
 import * as React from 'react';
+import { Color } from '@tiptap/extension-color';
+import TextStyle from '@tiptap/extension-text-style';
+import { Button } from '@/components/ui/button';
 
 const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) {
@@ -60,6 +64,27 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
       >
         <Strikethrough className="h-4 w-4" />
       </Toggle>
+      
+      <Separator orientation="vertical" className="h-8" />
+      
+      <input
+        type="color"
+        onInput={(event: React.ChangeEvent<HTMLInputElement>) => editor.chain().focus().setColor(event.target.value).run()}
+        value={editor.getAttributes('textStyle').color || '#000000'}
+        className="w-8 h-8 p-1 bg-transparent border-none rounded-sm cursor-pointer"
+        title="Couleur du texte"
+      />
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-9 w-9"
+        onClick={() => editor.chain().focus().unsetColor().run()}
+        disabled={!editor.getAttributes('textStyle').color}
+        title="Réinitialiser la couleur"
+      >
+        <Paintbrush className="h-4 w-4" />
+      </Button>
+
       <Separator orientation="vertical" className="h-8" />
       <Toggle
         size="sm"
@@ -115,6 +140,8 @@ export const RichTextEditor = ({ content, onChange, placeholder }: RichTextEdito
           keepAttributes: false,
         },
       }),
+      TextStyle,
+      Color,
     ],
     content: content,
     editorProps: {
