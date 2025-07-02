@@ -2,14 +2,19 @@
 'use client'
 
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, TrendingUp, FileSignature, ClipboardList, CalendarCheck, GraduationCap } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Users, TrendingUp, FileSignature, ClipboardList, Send } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Brush } from 'recharts';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useEffect, useState, useMemo } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { format, getDaysInMonth, startOfMonth, addMonths, getMonth, getYear } from 'date-fns';
+import { format, getDaysInMonth } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { useToast } from "@/hooks/use-toast";
+
 
 const generateDailyData = (monthDate, dataKey, min, max) => {
   const daysInMonth = getDaysInMonth(monthDate);
@@ -22,14 +27,6 @@ const generateDailyData = (monthDate, dataKey, min, max) => {
   }
   return data;
 };
-
-const recentAssessments = [
-    { name: 'Olivia Martin', email: 'olivia.martin@email.com', subject: 'Mathématiques', grade: '17/20', avatar: 'femme' },
-    { name: 'Jackson Lee', email: 'jackson.lee@email.com', subject: 'Physique', grade: '14/20', avatar: 'homme' },
-    { name: 'Isabella Nguyen', email: 'isabella.nguyen@email.com', subject: 'Histoire', grade: '19/20', avatar: 'femme Asie' },
-    { name: 'William Kim', email: 'will@email.com', subject: 'Chimie', grade: '12/20', avatar: 'homme noir' },
-    { name: 'Sofia Davis', email: 'sofia.davis@email.com', subject: 'Biologie', grade: '16/20', avatar: 'femme hispanique' },
-];
 
 const monthOptions = Array.from({ length: 12 }, (_, i) => {
     const date = new Date(2024, i, 1);
@@ -53,12 +50,49 @@ const CustomTooltip = ({ active, payload, label, dataKey, unit }: any) => {
 
 
 export default function Dashboard() {
+  const { toast } = useToast();
   const [gradesMonth, setGradesMonth] = useState(new Date().toISOString());
   const [attendanceMonth, setAttendanceMonth] = useState(new Date().toISOString());
 
   const gradesData = useMemo(() => generateDailyData(new Date(gradesMonth), 'note', 10, 18), [gradesMonth]);
   const attendanceData = useMemo(() => generateDailyData(new Date(attendanceMonth), 'présence', 85, 99), [attendanceMonth]);
   
+  const [message, setMessage] = useState('');
+  const [audiences, setAudiences] = useState({
+    parents: false,
+    eleves: false,
+    professeurs: false,
+  });
+
+  const handleAudienceChange = (audience: keyof typeof audiences) => {
+    setAudiences(prev => ({ ...prev, [audience]: !prev[audience] }));
+  };
+
+  const handleSend = () => {
+    if (!message.trim()) {
+      toast({ variant: 'destructive', title: 'Erreur', description: 'Le message ne peut pas être vide.' });
+      return;
+    }
+    const selectedAudiences = Object.entries(audiences)
+      .filter(([, isSelected]) => isSelected)
+      .map(([key]) => key);
+
+    if (selectedAudiences.length === 0) {
+      toast({ variant: 'destructive', title: 'Erreur', description: 'Veuillez sélectionner au moins un destinataire.' });
+      return;
+    }
+
+    console.log('Sending message:', message, 'to', selectedAudiences);
+    toast({
+      title: 'Communiqué envoyé !',
+      description: `Votre message a bien été envoyé à : ${selectedAudiences.join(', ')}.`,
+      className: "bg-green-500 text-white",
+    });
+    setMessage('');
+    setAudiences({ parents: false, eleves: false, professeurs: false });
+  };
+
+
   return (
     <div className="flex flex-col gap-6">
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
@@ -176,31 +210,44 @@ export default function Dashboard() {
         </div>
 
         <Card>
-           <CardHeader>
-            <CardTitle>Dernières Évaluations</CardTitle>
-            <CardDescription>Notes des dernières évaluations rendues.</CardDescription>
+          <CardHeader>
+              <CardTitle>Communiqués</CardTitle>
+              <CardDescription>Envoyez des messages aux élèves, parents et professeurs.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {recentAssessments.map((assessment, index) => (
-                <div key={index} className="flex items-center">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage src={`https://placehold.co/40x40.png`} alt="Avatar" data-ai-hint={assessment.avatar} />
-                    <AvatarFallback>{assessment.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                  </Avatar>
-                  <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">{assessment.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {assessment.subject}
-                    </p>
+          <CardContent className="grid gap-6">
+              <Textarea 
+                placeholder="Écrivez votre message ici..." 
+                rows={8}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+              <div className="grid gap-3">
+                  <Label>Destinataires</Label>
+                  <div className="flex items-center gap-x-4 gap-y-2 flex-wrap">
+                      <div className="flex items-center space-x-2">
+                          <Checkbox id="dest-parents" checked={audiences.parents} onCheckedChange={() => handleAudienceChange('parents')} />
+                          <Label htmlFor="dest-parents" className="cursor-pointer">Parents</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                          <Checkbox id="dest-eleves" checked={audiences.eleves} onCheckedChange={() => handleAudienceChange('eleves')} />
+                          <Label htmlFor="dest-eleves" className="cursor-pointer">Élèves</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                          <Checkbox id="dest-professeurs" checked={audiences.professeurs} onCheckedChange={() => handleAudienceChange('professeurs')} />
+                          <Label htmlFor="dest-professeurs" className="cursor-pointer">Professeurs</Label>
+                      </div>
                   </div>
-                  <div className="ml-auto font-medium text-sm text-foreground">{assessment.grade}</div>
-                </div>
-              ))}
-            </div>
+              </div>
           </CardContent>
+          <CardFooter>
+              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleSend}>
+                  <Send className="mr-2 h-4 w-4" />
+                  Envoyer le Communiqué
+              </Button>
+          </CardFooter>
         </Card>
       </div>
     </div>
   );
 }
+
