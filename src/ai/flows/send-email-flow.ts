@@ -52,11 +52,15 @@ const sendEmailFlow = ai.defineFlow(
         return { error: error.message };
       }
       
-      if (!data) {
-         return { error: 'No response data from email service.' };
+      // Check for a valid response with an ID.
+      // The previous check was not robust enough.
+      if (data && data.id) {
+         return { id: data.id };
       }
 
-      return { id: data.id };
+      // If we are here, it means there was no error, but also no valid data.id
+      return { error: 'No valid ID was returned from the email service.' };
+
     } catch (e: any) {
         console.error('Failed to send email:', e);
         return { error: e.message || 'An unknown error occurred while sending the email.' };
