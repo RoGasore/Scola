@@ -32,6 +32,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { addStudent } from '@/services/students';
+import type { Student, StudentStatus } from '@/types';
+
 
 const levels = getLevels();
 const sections = getSectionsForSecondary();
@@ -129,44 +132,78 @@ export function StudentEnrollmentForm() {
     const generatedMatricule = generateMatricule(values);
     const generatedPassword = Math.random().toString(36).slice(-8);
 
-    const emailHtml = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <h2>Bienvenue chez ScolaGest !</h2>
-        <p>Bonjour ${values.parentName},</p>
-        <p>Le compte pour l'élève <strong>${values.firstName} ${values.lastName}</strong> a été créé avec succès. Voici ses identifiants pour se connecter à la plateforme :</p>
-        <ul style="list-style-type: none; padding: 0;">
-          <li style="margin-bottom: 10px;"><strong>Matricule (Identifiant) :</strong> <code style="background-color: #f4f4f4; padding: 2px 5px; border-radius: 3px;">${generatedMatricule}</code></li>
-          <li style="margin-bottom: 10px;"><strong>Mot de passe :</strong> <code style="background-color: #f4f4f4; padding: 2px 5px; border-radius: 3px;">${generatedPassword}</code></li>
-        </ul>
-        <p>Nous vous recommandons de conserver ces informations en lieu sûr.</p>
-        <p>Cordialement,</p>
-        <p><strong>L'équipe ScolaGest</strong></p>
-      </div>
-    `;
+    const newStudentData: Omit<Student, 'id'> = {
+      matricule: generatedMatricule,
+      password: generatedPassword,
+      firstName: values.firstName,
+      middleName: values.middleName || '',
+      lastName: values.lastName,
+      email: values.studentEmail || '',
+      phone: values.studentPhone || '',
+      dob: values.dob.toISOString(),
+      pob: values.pob,
+      address: values.address,
+      parentName: values.parentName,
+      parentPhone: values.parentPhone,
+      parentEmail: values.parentEmail,
+      level: values.level,
+      classe: values.class,
+      section: values.section || '',
+      option: values.option || '',
+      status: values.status as StudentStatus,
+      dateJoined: new Date().toISOString(),
+      avatar: 'etudiant', // default AI hint
+      cover: 'campus scolaire', // default AI hint
+    };
 
-    const emailResult = await sendEmail({
-        to: values.parentEmail,
-        subject: `Identifiants de connexion ScolaGest pour ${values.firstName} ${values.lastName}`,
-        html: emailHtml,
-    });
+    try {
+        await addStudent(newStudentData);
 
-    if ('error' in emailResult) {
+        const emailHtml = `
+          <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <h2>Bienvenue chez ScolaGest !</h2>
+            <p>Bonjour ${values.parentName},</p>
+            <p>Le compte pour l'élève <strong>${values.firstName} ${values.lastName}</strong> a été créé avec succès. Voici ses identifiants pour se connecter à la plateforme :</p>
+            <ul style="list-style-type: none; padding: 0;">
+              <li style="margin-bottom: 10px;"><strong>Matricule (Identifiant) :</strong> <code style="background-color: #f4f4f4; padding: 2px 5px; border-radius: 3px;">${generatedMatricule}</code></li>
+              <li style="margin-bottom: 10px;"><strong>Mot de passe :</strong> <code style="background-color: #f4f4f4; padding: 2px 5px; border-radius: 3px;">${generatedPassword}</code></li>
+            </ul>
+            <p>Nous vous recommandons de conserver ces informations en lieu sûr.</p>
+            <p>Cordialement,</p>
+            <p><strong>L'équipe ScolaGest</strong></p>
+          </div>
+        `;
+
+        const emailResult = await sendEmail({
+            to: values.parentEmail,
+            subject: `Identifiants de connexion ScolaGest pour ${values.firstName} ${values.lastName}`,
+            html: emailHtml,
+        });
+
+        if ('error' in emailResult) {
+            toast({
+                variant: "destructive",
+                title: "Échec de l'envoi de l'e-mail",
+                description: "L'élève a été enregistré, mais l'e-mail n'a pas pu être envoyé. " + emailResult.error,
+            });
+        } else {
+            toast({
+                title: "Inscription réussie !",
+                description: `L'élève a été enregistré et les identifiants ont été envoyés à ${values.parentEmail}.`,
+                className: "bg-green-500 text-white",
+            });
+        }
+        setCredentials({ matricule: generatedMatricule, password: generatedPassword });
+
+    } catch (error: any) {
         toast({
             variant: "destructive",
-            title: "Échec de l'envoi de l'e-mail",
-            description: emailResult.error,
+            title: "Échec de l'inscription",
+            description: error.message || "Impossible d'enregistrer l'élève dans la base de données.",
         });
-    } else {
-        toast({
-            title: "Email envoyé !",
-            description: `Les identifiants ont été envoyés à ${values.parentEmail}.`,
-            className: "bg-green-500 text-white",
-        });
-        setCredentials({ matricule: generatedMatricule, password: generatedPassword });
+    } finally {
+        setIsSubmitting(false);
     }
-
-    console.log("New Student:", { ...values, matricule: generatedMatricule, password: generatedPassword, documents, photo: photoPreview ? 'Photo Selected' : 'No Photo' });
-    setIsSubmitting(false);
   };
 
   const handleDialogClose = () => {
