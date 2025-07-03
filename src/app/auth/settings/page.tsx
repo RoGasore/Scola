@@ -14,13 +14,16 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import type { AcademicTerm } from '@/types';
+import type { AcademicTerm, Student } from '@/types';
 import { getAcademicTerms, addAcademicTerm, setCurrentTerm } from '@/services/academic';
 import SettingsLoading from './loading';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BulletinView } from '@/components/bulletin-view';
+import { getStudents } from '@/services/students';
 
 
 export default function SettingsPage() {
@@ -30,6 +33,10 @@ export default function SettingsPage() {
     const [isUpdating, setIsUpdating] = useState<string | null>(null);
     const { toast } = useToast();
 
+    // State for bulletin previews
+    const [previewStudentIds, setPreviewStudentIds] = useState<{ [level: string]: string }>({});
+    const [currentTermId, setCurrentTermId] = useState<string | null>(null);
+
     // State for the new term form
     const [dialogOpen, setDialogOpen] = useState(false);
     const [newName, setNewName] = useState('');
@@ -38,16 +45,37 @@ export default function SettingsPage() {
     const [newStartDate, setNewStartDate] = useState<Date | undefined>();
     const [newEndDate, setNewEndDate] = useState<Date | undefined>();
 
-    async function fetchTerms() {
+    async function fetchData() {
         setIsLoading(true);
         try {
-            const termsData = await getAcademicTerms();
+            const [termsData, studentsData] = await Promise.all([
+                getAcademicTerms(),
+                getStudents()
+            ]);
+            
             setTerms(termsData);
+
+            const currentTerm = termsData.find(t => t.isCurrent) || termsData[0];
+            if (currentTerm) {
+                setCurrentTermId(currentTerm.id);
+            }
+            
+            const studentIds: { [level: string]: string } = {};
+            const maternelleStudent = studentsData.find(s => s.level === 'Maternelle');
+            const primaireStudent = studentsData.find(s => s.level === 'Primaire');
+            const secondaireStudent = studentsData.find(s => s.level === 'Secondaire');
+
+            if (maternelleStudent) studentIds['Maternelle'] = maternelleStudent.id;
+            if (primaireStudent) studentIds['Primaire'] = primaireStudent.id;
+            if (secondaireStudent) studentIds['Secondaire'] = secondaireStudent.id;
+            
+            setPreviewStudentIds(studentIds);
+
         } catch (error) {
             toast({
                 variant: 'destructive',
                 title: "Erreur de chargement",
-                description: "Impossible de charger les périodes académiques."
+                description: "Impossible de charger les données pour les paramètres."
             });
         } finally {
             setIsLoading(false);
@@ -55,7 +83,8 @@ export default function SettingsPage() {
     }
 
     useEffect(() => {
-        fetchTerms();
+        fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleSetCurrent = async (termId: string) => {
@@ -67,7 +96,7 @@ export default function SettingsPage() {
                 description: "La nouvelle période actuelle a été définie avec succès.",
                 className: "bg-green-500 text-white",
             });
-            await fetchTerms(); // Refresh the list
+            await fetchData();
         } catch (error) {
             toast({
                 variant: 'destructive',
@@ -97,7 +126,7 @@ export default function SettingsPage() {
             toast({ title: "Période ajoutée", description: "La nouvelle période a été créée avec succès.", className: "bg-green-500 text-white" });
             setDialogOpen(false);
             resetForm();
-            await fetchTerms();
+            await fetchData();
         } catch (error) {
             toast({ variant: 'destructive', title: "Erreur", description: "Impossible d'ajouter la nouvelle période." });
         } finally {
@@ -115,6 +144,23 @@ export default function SettingsPage() {
 
     if (isLoading) {
         return <SettingsLoading />;
+    }
+
+    const renderBulletinPreview = (level: 'Maternelle' | 'Primaire' | 'Secondaire') => {
+        const studentId = previewStudentIds[level];
+        if (studentId && currentTermId) {
+            return (
+                <div className="mt-4 p-4 border rounded-lg bg-muted/20 max-h-[800px] overflow-auto">
+                    <BulletinView studentId={studentId} termId={currentTermId} />
+                </div>
+            );
+        }
+        return (
+            <div className="mt-4 p-8 text-center text-muted-foreground border rounded-lg bg-muted/20">
+                <p>Aucun élève de niveau "{level}" trouvé pour générer un aperçu.</p>
+                <p className="text-sm">Veuillez d'abord inscrire un élève de ce niveau.</p>
+            </div>
+        );
     }
 
     return (
@@ -220,6 +266,34 @@ export default function SettingsPage() {
                     </Table>
                 </CardContent>
             </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Modèles de Bulletins</CardTitle>
+                    <CardDescription>
+                        Prévisualisez l'apparence des bulletins pour chaque niveau d'enseignement.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Tabs defaultValue="Secondaire" className="w-full">
+                        <TabsList>
+                            <TabsTrigger value="Secondaire">Secondaire</TabsTrigger>
+                            <TabsTrigger value="Primaire">Primaire</TabsTrigger>
+                            <TabsTrigger value="Maternelle">Maternelle</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="Secondaire">
+                            {renderBulletinPreview('Secondaire')}
+                        </TabsContent>
+                        <TabsContent value="Primaire">
+                            {renderBulletinPreview('Primaire')}
+                        </TabsContent>
+                        <TabsContent value="Maternelle">
+                            {renderBulletinPreview('Maternelle')}
+                        </TabsContent>
+                    </Tabs>
+                </CardContent>
+            </Card>
+
         </div>
     );
 }
