@@ -57,12 +57,10 @@ export function BulletinView({ studentId, termId }: BulletinViewProps) {
         case 'Secondaire':
             return <SecondaireBulletinView studentId={studentId} termId={termId} />;
         case 'Primaire':
-            return <PrimaireBulletinView student={student} termId={termId} />;
+            return <PrimaireBulletinView studentId={studentId} termId={termId} />;
         case 'Maternelle':
-            return <MaternelleBulletinView student={student} termId={termId} />;
+            return <MaternelleBulletinView studentId={studentId} termId={termId} />;
         default:
             return <div className="text-center p-8">Type de bulletin non pris en charge pour ce niveau.</div>;
     }
 }
-
-    
