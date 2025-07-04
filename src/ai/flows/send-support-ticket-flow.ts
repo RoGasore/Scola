@@ -1,12 +1,14 @@
 
 'use server';
 /**
- * @fileOverview A Genkit flow for sending a support ticket with attachments via email.
+ * @fileOverview A Genkit flow for sending a support ticket with attachments via email and saving it to the database.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { Resend } from 'resend';
+import { addSupportTicketToDb } from '@/services/support';
+import type { SupportTicket } from '@/types';
 
 const SendSupportTicketInputSchema = z.object({
   message: z.string().describe("The user's description of the problem."),
@@ -32,9 +34,26 @@ const sendSupportTicketFlow = ai.defineFlow(
     outputSchema: z.object({ id: z.string() }).or(z.object({ error: z.string() })),
   },
   async (input) => {
+    
+    // Step 1: Save the ticket to Firestore
+    try {
+        const ticketData: Omit<SupportTicket, 'id'> = {
+            ...input,
+            createdAt: new Date().toISOString(),
+            status: 'new'
+        };
+        await addSupportTicketToDb(ticketData);
+    } catch(dbError: any) {
+        console.error('Failed to save support ticket to DB:', dbError);
+        // We might decide to still send the email, but for now, we'll fail fast.
+        return { error: 'Failed to save ticket to database. ' + dbError.message };
+    }
+    
+    // Step 2: Send email notification
     if (!resend) {
       const errorMsg = 'The email service is not configured on the server.';
       console.error(errorMsg);
+      // The ticket is saved, but email failed. This could be handled more gracefully.
       return { error: errorMsg };
     }
 
@@ -45,6 +64,7 @@ const sendSupportTicketFlow = ai.defineFlow(
     const htmlBody = `
       <div style="font-family: sans-serif; line-height: 1.5;">
         <h1>Nouveau Ticket de Support</h1>
+        <p>Un nouveau ticket de support a été soumis et enregistré. Vous pouvez le consulter sur le tableau de bord administrateur.</p>
         <p><strong>Page concernée :</strong> <a href="${pageUrl}">${pageUrl}</a></p>
         <hr>
         <h2>Message de l'utilisateur :</h2>
@@ -68,6 +88,14 @@ const sendSupportTicketFlow = ai.defineFlow(
             content: audioDataUrl.split(',')[1], // Base64 content
         });
     }
+
+    // TODO: Intégrer l'API WhatsApp ici (ex: Twilio)
+    // try {
+    //   await sendWhatsAppNotification(`Nouveau ticket de support de ${pageUrl}: ${message}`);
+    // } catch (whatsappError) {
+    //   console.error("Failed to send WhatsApp notification:", whatsappError);
+    //   // Do not block the flow if WhatsApp fails
+    // }
 
     try {
       const { data, error } = await resend.emails.send({

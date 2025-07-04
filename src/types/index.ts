@@ -159,3 +159,13 @@ export interface BulletinData {
     };
     percentage: string;
 }
+
+export interface SupportTicket {
+    id: string;
+    message: string;
+    pageUrl: string;
+    screenshotDataUrl?: string;
+    audioDataUrl?: string;
+    createdAt: string; // ISO string
+    status: 'new' | 'seen' | 'resolved';
+}

@@ -3,14 +3,16 @@
 
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Users, TrendingUp, FileSignature, ClipboardList, MessageSquare, UserPlus, BookUser } from 'lucide-react';
+import { Users, TrendingUp, FileSignature, ClipboardList, MessageSquare, UserPlus, BookUser, LifeBuoy } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, YAxis, Tooltip } from 'recharts';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { format, getDaysInMonth } from 'date-fns';
+import { format, getDaysInMonth, formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getRecentSupportTickets } from '@/services/support';
+import type { SupportTicket } from '@/types';
 
 const generateDailyData = (monthDate, dataKey, min, max) => {
   const daysInMonth = getDaysInMonth(monthDate);
@@ -54,6 +56,15 @@ const CustomTooltip = ({ active, payload, label, dataKey, unit }: any) => {
 export default function Dashboard() {
   const [gradesMonth, setGradesMonth] = useState(new Date().toISOString());
   const [attendanceMonth, setAttendanceMonth] = useState(new Date().toISOString());
+  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
+
+  useEffect(() => {
+    async function fetchTickets() {
+      const tickets = await getRecentSupportTickets(5);
+      setSupportTickets(tickets);
+    }
+    fetchTickets();
+  }, []);
 
   const gradesData = useMemo(() => generateDailyData(new Date(gradesMonth), 'note', 10, 18), [gradesMonth]);
   const attendanceData = useMemo(() => generateDailyData(new Date(attendanceMonth), 'présence', 85, 99), [attendanceMonth]);
@@ -156,8 +167,8 @@ export default function Dashboard() {
         </Card>
       </div>
 
-       <div className="grid gap-4 md:gap-8 lg:grid-cols-1">
-          <Card>
+       <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
+          <Card className="xl:col-span-2">
             <CardHeader className="flex-row items-center justify-between">
                 <div>
                     <CardTitle>Taux de présence</CardTitle>
@@ -183,6 +194,30 @@ export default function Dashboard() {
                     <Area type="monotone" dataKey="présence" stroke="hsl(var(--chart-2))" strokeWidth={2} fillOpacity={1} fill="url(#colorAttendance)" />
                     </AreaChart>
                 </ResponsiveContainer>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Tickets de Support Récents</CardTitle>
+                <CardDescription>Les dernières demandes d'assistance des utilisateurs.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {supportTickets.length > 0 ? supportTickets.map((ticket) => (
+                    <div key={ticket.id} className="flex items-start gap-4">
+                        <div className="flex-shrink-0 pt-1">
+                            <LifeBuoy className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div className="space-y-1 flex-1">
+                            <p className="text-sm font-medium leading-none truncate" title={ticket.message}>{ticket.message}</p>
+                            <p className="text-xs text-muted-foreground">
+                                De: {ticket.pageUrl.split('/').pop()} &middot; {formatDistanceToNow(new Date(ticket.createdAt), { addSuffix: true, locale: fr })}
+                            </p>
+                        </div>
+                    </div>
+                )) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">Aucun ticket de support récent.</p>
+                )}
             </CardContent>
         </Card>
       </div>
