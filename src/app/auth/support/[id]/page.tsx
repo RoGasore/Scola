@@ -103,7 +103,7 @@ export default function TicketDetailPage() {
             
             setTicket(prev => prev ? {
                 ...prev,
-                conversation: [...prev.conversation, newMessage],
+                conversation: [...(prev.conversation || []), newMessage],
                 status: prev.status === 'resolved' ? 'resolved' : 'seen',
             } : null);
             setReplyMessage('');
@@ -179,7 +179,7 @@ export default function TicketDetailPage() {
                 </CardHeader>
                 <ScrollArea className="flex-1" ref={scrollAreaRef}>
                     <CardContent className="p-4 sm:p-6 space-y-6">
-                        {ticket.conversation.map((msg, index) => (
+                        {(ticket.conversation || []).map((msg, index) => (
                            <div key={index} className={cn("flex items-end gap-3", msg.author === 'admin' ? 'justify-end' : 'justify-start')}>
                                {msg.author === 'user' && (
                                    <Avatar className="h-8 w-8">
