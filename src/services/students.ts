@@ -23,6 +23,16 @@ export async function getStudents(): Promise<Student[]> {
     return students;
 }
 
+export async function getStudentsByClass(className: string): Promise<Student[]> {
+    const q = query(collection(db, "students"), where("classe", "==", className));
+    const querySnapshot = await getDocs(q);
+    const students: Student[] = [];
+    querySnapshot.forEach((doc: DocumentData) => {
+        students.push({ id: doc.id, ...doc.data() } as Student);
+    });
+    return students;
+}
+
 export async function getStudentByMatricule(matricule: string): Promise<Student | null> {
     const q = query(collection(db, "students"), where("matricule", "==", matricule), limit(1));
     const querySnapshot = await getDocs(q);

@@ -82,18 +82,25 @@ export interface AcademicTerm {
     isCurrent: boolean;
 }
 
+// This is the new, more detailed grade structure.
+// The old student-facing views are temporarily adapted to it.
 export interface Grade {
     id: string;
+    studentId: string;
+    studentMatricule: string;
+    class: string;
     course: string;
-    type: string; // Now a generic string: "Interrogation", "Examen Semestriel", "P1", etc.
-    date: string; // ISO String
-    grade: string; // e.g., "18/20", "A", "Très Bien", "Acquis", "Excellent"
+    evaluationType: string;
+    evaluationDate: string; // ISO
+    ponderation: number;
+    score: number;
     professeur: string;
-    comment?: string;
-    termId: string; // Link to AcademicTerm
+    termId: string;
     semester: number;
     period: number;
+    submissionDate: string; // ISO
 }
+
 
 export interface ScheduleItem {
     time: string; // "08:00 - 09:50"
@@ -109,8 +116,8 @@ export interface Schedule {
 // Types for the detailed bulletin
 export type BulletinCourse = Course & {
     grades: {
-        s1: { p1: Grade | null, p2: Grade | null, exam: Grade | null },
-        s2: { p1: Grade | null, p2: Grade | null, exam: Grade | null }
+        s1: { p1: any | null, p2: any | null, exam: any | null }, // Using 'any' as Grade type is changing
+        s2: { p1: any | null, p2: any | null, exam: any | null }
     },
     totals: {
         s1: number,
