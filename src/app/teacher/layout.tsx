@@ -83,10 +83,7 @@ export default function TeacherLayout({
               </nav>
             </div>
             <div className="mt-auto p-4">
-              <Button variant="outline" className="w-full justify-start" onClick={() => setIsSupportDialogOpen(true)}>
-                  <LifeBuoy className="mr-2 h-4 w-4" />
-                  Support
-              </Button>
+              {/* Support button removed from here */}
             </div>
           </div>
         </div>
@@ -118,11 +115,8 @@ export default function TeacherLayout({
                     <Link href="/teacher/notes" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/teacher/notes')}`}><GraduationCap className="h-5 w-5" />Saisie des Notes</Link>
                     <Link href="/teacher/communiques" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/teacher/communiques')}`}><MessageSquare className="h-5 w-5" />Communiqués</Link>
                 </nav>
-                <div className="mt-auto">
-                   <Button variant="outline" className="w-full justify-start" onClick={() => setIsSupportDialogOpen(true)}>
-                      <LifeBuoy className="mr-2 h-4 w-4" />
-                      Support
-                   </Button>
+                <div className="mt-auto p-4">
+                   {/* Support button removed from here */}
                 </div>
               </SheetContent>
             </Sheet>
@@ -154,6 +148,14 @@ export default function TeacherLayout({
           </main>
         </div>
       </div>
+      <Button 
+        className="fixed bottom-6 right-6 rounded-full h-14 w-14 shadow-lg z-50"
+        onClick={() => setIsSupportDialogOpen(true)}
+        size="icon"
+      >
+        <LifeBuoy className="h-6 w-6" />
+        <span className="sr-only">Support</span>
+      </Button>
       <SupportDialog 
         open={isSupportDialogOpen} 
         onOpenChange={setIsSupportDialogOpen}

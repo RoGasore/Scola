@@ -85,10 +85,7 @@ export default function StudentLayout({
               </nav>
             </div>
             <div className="mt-auto p-4">
-                <Button variant="outline" className="w-full justify-start" onClick={() => setIsSupportDialogOpen(true)}>
-                    <LifeBuoy className="mr-2 h-4 w-4" />
-                    Support
-                </Button>
+               {/* Support button removed from here */}
             </div>
           </div>
         </div>
@@ -122,10 +119,7 @@ export default function StudentLayout({
                     <Link href="/student/communiques" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/student/communiques')}`}><MessageSquare className="h-5 w-5" />Communiqués</Link>
                 </nav>
                 <div className="mt-auto p-4">
-                  <Button variant="outline" className="w-full justify-start" onClick={() => setIsSupportDialogOpen(true)}>
-                      <LifeBuoy className="mr-2 h-4 w-4" />
-                      Support
-                  </Button>
+                  {/* Support button removed from here */}
                 </div>
               </SheetContent>
             </Sheet>
@@ -157,6 +151,14 @@ export default function StudentLayout({
           </main>
         </div>
       </div>
+      <Button 
+        className="fixed bottom-6 right-6 rounded-full h-14 w-14 shadow-lg z-50"
+        onClick={() => setIsSupportDialogOpen(true)}
+        size="icon"
+      >
+        <LifeBuoy className="h-6 w-6" />
+        <span className="sr-only">Support</span>
+      </Button>
       <SupportDialog 
         open={isSupportDialogOpen} 
         onOpenChange={setIsSupportDialogOpen}

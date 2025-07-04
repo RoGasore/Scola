@@ -113,10 +113,6 @@ export default function DashboardLayout({
               </nav>
             </div>
             <div className="mt-auto p-4 space-y-4">
-                <Button variant="outline" className="w-full justify-start" onClick={() => setIsSupportDialogOpen(true)}>
-                    <LifeBuoy className="mr-2 h-4 w-4" />
-                    Contacter le Support
-                </Button>
                 <div className="flex items-center space-x-2">
                   <Switch 
                     id="theme-switch-desktop" 
@@ -164,10 +160,6 @@ export default function DashboardLayout({
                     <Link href="/auth/settings" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/settings')}`}><Settings className="h-5 w-5" />Paramètres</Link>
                 </nav>
                  <div className="mt-auto p-4 space-y-4">
-                  <Button variant="outline" className="w-full justify-start" onClick={() => setIsSupportDialogOpen(true)}>
-                      <LifeBuoy className="mr-2 h-4 w-4" />
-                      Contacter le Support
-                  </Button>
                   <div className="flex items-center space-x-2">
                     <Switch 
                       id="theme-switch-mobile" 
@@ -214,6 +206,14 @@ export default function DashboardLayout({
           </main>
         </div>
       </div>
+      <Button 
+        className="fixed bottom-6 right-6 rounded-full h-14 w-14 shadow-lg z-50"
+        onClick={() => setIsSupportDialogOpen(true)}
+        size="icon"
+      >
+        <LifeBuoy className="h-6 w-6" />
+        <span className="sr-only">Support</span>
+      </Button>
       <SupportDialog 
         open={isSupportDialogOpen} 
         onOpenChange={setIsSupportDialogOpen}

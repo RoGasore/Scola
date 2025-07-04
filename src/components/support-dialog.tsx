@@ -11,6 +11,7 @@ import { Camera, Mic, Square, Trash2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { sendSupportTicket } from '@/ai/flows/send-support-ticket-flow';
 import Image from 'next/image';
+import { ScrollArea } from './ui/scroll-area';
 
 type SupportDialogProps = {
     open: boolean;
@@ -71,8 +72,10 @@ export function SupportDialog({ open, onOpenChange, user }: SupportDialogProps) 
                 useCORS: true,
                 logging: false,
                 onclone: (doc) => {
-                    const dialog = doc.querySelector('[role="dialog"]');
-                    if (dialog) dialog.remove();
+                    const dialogs = doc.querySelectorAll('[role="dialog"]');
+                    dialogs.forEach(dialog => dialog.remove());
+                    const fab = doc.querySelector('.fixed.bottom-6.right-6');
+                    if (fab) fab.remove();
                 }
             });
             setScreenshotDataUrl(canvas.toDataURL('image/png'));
@@ -148,60 +151,62 @@ export function SupportDialog({ open, onOpenChange, user }: SupportDialogProps) 
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader>
+            <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
+                <DialogHeader className="px-6 pt-6">
                     <DialogTitle>Contacter le Support</DialogTitle>
                     <DialogDescription>
                         Décrivez votre problème. Vous pouvez joindre une capture d'écran et un message vocal.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4">
-                    <div className="grid w-full gap-1.5">
-                        <Label htmlFor="message">Votre message</Label>
-                        <Textarea 
-                            placeholder="Veuillez décrire le problème que vous rencontrez..." 
-                            id="message" 
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                        />
-                    </div>
-                    
-                    <div className="flex gap-2 flex-wrap">
-                        <Button variant="outline" onClick={handleScreenshot}>
-                            <Camera className="mr-2" /> Joindre une capture d'écran
-                        </Button>
-                        {!isRecording ? (
-                            <Button variant="outline" onClick={startRecording}>
-                                <Mic className="mr-2" /> Enregistrer un message vocal
+                <ScrollArea className="flex-1 px-6">
+                    <div className="space-y-4 py-4">
+                        <div className="grid w-full gap-1.5">
+                            <Label htmlFor="message">Votre message</Label>
+                            <Textarea 
+                                placeholder="Veuillez décrire le problème que vous rencontrez..." 
+                                id="message" 
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                            />
+                        </div>
+                        
+                        <div className="flex gap-2 flex-wrap">
+                            <Button variant="outline" onClick={handleScreenshot}>
+                                <Camera className="mr-2" /> Joindre une capture d'écran
                             </Button>
-                        ) : (
-                            <div className="flex items-center gap-2 p-2 rounded-md border border-destructive w-full justify-between">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-                                    <span className="font-mono text-sm text-destructive">{formatTime(recordingTime)}</span>
-                                </div>
-                                <Button variant="destructive" size="sm" onClick={stopRecording}>
-                                    <Square className="mr-2" /> Arrêter
+                            {!isRecording ? (
+                                <Button variant="outline" onClick={startRecording}>
+                                    <Mic className="mr-2" /> Enregistrer un message vocal
                                 </Button>
+                            ) : (
+                                <div className="flex items-center gap-2 p-2 rounded-md border border-destructive w-full justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                                        <span className="font-mono text-sm text-destructive">{formatTime(recordingTime)}</span>
+                                    </div>
+                                    <Button variant="destructive" size="sm" onClick={stopRecording}>
+                                        <Square className="mr-2" /> Arrêter
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+
+                        {screenshotDataUrl && (
+                            <div className="relative group">
+                                <Image src={screenshotDataUrl} alt="Capture d'écran" width={400} height={225} className="rounded-md border"/>
+                                <Button variant="destructive" size="icon" className="absolute top-1 right-1 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setScreenshotDataUrl(null)}><Trash2 className="h-4 w-4" /></Button>
+                            </div>
+                        )}
+                        
+                        {audioDataUrl && (
+                            <div className="flex items-center gap-2">
+                                <audio src={audioDataUrl} controls className="w-full" />
+                                <Button variant="destructive" size="icon" onClick={() => setAudioDataUrl(null)}><Trash2/></Button>
                             </div>
                         )}
                     </div>
-
-                    {screenshotDataUrl && (
-                        <div className="relative group">
-                             <Image src={screenshotDataUrl} alt="Capture d'écran" width={400} height={225} className="rounded-md border"/>
-                             <Button variant="destructive" size="icon" className="absolute top-1 right-1 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setScreenshotDataUrl(null)}><Trash2 className="h-4 w-4" /></Button>
-                        </div>
-                    )}
-                    
-                    {audioDataUrl && (
-                        <div className="flex items-center gap-2">
-                             <audio src={audioDataUrl} controls className="w-full" />
-                             <Button variant="destructive" size="icon" onClick={() => setAudioDataUrl(null)}><Trash2/></Button>
-                        </div>
-                    )}
-                </div>
-                <DialogFooter>
+                </ScrollArea>
+                <DialogFooter className="px-6 pb-6">
                     <Button variant="ghost" onClick={() => onOpenChange(false)}>Annuler</Button>
                     <Button onClick={handleSubmit} disabled={isSubmitting}>
                         {isSubmitting && <Loader2 className="mr-2 animate-spin" />}
