@@ -1,7 +1,7 @@
 
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from './ui/button';
@@ -24,8 +24,38 @@ export function SupportDialog({ open, onOpenChange }: SupportDialogProps) {
     const [audioDataUrl, setAudioDataUrl] = useState<string | null>(null);
     const [isRecording, setIsRecording] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [recordingTime, setRecordingTime] = useState(0);
+
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
+    const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    const formatTime = (seconds: number) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const stopRecording = useCallback(() => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.stop();
+        }
+        if (timerIntervalRef.current) {
+            clearInterval(timerIntervalRef.current);
+            timerIntervalRef.current = null;
+        }
+        setIsRecording(false);
+    }, []);
+
+    useEffect(() => {
+        if (!open) {
+            stopRecording();
+            setMessage('');
+            setScreenshotDataUrl(null);
+            setAudioDataUrl(null);
+            setRecordingTime(0);
+        }
+    }, [open, stopRecording]);
 
     const handleScreenshot = async () => {
         try {
@@ -33,7 +63,6 @@ export function SupportDialog({ open, onOpenChange }: SupportDialogProps) {
                 useCORS: true,
                 logging: false,
                 onclone: (doc) => {
-                    // Find and remove the support dialog from the clone to avoid capturing it
                     const dialog = doc.querySelector('[role="dialog"]');
                     if (dialog) dialog.remove();
                 }
@@ -63,43 +92,41 @@ export function SupportDialog({ open, onOpenChange }: SupportDialogProps) {
                 reader.onloadend = () => {
                     setAudioDataUrl(reader.result as string);
                 };
-                 // Stop all tracks to release the microphone
                 stream.getTracks().forEach(track => track.stop());
             };
 
             mediaRecorderRef.current.start();
             setIsRecording(true);
+            setRecordingTime(0);
+            timerIntervalRef.current = setInterval(() => {
+                setRecordingTime(prev => prev + 1);
+            }, 1000);
         } catch (error) {
             console.error("Error starting recording:", error);
             toast({ variant: 'destructive', title: "Erreur de micro", description: "Impossible d'accéder au microphone." });
         }
     };
 
-    const stopRecording = () => {
-        if (mediaRecorderRef.current && isRecording) {
-            mediaRecorderRef.current.stop();
-            setIsRecording(false);
-        }
-    };
-    
     const handleSubmit = async () => {
-        if (!message.trim()) {
-            toast({ variant: 'destructive', title: "Message vide", description: "Veuillez décrire votre problème." });
+        let finalMessage = message.trim();
+        if (finalMessage === '' && audioDataUrl) {
+            finalMessage = "J'ai envoyé un message vocal pour exprimer mon souci. Veuillez l'écouter.";
+        }
+
+        if (finalMessage === '' && !audioDataUrl) {
+            toast({ variant: 'destructive', title: "Ticket vide", description: "Veuillez décrire votre problème ou enregistrer un message vocal." });
             return;
         }
+        
         setIsSubmitting(true);
         try {
             await sendSupportTicket({
-                message,
+                message: finalMessage,
                 screenshotDataUrl: screenshotDataUrl || undefined,
                 audioDataUrl: audioDataUrl || undefined,
                 pageUrl: window.location.href,
             });
             toast({ title: "Ticket envoyé !", description: "Votre demande de support a été envoyée à l'administrateur.", className: 'bg-green-500 text-white' });
-            // Reset state and close
-            setMessage('');
-            setScreenshotDataUrl(null);
-            setAudioDataUrl(null);
             onOpenChange(false);
         } catch (error) {
             console.error("Failed to send support ticket:", error);
@@ -138,9 +165,15 @@ export function SupportDialog({ open, onOpenChange }: SupportDialogProps) {
                                 <Mic className="mr-2" /> Enregistrer un message vocal
                             </Button>
                         ) : (
-                            <Button variant="destructive" onClick={stopRecording}>
-                                <Square className="mr-2" /> Arrêter l'enregistrement
-                            </Button>
+                            <div className="flex items-center gap-2 p-2 rounded-md border border-destructive w-full justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                                    <span className="font-mono text-sm text-destructive">{formatTime(recordingTime)}</span>
+                                </div>
+                                <Button variant="destructive" size="sm" onClick={stopRecording}>
+                                    <Square className="mr-2" /> Arrêter
+                                </Button>
+                            </div>
                         )}
                     </div>
 
