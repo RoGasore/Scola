@@ -160,7 +160,7 @@ export default function TicketDetailPage() {
                         </CardContent>
                     </Card>
 
-                    {(ticket.screenshotDataUrl || ticket.audioDataUrls.length > 0) && (
+                    {(ticket.screenshotDataUrl || (ticket.audioDataUrls && ticket.audioDataUrls.length > 0)) && (
                         <Card>
                              <CardHeader>
                                 <CardTitle className="text-lg">Pièces Jointes</CardTitle>
@@ -172,7 +172,7 @@ export default function TicketDetailPage() {
                                         <Image src={ticket.screenshotDataUrl} alt="Capture d'écran du problème" width={400} height={225} className="rounded-md border w-full h-auto"/>
                                     </div>
                                 )}
-                                {ticket.audioDataUrls.length > 0 && (
+                                {ticket.audioDataUrls && ticket.audioDataUrls.length > 0 && (
                                     <div>
                                         <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><Mic/> Messages Vocaux</h4>
                                         <div className="space-y-2">
