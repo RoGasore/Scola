@@ -90,16 +90,22 @@ const sendSupportTicketFlow = ai.defineFlow(
 
     const attachments = [];
     if (screenshotDataUrl) {
-        attachments.push({
-            filename: 'screenshot.png',
-            content: screenshotDataUrl.split(',')[1],
-        });
+        const content = screenshotDataUrl.split(',')[1];
+        if (content) {
+            attachments.push({
+                filename: 'screenshot.png',
+                content: content,
+            });
+        }
     }
     if (audioDataUrl) {
-        attachments.push({
-            filename: 'message_vocal.webm',
-            content: audioDataUrl.split(',')[1], // Base64 content
-        });
+        const content = audioDataUrl.split(',')[1];
+        if (content) {
+            attachments.push({
+                filename: 'message_vocal.webm',
+                content: content, // Base64 content
+            });
+        }
     }
 
     try {
@@ -116,7 +122,7 @@ const sendSupportTicketFlow = ai.defineFlow(
         return { error: error.message };
       }
       
-      if (data && data.id) {
+      if (data?.id) {
          return { id: data.id };
       }
 

@@ -54,9 +54,7 @@ const sendEmailFlow = ai.defineFlow(
         return { error: error.message };
       }
       
-      // Check for a valid response with an ID.
-      // The previous check was not robust enough.
-      if (data && data.id) {
+      if (data?.id) {
          return { id: data.id };
       }
 
