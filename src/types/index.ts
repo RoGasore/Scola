@@ -53,7 +53,7 @@ export interface Communique {
     recipients: Array<'Parents' | 'Élèves' | 'Professeurs' | 'Tous'>;
     date: string;
     time?: string;
-    status: { read: number; unread: number };
+    status: 'draft' | 'pending_approval' | 'approved' | 'rejected';
     content: string;
     attachments: { name: string; size: string }[];
     comments: {
@@ -62,6 +62,9 @@ export interface Communique {
         text: string;
         time: string;
     }[];
+    approvedBy?: string;
+    signatureUrl?: string;
+    sealUrl?: string;
 }
 
 
@@ -167,7 +170,7 @@ export interface SupportTicket {
     message: string;
     pageUrl: string;
     screenshotDataUrl?: string;
-    audioDataUrl?: string;
+    audioDataUrls: string[];
     createdAt: string; // ISO string
     status: 'new' | 'seen' | 'resolved';
 }

@@ -14,7 +14,7 @@ const SendSupportTicketInputSchema = z.object({
   message: z.string().describe("The user's description of the problem."),
   pageUrl: z.string().url().describe("The URL of the page where the user encountered the issue."),
   screenshotDataUrl: z.string().optional().describe("A data URI of the screenshot image (e.g., 'data:image/png;base64,...')."),
-  audioDataUrl: z.string().optional().describe("A data URI of the recorded audio (e.g., 'data:audio/webm;base64,...')."),
+  audioDataUrls: z.array(z.string()).optional().describe("A list of data URIs of the recorded audio files (e.g., 'data:audio/webm;base64,...')."),
   userName: z.string().describe("The name of the user submitting the ticket."),
   userRole: z.string().describe("The role of the user (e.g., Admin, Teacher, Student)."),
 });
@@ -43,7 +43,7 @@ const sendSupportTicketFlow = ai.defineFlow(
             message: input.message,
             pageUrl: input.pageUrl,
             screenshotDataUrl: input.screenshotDataUrl,
-            audioDataUrl: input.audioDataUrl,
+            audioDataUrls: input.audioDataUrls || [],
             userName: input.userName,
             userRole: input.userRole,
             createdAt: new Date().toISOString(),
@@ -52,7 +52,6 @@ const sendSupportTicketFlow = ai.defineFlow(
         await addSupportTicketToDb(ticketData);
     } catch(dbError: any) {
         console.error('Failed to save support ticket to DB:', dbError);
-        // We might decide to still send the email, but for now, we'll fail fast.
         return { error: 'Failed to save ticket to database. ' + dbError.message };
     }
     
@@ -60,14 +59,12 @@ const sendSupportTicketFlow = ai.defineFlow(
     if (!resend) {
       const errorMsg = 'The email service is not configured on the server.';
       console.error(errorMsg);
-      // The ticket is saved, but email failed. This could be handled more gracefully.
       return { error: errorMsg };
     }
 
-    const { message, pageUrl, screenshotDataUrl, audioDataUrl, userName, userRole } = input;
+    const { message, pageUrl, screenshotDataUrl, audioDataUrls, userName, userRole } = input;
     const subject = `Nouveau ticket de support (${userRole}) : ${pageUrl}`;
     
-    // Construct email body
     const htmlBody = `
       <div style="font-family: sans-serif; line-height: 1.5;">
         <h1>Nouveau Ticket de Support</h1>
@@ -77,14 +74,9 @@ const sendSupportTicketFlow = ai.defineFlow(
         <h2>Message de l'utilisateur :</h2>
         <p style="white-space: pre-wrap; background-color: #f5f5f5; padding: 15px; border-radius: 5px;">${message}</p>
         <hr>
-        ${screenshotDataUrl ? `
-          <h2>Capture d'écran :</h2>
-          <p>La capture d'écran est jointe à ce mail et visible dans le tableau de bord ScolaGest.</p>
-        ` : ''}
-        ${audioDataUrl ? `
-          <h2>Message vocal :</h2>
-          <p>Un message vocal a été joint. Veuillez l'écouter en utilisant un lecteur compatible (ex: VLC, Chrome).</p>
-        ` : ''}
+        ${screenshotDataUrl ? `<h2>Capture d'écran jointe.</h2>` : ''}
+        ${audioDataUrls && audioDataUrls.length > 0 ? `<h2>${audioDataUrls.length} message(s) vocal/vocaux joint(s).</h2>` : ''}
+        <p>Connectez-vous à votre tableau de bord ScolaGest pour voir tous les détails et pièces jointes.</p>
       </div>
     `;
 
@@ -98,14 +90,16 @@ const sendSupportTicketFlow = ai.defineFlow(
             });
         }
     }
-    if (audioDataUrl) {
-        const content = audioDataUrl.split(',')[1];
-        if (content) {
-            attachments.push({
-                filename: 'message_vocal.webm',
-                content: content, // Base64 content
-            });
-        }
+    if (audioDataUrls) {
+        audioDataUrls.forEach((audioUrl, index) => {
+            const content = audioUrl.split(',')[1];
+            if (content) {
+                attachments.push({
+                    filename: `message_vocal_${index + 1}.webm`,
+                    content: content,
+                });
+            }
+        });
     }
 
     try {
@@ -130,6 +124,10 @@ const sendSupportTicketFlow = ai.defineFlow(
 
     } catch (e: any) {
         console.error('Failed to send support ticket:', e);
+        // Placeholder for WhatsApp Integration
+        // if (config.whatsapp.enabled) {
+        //   await sendWhatsAppNotification(`New support ticket from ${userName}: ${message}`);
+        // }
         return { error: e.message || 'An unknown error occurred while sending the ticket.' };
     }
   }

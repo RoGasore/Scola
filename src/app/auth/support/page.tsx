@@ -1,19 +1,18 @@
 
 'use client'
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { format, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MoreHorizontal, Loader2, CheckCircle } from 'lucide-react';
+import { MoreHorizontal, Loader2 } from 'lucide-react';
 import type { SupportTicket } from '@/types';
-import { getAllSupportTickets, updateTicketStatus } from '@/services/support';
+import { getAllSupportTickets } from '@/services/support';
 import SupportLoading from './loading';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -27,7 +26,6 @@ export default function SupportPage() {
     const [filteredTickets, setFilteredTickets] = useState<SupportTicket[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState<Status | 'all'>('all');
-    const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
     const ticketIdParam = searchParams.get('ticketId');
 
@@ -48,6 +46,15 @@ export default function SupportPage() {
         fetchTickets();
     }, [fetchTickets]);
     
+    const ticketCounts = useMemo(() => {
+        return {
+            all: allTickets.length,
+            new: allTickets.filter(t => t.status === 'new').length,
+            seen: allTickets.filter(t => t.status === 'seen').length,
+            resolved: allTickets.filter(t => t.status === 'resolved').length,
+        }
+    }, [allTickets]);
+
     useEffect(() => {
         let tickets = allTickets;
         if (statusFilter !== 'all') {
@@ -57,7 +64,7 @@ export default function SupportPage() {
     }, [statusFilter, allTickets]);
     
     useEffect(() => {
-        if (ticketIdParam) {
+        if (ticketIdParam && !isLoading) {
             const element = document.getElementById(`ticket-${ticketIdParam}`);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -69,23 +76,6 @@ export default function SupportPage() {
         }
     }, [ticketIdParam, isLoading]);
 
-    const handleUpdateStatus = async (ticketId: string, status: Status) => {
-        setIsUpdating(ticketId);
-        try {
-            await updateTicketStatus(ticketId, status);
-            toast({ title: 'Statut mis à jour', description: 'Le statut du ticket a été modifié.', className: 'bg-green-500 text-white' });
-            // Optimistically update the UI before re-fetching
-            setAllTickets(prevTickets =>
-                prevTickets.map(t =>
-                    t.id === ticketId ? { ...t, status } : t
-                )
-            );
-        } catch (error) {
-            toast({ variant: 'destructive', title: 'Erreur', description: 'Impossible de mettre à jour le statut.' });
-        } finally {
-            setIsUpdating(null);
-        }
-    };
 
     if (isLoading) {
         return <SupportLoading />;
@@ -112,10 +102,10 @@ export default function SupportPage() {
                 <CardHeader>
                     <Tabs value={statusFilter} onValueChange={(value) => setStatusFilter(value as Status | 'all')}>
                         <TabsList>
-                            <TabsTrigger value="all">Tous</TabsTrigger>
-                            <TabsTrigger value="new">Nouveaux</TabsTrigger>
-                            <TabsTrigger value="seen">Vus</TabsTrigger>
-                            <TabsTrigger value="resolved">Résolus</TabsTrigger>
+                            <TabsTrigger value="all" className="gap-2">Tous <Badge variant={statusFilter === 'all' ? 'default' : 'secondary'}>{ticketCounts.all}</Badge></TabsTrigger>
+                            <TabsTrigger value="new" className="gap-2">Nouveaux <Badge variant={statusFilter === 'new' ? 'default' : 'secondary'}>{ticketCounts.new}</Badge></TabsTrigger>
+                            <TabsTrigger value="seen" className="gap-2">Vus <Badge variant={statusFilter === 'seen' ? 'default' : 'secondary'}>{ticketCounts.seen}</Badge></TabsTrigger>
+                            <TabsTrigger value="resolved" className="gap-2">Résolus <Badge variant={statusFilter === 'resolved' ? 'default' : 'secondary'}>{ticketCounts.resolved}</Badge></TabsTrigger>
                         </TabsList>
                     </Tabs>
                 </CardHeader>
@@ -125,10 +115,9 @@ export default function SupportPage() {
                             <TableRow>
                                 <TableHead>Utilisateur</TableHead>
                                 <TableHead>Message</TableHead>
-                                <TableHead>Page</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Statut</TableHead>
-                                <TableHead><span className="sr-only">Actions</span></TableHead>
+                                <TableHead>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -142,26 +131,12 @@ export default function SupportPage() {
                                         <TableCell>
                                             <p className="truncate max-w-xs" title={ticket.message}>{ticket.message}</p>
                                         </TableCell>
-                                        <TableCell>
-                                            <Link href={ticket.pageUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                                {ticket.pageUrl.split('/').pop() || 'Page d\'accueil'}
-                                            </Link>
-                                        </TableCell>
                                         <TableCell>{formatDistanceToNow(new Date(ticket.createdAt), { addSuffix: true, locale: fr })}</TableCell>
                                         <TableCell>{getStatusBadge(ticket.status)}</TableCell>
-                                        <TableCell className="text-right">
-                                             <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon" disabled={isUpdating === ticket.id}>
-                                                        {isUpdating === ticket.id ? <Loader2 className="animate-spin"/> : <MoreHorizontal />}
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    {ticket.status !== 'seen' && <DropdownMenuItem onClick={() => handleUpdateStatus(ticket.id, 'seen')}>Marquer comme Vu</DropdownMenuItem>}
-                                                    {ticket.status !== 'resolved' && <DropdownMenuItem onClick={() => handleUpdateStatus(ticket.id, 'resolved')}>Marquer comme Résolu</DropdownMenuItem>}
-                                                    {/* Add details view later */}
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
+                                        <TableCell>
+                                            <Button asChild variant="outline" size="sm">
+                                                <Link href={`/auth/support/${ticket.id}`}>Voir le ticket</Link>
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))

@@ -1,7 +1,7 @@
 
 'use client'
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Home,
   PanelLeft,
@@ -36,10 +36,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
 import { SupportDialog } from '@/components/support-dialog';
+import { Badge } from '@/components/ui/badge';
+import { getNewTicketCount } from '@/services/support';
 
-function NavLink({ href, icon: Icon, children }: { href: string; icon: React.ElementType, children: React.ReactNode }) {
+function NavLink({ href, icon: Icon, children, badgeCount }: { href: string; icon: React.ElementType, children: React.ReactNode, badgeCount?: number }) {
   const pathname = usePathname();
   const isActive = pathname.startsWith(href);
 
@@ -55,6 +56,11 @@ function NavLink({ href, icon: Icon, children }: { href: string; icon: React.Ele
     >
       <Icon className="h-4 w-4" />
       {children}
+      {badgeCount !== undefined && badgeCount > 0 && (
+        <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+          {badgeCount}
+        </Badge>
+      )}
     </Link>
   );
 }
@@ -68,9 +74,15 @@ export default function DashboardLayout({
   const { setTheme, theme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
   const [isSupportDialogOpen, setIsSupportDialogOpen] = useState(false);
+  const [newTicketCount, setNewTicketCount] = useState(0);
 
   useEffect(() => {
     setIsMounted(true);
+    const fetchTicketCount = async () => {
+        const count = await getNewTicketCount();
+        setNewTicketCount(count);
+    };
+    fetchTicketCount();
   }, []);
 
   const getLinkClass = (path: string) => {
@@ -108,7 +120,7 @@ export default function DashboardLayout({
                 <NavLink href="/auth/bulletins" icon={FileText}>Bulletins</NavLink>
                 <NavLink href="/auth/attendance" icon={CalendarCheck}>Présences</NavLink>
                 <NavLink href="/auth/teachers" icon={Briefcase}>Professeurs</NavLink>
-                <NavLink href="/auth/support" icon={LifeBuoy}>Tickets de Support</NavLink>
+                <NavLink href="/auth/support" icon={LifeBuoy} badgeCount={newTicketCount}>Tickets de Support</NavLink>
                 <NavLink href="/auth/settings" icon={Settings}>Paramètres</NavLink>
               </nav>
             </div>
@@ -156,7 +168,9 @@ export default function DashboardLayout({
                     <Link href="/auth/bulletins" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/bulletins')}`}><FileText className="h-5 w-5" />Bulletins</Link>
                     <Link href="/auth/attendance" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/attendance')}`}><CalendarCheck className="h-5 w-5" />Présences</Link>
                     <Link href="/auth/teachers" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/teachers')}`}><Briefcase className="h-5 w-5" />Professeurs</Link>
-                    <Link href="/auth/support" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/support')}`}><LifeBuoy className="h-5 w-5" />Tickets de Support</Link>
+                    <Link href="/auth/support" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/support')}`}><LifeBuoy className="h-5 w-5" />Tickets de Support
+                        {newTicketCount > 0 && <Badge className="ml-auto">{newTicketCount}</Badge>}
+                    </Link>
                     <Link href="/auth/settings" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/settings')}`}><Settings className="h-5 w-5" />Paramètres</Link>
                 </nav>
                  <div className="mt-auto p-4 space-y-4">

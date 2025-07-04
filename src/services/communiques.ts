@@ -13,7 +13,10 @@ const communiquesData: Communique[] = [
     recipients: ['Parents', 'Tous'],
     date: format(subDays(new Date(), 2), 'dd/MM/yyyy HH:mm'),
     time: "il y a 2 jours",
-    status: { read: 85, unread: 15 },
+    status: 'approved',
+    approvedBy: 'M. le Directeur',
+    signatureUrl: 'https://placehold.co/150x50.png',
+    sealUrl: 'https://placehold.co/80x80.png',
     content: "<p>Chers parents,</p><p>Ceci est un rappel amical pour la réunion parents-professeurs qui aura lieu ce <strong>vendredi à 17h00</strong>. Votre présence est vivement souhaitée pour discuter des progrès de votre enfant et des objectifs pour le reste de l'année.</p><p>Cordialement,</p><p>La Direction</p>",
     attachments: [{ name: 'Ordre_du_jour.pdf', size: '128 KB' }],
     comments: [
@@ -31,7 +34,10 @@ const communiquesData: Communique[] = [
     recipients: ['Élèves', 'Parents', 'Tous'],
     date: format(subDays(new Date(), 10), 'dd/MM/yyyy HH:mm'),
     time: "il y a 10 jours",
-    status: { read: 92, unread: 8 },
+    status: 'approved',
+    approvedBy: 'Direction Pédagogique',
+    signatureUrl: 'https://placehold.co/150x50.png',
+    sealUrl: 'https://placehold.co/80x80.png',
     content: "<p>Bonjour à tous,</p><p>La journée sportive annuelle se tiendra le <strong>30 juillet</strong>. N'oubliez pas vos tenues de sport ! Des médailles seront décernées aux vainqueurs de chaque épreuve.</p><p>Préparez-vous !</p>",
     attachments: [],
     comments: [
@@ -48,7 +54,8 @@ const communiquesData: Communique[] = [
     recipients: ['Professeurs'],
     date: format(subDays(new Date(), 1), 'dd/MM/yyyy HH:mm'),
     time: "il y a 1 jour",
-    status: { read: 98, unread: 2 },
+    status: 'approved',
+    approvedBy: 'Admin Technique',
     content: "<p>Chers professeurs,</p><p>Une mise à jour de la plateforme ScolaGest sera déployée ce soir à 22h00. Une interruption de service de 15 minutes est à prévoir. La nouvelle version inclura des améliorations pour l'encodage des notes.</p><p>Merci pour votre compréhension.</p>",
     attachments: [],
     comments: []
@@ -62,7 +69,7 @@ export async function getRecentAnnouncements(role: 'admin' | 'student' | 'teache
     let filteredData = communiquesData;
 
     if (role === 'student') {
-        filteredData = communiquesData.filter(c => c.recipients.includes('Élèves') || c.recipients.includes('Tous'));
+        filteredData = communiquesData.filter(c => c.status === 'approved' && (c.recipients.includes('Élèves') || c.recipients.includes('Tous')));
     } else if (role === 'teacher') {
         filteredData = communiquesData.filter(c => c.recipients.includes('Professeurs') || c.recipients.includes('Tous'));
     }

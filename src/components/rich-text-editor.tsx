@@ -4,34 +4,19 @@
 import { useEditor, EditorContent, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import {
-  Bold,
-  Italic,
-  Strikethrough,
-  List,
-  ListOrdered,
-  Heading1,
-  Heading2,
-  Heading3,
-  Quote,
-  Code,
-  Paintbrush,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  AlignJustify,
-  Underline,
-  Highlighter,
-  Link as LinkIcon,
-  Minus,
+  Bold, Italic, Strikethrough, List, ListOrdered, Quote, Code, Paintbrush, AlignLeft,
+  AlignCenter, AlignRight, AlignJustify, Underline, Highlighter, Link as LinkIcon, Minus,
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
 import * as React from 'react';
 import { Color } from '@tiptap/extension-color';
 import TextStyle from '@tiptap/extension-text-style';
+import FontFamily from '@tiptap/extension-font-family';
 import TextAlign from '@tiptap/extension-text-align';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import UnderlineExt from '@tiptap/extension-underline';
 import HighlightExt from '@tiptap/extension-highlight';
@@ -46,48 +31,55 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
   const setLink = useCallback(() => {
     const previousUrl = editor.getAttributes('link').href;
     const url = window.prompt('URL', previousUrl);
-
-    if (url === null) {
-      return;
-    }
-
+    if (url === null) return;
     if (url === '') {
       editor.chain().focus().extendMarkRange('link').unsetLink().run();
       return;
     }
-
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
   }, [editor]);
 
+  const fontFamilies = [
+    { name: 'Inter (Défaut)', value: 'Inter' },
+    { name: 'Roboto', value: 'Roboto' },
+    { name: 'Lato', value: 'Lato' },
+    { name: 'Montserrat', value: 'Montserrat' },
+    { name: 'Merriweather', value: 'Merriweather' },
+  ];
+
+  const fontSizes = ['12px', '14px', '16px', '18px', '24px', '30px'];
 
   return (
     <TooltipProvider delayDuration={0}>
       <div className="border-b border-input bg-transparent rounded-t-md p-1 flex items-center gap-1 flex-wrap">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Toggle size="sm" pressed={editor.isActive('heading', { level: 1 })} onPressedChange={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}>
-              <Heading1 className="h-4 w-4" />
-            </Toggle>
-          </TooltipTrigger>
-          <TooltipContent><p>Titre 1</p></TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Toggle size="sm" pressed={editor.isActive('heading', { level: 2 })} onPressedChange={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
-              <Heading2 className="h-4 w-4" />
-            </Toggle>
-          </TooltipTrigger>
-          <TooltipContent><p>Titre 2</p></TooltipContent>
-        </Tooltip>
-         <Tooltip>
-          <TooltipTrigger asChild>
-            <Toggle size="sm" pressed={editor.isActive('heading', { level: 3 })} onPressedChange={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>
-              <Heading3 className="h-4 w-4" />
-            </Toggle>
-          </TooltipTrigger>
-          <TooltipContent><p>Titre 3</p></TooltipContent>
-        </Tooltip>
+        <Select
+          onValueChange={(value) => editor.chain().focus().setFontFamily(value).run()}
+          value={editor.getAttributes('textStyle').fontFamily || 'Inter'}
+        >
+          <SelectTrigger className="w-[150px] h-9 text-xs">
+            <SelectValue placeholder="Police" />
+          </SelectTrigger>
+          <SelectContent>
+            {fontFamilies.map(font => (
+              <SelectItem key={font.value} value={font.value}>{font.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
+        <Select
+          onValueChange={(value) => editor.chain().focus().setMark('textStyle', { fontSize: value }).run()}
+          value={editor.getAttributes('textStyle').fontSize || '16px'}
+        >
+          <SelectTrigger className="w-[80px] h-9 text-xs">
+            <SelectValue placeholder="Taille" />
+          </SelectTrigger>
+          <SelectContent>
+            {fontSizes.map(size => (
+              <SelectItem key={size} value={size}>{size}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
         <Separator orientation="vertical" className="h-8" />
         
         <Tooltip>
@@ -225,14 +217,6 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
           </TooltipTrigger>
           <TooltipContent><p>Citation</p></TooltipContent>
         </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Toggle size="sm" pressed={editor.isActive('codeBlock')} onPressedChange={() => editor.chain().focus().toggleCodeBlock().run()}>
-              <Code className="h-4 w-4" />
-            </Toggle>
-          </TooltipTrigger>
-          <TooltipContent><p>Bloc de code</p></TooltipContent>
-        </Tooltip>
          <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => editor.chain().focus().setHorizontalRule().run()}>
@@ -259,26 +243,18 @@ export const RichTextEditor = ({ content, onChange, placeholder }: RichTextEdito
         heading: {
           levels: [1, 2, 3],
         },
-        bulletList: {
-          keepMarks: true,
-          keepAttributes: false,
-        },
-        orderedList: {
-          keepMarks: true,
-          keepAttributes: false,
-        },
+        bulletList: { keepMarks: true, keepAttributes: false },
+        orderedList: { keepMarks: true, keepAttributes: false },
+        textStyle: false, // disable default textStyle to use our own
+        fontFamily: false, // disable default fontFamily
       }),
       TextStyle,
+      FontFamily,
       Color,
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-      }),
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
       UnderlineExt,
       HighlightExt.configure({ multicolor: true }),
-      LinkExt.configure({
-        openOnClick: false,
-        autolink: true,
-      }),
+      LinkExt.configure({ openOnClick: false, autolink: true }),
     ],
     content: content,
     editorProps: {

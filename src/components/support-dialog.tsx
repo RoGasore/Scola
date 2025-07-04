@@ -26,7 +26,7 @@ export function SupportDialog({ open, onOpenChange, user }: SupportDialogProps) 
     const { toast } = useToast();
     const [message, setMessage] = useState('');
     const [screenshotDataUrl, setScreenshotDataUrl] = useState<string | null>(null);
-    const [audioDataUrl, setAudioDataUrl] = useState<string | null>(null);
+    const [audioDataUrls, setAudioDataUrls] = useState<string[]>([]);
     const [isRecording, setIsRecording] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
@@ -56,13 +56,19 @@ export function SupportDialog({ open, onOpenChange, user }: SupportDialogProps) 
         stopRecording();
         setMessage('');
         setScreenshotDataUrl(null);
-        setAudioDataUrl(null);
+        setAudioDataUrls([]);
         setRecordingTime(0);
     }, [stopRecording]);
 
     useEffect(() => {
         if (!open) {
             cleanup();
+        }
+        // Cleanup on component unmount
+        return () => {
+            if (mediaRecorderRef.current && mediaRecorderRef.current.stream) {
+                mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+            }
         }
     }, [open, cleanup]);
 
@@ -89,7 +95,7 @@ export function SupportDialog({ open, onOpenChange, user }: SupportDialogProps) 
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorderRef.current = new MediaRecorder(stream);
+            mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
             audioChunksRef.current = [];
 
             mediaRecorderRef.current.ondataavailable = (event) => {
@@ -101,7 +107,7 @@ export function SupportDialog({ open, onOpenChange, user }: SupportDialogProps) 
                 const reader = new FileReader();
                 reader.readAsDataURL(audioBlob);
                 reader.onloadend = () => {
-                    setAudioDataUrl(reader.result as string);
+                    setAudioDataUrls(prev => [...prev, reader.result as string]);
                 };
                 stream.getTracks().forEach(track => track.stop());
             };
@@ -120,11 +126,11 @@ export function SupportDialog({ open, onOpenChange, user }: SupportDialogProps) 
 
     const handleSubmit = async () => {
         let finalMessage = message.trim();
-        if (finalMessage === '' && audioDataUrl) {
+        if (finalMessage === '' && audioDataUrls.length > 0) {
             finalMessage = "J'ai envoyé un message vocal pour exprimer mon souci. Veuillez l'écouter.";
         }
 
-        if (finalMessage === '' && !audioDataUrl) {
+        if (finalMessage === '' && audioDataUrls.length === 0) {
             toast({ variant: 'destructive', title: "Ticket vide", description: "Veuillez décrire votre problème ou enregistrer un message vocal." });
             return;
         }
@@ -134,7 +140,7 @@ export function SupportDialog({ open, onOpenChange, user }: SupportDialogProps) 
             await sendSupportTicket({
                 message: finalMessage,
                 screenshotDataUrl: screenshotDataUrl || undefined,
-                audioDataUrl: audioDataUrl || undefined,
+                audioDataUrls: audioDataUrls,
                 pageUrl: window.location.href,
                 userName: user.name,
                 userRole: user.role,
@@ -155,7 +161,7 @@ export function SupportDialog({ open, onOpenChange, user }: SupportDialogProps) 
                 <DialogHeader className="px-6 pt-6">
                     <DialogTitle>Contacter le Support</DialogTitle>
                     <DialogDescription>
-                        Décrivez votre problème. Vous pouvez joindre une capture d'écran et un message vocal.
+                        Décrivez votre problème. Vous pouvez joindre une capture d'écran et des messages vocaux.
                     </DialogDescription>
                 </DialogHeader>
                 <ScrollArea className="flex-1 px-6">
@@ -193,15 +199,21 @@ export function SupportDialog({ open, onOpenChange, user }: SupportDialogProps) 
 
                         {screenshotDataUrl && (
                             <div className="relative group">
+                                <p className="text-sm font-medium mb-1">Capture d'écran :</p>
                                 <Image src={screenshotDataUrl} alt="Capture d'écran" width={400} height={225} className="rounded-md border"/>
                                 <Button variant="destructive" size="icon" className="absolute top-1 right-1 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setScreenshotDataUrl(null)}><Trash2 className="h-4 w-4" /></Button>
                             </div>
                         )}
                         
-                        {audioDataUrl && (
-                            <div className="flex items-center gap-2">
-                                <audio src={audioDataUrl} controls className="w-full" />
-                                <Button variant="destructive" size="icon" onClick={() => setAudioDataUrl(null)}><Trash2/></Button>
+                        {audioDataUrls.length > 0 && (
+                            <div className="space-y-2">
+                                <p className="text-sm font-medium">Messages vocaux :</p>
+                                {audioDataUrls.map((audioUrl, index) => (
+                                    <div key={index} className="flex items-center gap-2">
+                                        <audio src={audioUrl} controls className="w-full h-10" />
+                                        <Button variant="ghost" size="icon" onClick={() => setAudioDataUrls(urls => urls.filter((_, i) => i !== index))}><Trash2 className="text-destructive h-4 w-4"/></Button>
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>

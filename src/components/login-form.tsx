@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -8,7 +9,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
-type Role = 'admin' | 'teacher' | 'student';
+type Role = 'admin' | 'teacher' | 'student' | 'parent' | 'authority';
 
 export function LoginForm() {
   const router = useRouter();
@@ -25,6 +26,12 @@ export function LoginForm() {
         break;
       case 'student':
         router.push('/student/dashboard');
+        break;
+      case 'parent':
+        router.push('/parent/dashboard');
+        break;
+      case 'authority':
+        router.push('/authority/dashboard');
         break;
       default:
         router.push('/auth/dashboard');
@@ -44,6 +51,8 @@ export function LoginForm() {
                     <SelectItem value="admin">Administrateur</SelectItem>
                     <SelectItem value="teacher">Professeur</SelectItem>
                     <SelectItem value="student">Élève</SelectItem>
+                    <SelectItem value="parent">Parent</SelectItem>
+                    <SelectItem value="authority">Autorité</SelectItem>
                 </SelectContent>
             </Select>
         </div>
