@@ -113,6 +113,17 @@ export function CreateEvaluationWizard() {
     setEvaluationDetails(data);
     setIsLoading(true);
     const fetchedStudents = await getStudentsByClass(data.assignment.class);
+
+    if (fetchedStudents.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Aucun élève trouvé",
+        description: `Il n'y a aucun élève inscrit dans la classe ${data.assignment.class}.`
+      });
+      setIsLoading(false);
+      return;
+    }
+
     setStudents(fetchedStudents);
     setGrades(fetchedStudents.map(s => ({ student: s, score: null })));
     setIsLoading(false);
@@ -273,7 +284,16 @@ export function CreateEvaluationWizard() {
         );
       
       case 2:
-          const StudentGradingCard = ({ student, ponderation, onGradeSubmit }: { student: Student, ponderation: number, onGradeSubmit: (score: number) => void }) => {
+        if (!students[currentStudentIndex]) {
+          return (
+            <CardContent className="flex flex-col items-center justify-center text-center gap-4 h-48">
+              <p className="text-muted-foreground">Aucun élève à noter ou erreur de chargement.</p>
+              <Button variant="outline" onClick={() => setStep(1)}><ArrowLeft className="mr-2"/>Retour</Button>
+            </CardContent>
+          );
+        }
+
+        const StudentGradingCard = ({ student, ponderation, onGradeSubmit }: { student: Student, ponderation: number, onGradeSubmit: (score: number) => void }) => {
             const [score, setScore] = useState('');
             const [error, setError] = useState('');
 
