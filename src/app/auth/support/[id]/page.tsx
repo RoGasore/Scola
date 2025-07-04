@@ -85,6 +85,10 @@ export default function TicketDetailPage() {
         return null;
     }
 
+    const hasScreenshot = !!ticket.screenshotDataUrl;
+    const hasAudio = Array.isArray(ticket.audioDataUrls) && ticket.audioDataUrls.length > 0;
+    const hasAttachments = hasScreenshot || hasAudio;
+
     return (
         <div className="flex flex-col gap-4">
             <Link href="/auth/support" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-2">
@@ -92,14 +96,14 @@ export default function TicketDetailPage() {
                 Retour à la liste des tickets
             </Link>
 
-            <div className="grid md:grid-cols-3 gap-6 items-start">
-                <div className="md:col-span-2 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                <div className="lg:col-span-2 space-y-6">
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-start gap-4">
-                                <MessageSquare className="h-6 w-6 mt-1 text-primary"/>
+                                <MessageSquare className="h-6 w-6 mt-1 text-primary flex-shrink-0"/>
                                 <div>
-                                    <span className="text-2xl">Ticket de {ticket.userName}</span>
+                                    <span className="text-2xl break-words">Ticket de {ticket.userName}</span>
                                     <CardDescription>
                                         Soumis le {format(new Date(ticket.createdAt), "PPP 'à' HH:mm", { locale: fr })}
                                     </CardDescription>
@@ -107,7 +111,7 @@ export default function TicketDetailPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="whitespace-pre-wrap">{ticket.message}</p>
+                            <p className="whitespace-pre-wrap break-words">{ticket.message}</p>
                         </CardContent>
                     </Card>
 
@@ -133,7 +137,7 @@ export default function TicketDetailPage() {
                     </Card>
                 </div>
                 
-                <div className="space-y-6">
+                <div className="lg:col-span-1 space-y-6">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-lg">Détails</CardTitle>
@@ -141,38 +145,38 @@ export default function TicketDetailPage() {
                         </CardHeader>
                         <CardContent className="space-y-3 text-sm">
                              <div className="flex items-center gap-2">
-                                <User className="h-4 w-4 text-muted-foreground"/> 
-                                <span>{ticket.userName} ({ticket.userRole})</span>
+                                <User className="h-4 w-4 text-muted-foreground flex-shrink-0"/> 
+                                <span className="break-all">{ticket.userName} ({ticket.userRole})</span>
                             </div>
                              <div className="flex items-center gap-2">
-                                <LinkIcon className="h-4 w-4 text-muted-foreground"/> 
+                                <LinkIcon className="h-4 w-4 text-muted-foreground flex-shrink-0"/> 
                                 <a href={ticket.pageUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">{ticket.pageUrl}</a>
                             </div>
                             <Separator />
-                             <div className="flex justify-around pt-2">
-                                <Button onClick={() => handleStatusUpdate('seen')} disabled={isUpdating || ticket.status === 'seen' || ticket.status === 'resolved'} variant="outline" size="sm">
+                             <div className="flex flex-col sm:flex-row justify-around gap-2 pt-2">
+                                <Button onClick={() => handleStatusUpdate('seen')} disabled={isUpdating || ticket.status === 'seen' || ticket.status === 'resolved'} variant="outline" size="sm" className="w-full">
                                     {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>} Marquer comme Vu
                                 </Button>
-                                 <Button onClick={() => handleStatusUpdate('resolved')} disabled={isUpdating || ticket.status === 'resolved'} variant="default" size="sm">
+                                 <Button onClick={() => handleStatusUpdate('resolved')} disabled={isUpdating || ticket.status === 'resolved'} variant="default" size="sm" className="w-full">
                                     {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>} Marquer comme Résolu
                                 </Button>
                             </div>
                         </CardContent>
                     </Card>
 
-                    {(ticket.screenshotDataUrl || (ticket.audioDataUrls && ticket.audioDataUrls.length > 0)) && (
+                    {hasAttachments && (
                         <Card>
                              <CardHeader>
                                 <CardTitle className="text-lg">Pièces Jointes</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                {ticket.screenshotDataUrl && (
+                                {hasScreenshot && (
                                     <div>
                                         <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><ImageIcon/> Capture d'écran</h4>
-                                        <Image src={ticket.screenshotDataUrl} alt="Capture d'écran du problème" width={400} height={225} className="rounded-md border w-full h-auto"/>
+                                        <Image src={ticket.screenshotDataUrl!} alt="Capture d'écran du problème" width={400} height={225} className="rounded-md border w-full h-auto"/>
                                     </div>
                                 )}
-                                {ticket.audioDataUrls && ticket.audioDataUrls.length > 0 && (
+                                {hasAudio && (
                                     <div>
                                         <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><Mic/> Messages Vocaux</h4>
                                         <div className="space-y-2">
@@ -188,5 +192,5 @@ export default function TicketDetailPage() {
                 </div>
             </div>
         </div>
-    )
+    );
 }
