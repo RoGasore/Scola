@@ -10,7 +10,7 @@ import { fr } from 'date-fns/locale';
 import { ArrowLeft, User, MessageSquare, Calendar, Link as LinkIcon, Image as ImageIcon, Mic, Loader2, Send, Shield, AlertTriangle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
