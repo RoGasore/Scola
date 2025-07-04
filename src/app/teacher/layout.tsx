@@ -11,7 +11,8 @@ import {
   Bell,
   Settings,
   Presentation,
-  LifeBuoy
+  LifeBuoy,
+  MessagesSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -80,6 +81,7 @@ export default function TeacherLayout({
                 <NavLink href="/teacher/classes" icon={Presentation}>Mes Classes</NavLink>
                 <NavLink href="/teacher/notes" icon={GraduationCap}>Saisie des Notes</NavLink>
                 <NavLink href="/teacher/communiques" icon={MessageSquare}>Communiqués</NavLink>
+                <NavLink href="/auth/messaging" icon={MessagesSquare}>Messagerie</NavLink>
               </nav>
             </div>
             <div className="mt-auto p-4">
@@ -114,6 +116,7 @@ export default function TeacherLayout({
                     <Link href="/teacher/classes" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/teacher/classes')}`}><Presentation className="h-5 w-5" />Mes Classes</Link>
                     <Link href="/teacher/notes" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/teacher/notes')}`}><GraduationCap className="h-5 w-5" />Saisie des Notes</Link>
                     <Link href="/teacher/communiques" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/teacher/communiques')}`}><MessageSquare className="h-5 w-5" />Communiqués</Link>
+                    <Link href="/auth/messaging" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/messaging')}`}><MessagesSquare className="h-5 w-5" />Messagerie</Link>
                 </nav>
                 <div className="mt-auto p-4">
                    {/* Support button removed from here */}

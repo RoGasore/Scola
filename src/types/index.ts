@@ -169,6 +169,7 @@ export interface TicketMessage {
     createdAt: string; // ISO String
     screenshotDataUrl?: string;
     audioDataUrls?: string[];
+    status?: 'sent' | 'read';
 }
 
 export interface SupportTicket {

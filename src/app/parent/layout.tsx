@@ -11,7 +11,8 @@ import {
   Bell,
   Settings,
   CalendarCheck,
-  LifeBuoy
+  LifeBuoy,
+  MessagesSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -80,6 +81,7 @@ export default function ParentLayout({
                 <NavLink href="/parent/grades" icon={GraduationCap}>Notes de mon enfant</NavLink>
                 <NavLink href="/parent/attendance" icon={CalendarCheck}>Absences</NavLink>
                 <NavLink href="/parent/communiques" icon={MessageSquare}>Communiqués</NavLink>
+                <NavLink href="/auth/messaging" icon={MessagesSquare}>Messagerie</NavLink>
               </nav>
             </div>
           </div>
@@ -111,6 +113,7 @@ export default function ParentLayout({
                     <Link href="/parent/grades" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/parent/grades')}`}><GraduationCap className="h-5 w-5" />Notes</Link>
                     <Link href="/parent/attendance" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/parent/attendance')}`}><CalendarCheck className="h-5 w-5" />Absences</Link>
                     <Link href="/parent/communiques" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/parent/communiques')}`}><MessageSquare className="h-5 w-5" />Communiqués</Link>
+                    <Link href="/auth/messaging" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/messaging')}`}><MessagesSquare className="h-5 w-5" />Messagerie</Link>
                 </nav>
               </SheetContent>
             </Sheet>

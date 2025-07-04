@@ -7,14 +7,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { format, formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { ArrowLeft, User, MessageSquare, Calendar, Link as LinkIcon, Image as ImageIcon, Mic, Loader2, Send, Shield, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, User, Link as LinkIcon, Image as ImageIcon, Mic, Loader2, Send, Shield, AlertTriangle, Square, Trash2, Check, CheckCheck } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/rich-text-editor';
 import { useToast } from '@/hooks/use-toast';
 import type { SupportTicket, TicketMessage } from '@/types';
 import { getSupportTicketById, addMessageToTicket, updateTicketStatus } from '@/services/support';
@@ -43,7 +42,57 @@ export default function TicketDetailPage() {
     const [ticket, setTicket] = useState<SupportTicket | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isUpdating, setIsUpdating] = useState(false);
+    
+    // Reply state
     const [replyMessage, setReplyMessage] = useState('');
+    const [audioDataUrls, setAudioDataUrls] = useState<string[]>([]);
+    const [isRecording, setIsRecording] = useState(false);
+    const [recordingTime, setRecordingTime] = useState(0);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const audioChunksRef = useRef<Blob[]>([]);
+    const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    const formatTime = (seconds: number) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const stopRecording = useCallback(() => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.stop();
+        }
+        if (timerIntervalRef.current) {
+            clearInterval(timerIntervalRef.current);
+            timerIntervalRef.current = null;
+        }
+        setIsRecording(false);
+    }, []);
+    
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+            audioChunksRef.current = [];
+
+            mediaRecorderRef.current.ondataavailable = (event) => audioChunksRef.current.push(event.data);
+            mediaRecorderRef.current.onstop = () => {
+                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                reader.onloadend = () => setAudioDataUrls(prev => [...prev, reader.result as string]);
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorderRef.current.start();
+            setIsRecording(true);
+            setRecordingTime(0);
+            timerIntervalRef.current = setInterval(() => setRecordingTime(prev => prev + 1), 1000);
+        } catch (error) {
+            toast({ variant: "destructive", title: "Erreur de micro", description: "Impossible d'accéder au microphone." });
+        }
+    };
+
 
     const fetchTicket = useCallback(async () => {
         setIsLoading(true);
@@ -65,7 +114,8 @@ export default function TicketDetailPage() {
     useEffect(() => {
         if (!ticketId) return;
         fetchTicket();
-    }, [ticketId, fetchTicket]);
+        return () => stopRecording();
+    }, [ticketId, fetchTicket, stopRecording]);
     
     useEffect(() => {
       if (scrollAreaRef.current) {
@@ -88,54 +138,65 @@ export default function TicketDetailPage() {
     };
     
     const handleSendResponse = async () => {
-        if (!replyMessage.trim() || !ticket) return;
+        const isMessageEmpty = !replyMessage || replyMessage.replace(/<[^>]*>?/gm, '').trim().length === 0;
+        if (isMessageEmpty && audioDataUrls.length === 0) {
+            toast({ variant: "destructive", title: "Réponse vide", description: "Veuillez écrire un message ou enregistrer un audio." });
+            return;
+        }
+
+        if (!ticket || !ticket.userEmail) {
+            toast({ variant: 'destructive', title: "Erreur de données", description: "Impossible de trouver l'adresse e-mail du destinataire pour ce ticket." });
+            return;
+        }
+
         setIsUpdating(true);
     
         const newMessage: TicketMessage = {
             author: 'admin',
-            authorName: 'Support ScolaGest', // In a real app, get admin name from auth
+            authorName: 'Support ScolaGest',
             message: replyMessage,
             createdAt: new Date().toISOString(),
+            audioDataUrls: audioDataUrls,
+            status: 'sent',
         };
     
         try {
             await addMessageToTicket(ticket.id, newMessage);
             
-            setTicket(prev => prev ? {
-                ...prev,
-                conversation: [...(prev.conversation || []), newMessage],
-                status: prev.status === 'resolved' ? 'resolved' : 'seen',
-            } : null);
-            setReplyMessage('');
-    
+            const originalSubject = ticket.subject || `Ticket #${ticket.id.substring(0, 6)}`;
             await sendEmail({
                 to: ticket.userEmail,
-                subject: `Re: Votre ticket de support #${ticket.id.substring(0,6)}`,
+                subject: `Re: Votre ticket de support (${originalSubject})`,
                 html: `
                   <div style="font-family: sans-serif; line-height: 1.6;">
                     <h2>Réponse à votre ticket de support</h2>
-                    <p>Bonjour ${ticket.userName},</p>
-                    <p>Un membre de notre équipe a répondu à votre demande de support concernant : <strong>"${ticket.subject}"</strong></p>
+                    <p>Bonjour ${ticket.userName || 'Utilisateur'},</p>
+                    <p>Un membre de notre équipe a répondu à votre demande de support concernant : <strong>"${originalSubject}"</strong></p>
                     <hr>
-                    <p style="white-space: pre-wrap; background-color: #f5f5f5; padding: 15px; border-radius: 5px;">${replyMessage}</p>
+                    ${replyMessage}
                     <hr>
                     <p>Vous pouvez consulter la conversation complète en vous connectant à votre compte ScolaGest.</p>
                   </div>
                 `,
             });
     
+            setTicket(prev => prev ? {
+                ...prev,
+                conversation: [...(prev.conversation || []), newMessage],
+                status: prev.status === 'resolved' ? 'resolved' : 'seen',
+            } : null);
+            setReplyMessage('');
+            setAudioDataUrls([]);
             toast({ title: "Réponse envoyée", className: 'bg-green-500 text-white' });
     
         } catch (error: any) {
-            toast({ variant: 'destructive', title: "Erreur d'envoi", description: error.message || "Une erreur est survenue." });
+            toast({ variant: "destructive", title: "Erreur d'envoi", description: error.message || "Une erreur est survenue." });
         } finally {
             setIsUpdating(false);
         }
     };
 
-    if (isLoading) {
-        return <TicketDetailLoading />;
-    }
+    if (isLoading) return <TicketDetailLoading />;
 
     if (!ticket) {
         return (
@@ -144,10 +205,7 @@ export default function TicketDetailPage() {
                 <h1 className="text-2xl font-bold">Ticket non trouvé</h1>
                 <p className="text-muted-foreground">Impossible de charger les détails de ce ticket.</p>
                 <Button asChild variant="link" className="mt-4">
-                    <Link href="/auth/support">
-                        <ArrowLeft className="mr-2" />
-                        Retour à la liste des tickets
-                    </Link>
+                    <Link href="/auth/support"><ArrowLeft className="mr-2" />Retour à la liste</Link>
                 </Button>
             </div>
         )
@@ -182,15 +240,10 @@ export default function TicketDetailPage() {
                         {(ticket.conversation || []).map((msg, index) => (
                            <div key={index} className={cn("flex items-end gap-3", msg.author === 'admin' ? 'justify-end' : 'justify-start')}>
                                {msg.author === 'user' && (
-                                   <Avatar className="h-8 w-8">
-                                       <AvatarFallback><User /></AvatarFallback>
-                                   </Avatar>
+                                   <Avatar className="h-8 w-8"><AvatarFallback><User /></AvatarFallback></Avatar>
                                )}
-                               <div className={cn(
-                                   "max-w-md lg:max-w-xl p-3 rounded-lg space-y-2",
-                                   msg.author === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                                )}>
-                                    <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
+                               <div className={cn( "max-w-md lg:max-w-xl p-3 rounded-lg space-y-2", msg.author === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                    <div className="prose prose-sm dark:prose-invert max-w-none text-current" dangerouslySetInnerHTML={{ __html: msg.message }} />
                                     
                                     {msg.screenshotDataUrl && (
                                          <Image src={msg.screenshotDataUrl} alt="Capture d'écran du problème" width={400} height={225} className="rounded-md border w-full h-auto cursor-pointer" onClick={() => window.open(msg.screenshotDataUrl)}/>
@@ -203,40 +256,49 @@ export default function TicketDetailPage() {
                                         </div>
                                     )}
 
-                                    <p className="text-xs opacity-70 text-right">
-                                       {msg.authorName} &middot; {format(new Date(msg.createdAt), 'Pp', { locale: fr })}
-                                    </p>
+                                    <div className={cn("flex items-center gap-1.5 text-xs opacity-70", msg.author === 'admin' ? 'justify-end' : 'justify-start')}>
+                                       <span>{msg.authorName} &middot; {format(new Date(msg.createdAt), 'p', { locale: fr })}</span>
+                                       {msg.author === 'admin' && (
+                                          msg.status === 'read' ? <CheckCheck className="h-4 w-4 text-sky-400" /> : <Check className="h-4 w-4" />
+                                       )}
+                                    </div>
                                </div>
                                 {msg.author === 'admin' && (
-                                   <Avatar className="h-8 w-8 bg-primary text-primary-foreground">
-                                       <AvatarFallback><Shield /></AvatarFallback>
-                                   </Avatar>
+                                   <Avatar className="h-8 w-8 bg-primary text-primary-foreground"><AvatarFallback><Shield /></AvatarFallback></Avatar>
                                )}
                            </div>
                         ))}
                     </CardContent>
                 </ScrollArea>
-                <CardFooter className="border-t p-4">
-                    <div className="flex w-full items-start gap-3">
-                        <Avatar className="h-10 w-10">
-                            <AvatarFallback><Shield /></AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 grid gap-2">
-                             <Textarea 
-                                placeholder="Écrire une réponse..." 
-                                value={replyMessage}
-                                onChange={(e) => setReplyMessage(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                        e.preventDefault();
-                                        handleSendResponse();
-                                    }
-                                }}
-                            />
-                             <Button onClick={handleSendResponse} disabled={isUpdating || !replyMessage.trim()} className="w-full sm:w-auto ml-auto">
-                                {isUpdating ? <Loader2 className="animate-spin" /> : <Send />} Envoyer
+                <CardFooter className="border-t p-2 sm:p-4">
+                    <div className="flex-1 grid gap-2">
+                         <RichTextEditor content={replyMessage} onChange={setReplyMessage} placeholder="Écrire une réponse..." />
+                         <div className="flex items-center justify-between gap-2">
+                            <div className='flex gap-2'>
+                                {!isRecording ? (
+                                    <Button variant="ghost" size="icon" onClick={startRecording}><Mic/></Button>
+                                ) : (
+                                     <div className="flex items-center gap-2 p-2 rounded-md border border-destructive">
+                                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                                        <span className="font-mono text-sm text-destructive">{formatTime(recordingTime)}</span>
+                                        <Button variant="destructive" size="icon" className="h-7 w-7" onClick={stopRecording}><Square className="h-4 w-4" /></Button>
+                                    </div>
+                                )}
+                                 {audioDataUrls.length > 0 && (
+                                    <div className="flex gap-2 items-center">
+                                        {audioDataUrls.map((audioUrl, index) => (
+                                            <div key={index} className="flex items-center gap-1 p-1 rounded-full bg-muted">
+                                                <audio src={audioUrl} controls className="h-8 max-w-[150px]"/>
+                                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAudioDataUrls(urls => urls.filter((_, i) => i !== index))}><Trash2 className="text-destructive h-4 w-4"/></Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            <Button onClick={handleSendResponse} disabled={isUpdating}>
+                                {isUpdating ? <Loader2 className="animate-spin" /> : <Send />}<span className="hidden sm:inline ml-2">Envoyer</span>
                             </Button>
-                        </div>
+                         </div>
                     </div>
                 </CardFooter>
             </Card>

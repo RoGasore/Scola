@@ -74,8 +74,17 @@ export async function updateTicketStatus(ticketId: string, status: 'new' | 'seen
 
 export async function addMessageToTicket(ticketId: string, message: TicketMessage): Promise<void> {
     const ticketRef = doc(db, SUPPORT_TICKETS_COLLECTION, ticketId);
-    await updateDoc(ticketRef, {
-        conversation: arrayUnion(message),
-        status: 'seen' // When admin replies, mark as seen
-    });
+    
+    // When admin replies, mark status as 'seen' if it was 'new'
+    const currentTicket = await getDoc(ticketRef);
+    const ticketData = currentTicket.data();
+    const updates: { conversation: any, status?: 'seen' } = {
+        conversation: arrayUnion(message)
+    };
+
+    if (ticketData && ticketData.status !== 'resolved') {
+        updates.status = 'seen';
+    }
+
+    await updateDoc(ticketRef, updates);
 }

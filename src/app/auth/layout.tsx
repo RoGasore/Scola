@@ -16,6 +16,7 @@ import {
   Settings,
   FileText,
   LifeBuoy,
+  MessagesSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -114,6 +115,7 @@ export default function DashboardLayout({
               <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
                 <NavLink href="/auth/dashboard" icon={Home}>Tableau de bord Admin</NavLink>
                 <NavLink href="/auth/communiques" icon={MessageSquare}>Communiqués</NavLink>
+                <NavLink href="/auth/messaging" icon={MessagesSquare}>Messagerie</NavLink>
                 <NavLink href="/auth/courses" icon={BookOpen}>Cours</NavLink>
                 <NavLink href="/auth/students" icon={Users}>Élèves</NavLink>
                 <NavLink href="/auth/grades" icon={GraduationCap}>Notes</NavLink>
@@ -162,6 +164,7 @@ export default function DashboardLayout({
                 <nav className="grid gap-2 text-lg font-medium">
                     <Link href="/auth/dashboard" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/dashboard')}`}><Home className="h-5 w-5" />T. de bord Admin</Link>
                     <Link href="/auth/communiques" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/communiques')}`}><MessageSquare className="h-5 w-5" />Communiqués</Link>
+                    <Link href="/auth/messaging" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/messaging')}`}><MessagesSquare className="h-5 w-5" />Messagerie</Link>
                     <Link href="/auth/courses" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/courses')}`}><BookOpen className="h-5 w-5" />Cours</Link>
                     <Link href="/auth/students" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/students')}`}><Users className="h-5 w-5" />Élèves</Link>
                     <Link href="/auth/grades" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/auth/grades')}`}><GraduationCap className="h-5 w-5" />Notes</Link>
