@@ -1,6 +1,7 @@
 
 'use client'
 
+import React from 'react';
 import {
   Home,
   PanelLeft,
@@ -9,6 +10,8 @@ import {
   Package2,
   Bell,
   Settings,
+  Presentation,
+  LifeBuoy
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -24,6 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { SupportDialog } from '@/components/support-dialog';
 
 function NavLink({ href, icon: Icon, children }: { href: string; icon: React.ElementType, children: React.ReactNode }) {
   const pathname = usePathname();
@@ -51,6 +55,7 @@ export default function TeacherLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [isSupportDialogOpen, setIsSupportDialogOpen] = React.useState(false);
 
   const getLinkClass = (path: string) => {
     return pathname.startsWith(path)
@@ -71,9 +76,16 @@ export default function TeacherLayout({
           <div className="flex-1 overflow-auto py-2">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
               <NavLink href="/teacher/dashboard" icon={Home}>Tableau de bord</NavLink>
+              <NavLink href="/teacher/classes" icon={Presentation}>Mes Classes</NavLink>
               <NavLink href="/teacher/notes" icon={GraduationCap}>Saisie des Notes</NavLink>
-              {/* <NavLink href="/teacher/communiques" icon={MessageSquare}>Communiqués</NavLink> */}
+              <NavLink href="/teacher/communiques" icon={MessageSquare}>Communiqués</NavLink>
             </nav>
+          </div>
+          <div className="mt-auto p-4">
+            <Button variant="outline" className="w-full justify-start" onClick={() => setIsSupportDialogOpen(true)}>
+                <LifeBuoy className="mr-2 h-4 w-4" />
+                Support
+            </Button>
           </div>
         </div>
       </div>
@@ -101,9 +113,16 @@ export default function TeacherLayout({
               </SheetHeader>
               <nav className="grid gap-2 text-lg font-medium">
                   <Link href="/teacher/dashboard" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/teacher/dashboard')}`}><Home className="h-5 w-5" />Tableau de bord</Link>
+                  <Link href="/teacher/classes" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/teacher/classes')}`}><Presentation className="h-5 w-5" />Mes Classes</Link>
                   <Link href="/teacher/notes" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/teacher/notes')}`}><GraduationCap className="h-5 w-5" />Saisie des Notes</Link>
-                  {/* <Link href="/teacher/communiques" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/teacher/communiques')}`}><MessageSquare className="h-5 w-5" />Communiqués</Link> */}
+                  <Link href="/teacher/communiques" className={`flex items-center gap-4 rounded-xl px-3 py-2 ${getLinkClass('/teacher/communiques')}`}><MessageSquare className="h-5 w-5" />Communiqués</Link>
               </nav>
+              <div className="mt-auto">
+                 <Button variant="outline" className="w-full justify-start" onClick={() => setIsSupportDialogOpen(true)}>
+                    <LifeBuoy className="mr-2 h-4 w-4" />
+                    Support
+                 </Button>
+              </div>
             </SheetContent>
           </Sheet>
           <div className="w-full flex-1" />
@@ -133,6 +152,7 @@ export default function TeacherLayout({
           {children}
         </main>
       </div>
+      <SupportDialog open={isSupportDialogOpen} onOpenChange={setIsSupportDialogOpen} />
     </div>
   );
 }

@@ -33,10 +33,15 @@ export interface Teacher {
     email: string;
     avatar: string;
     department: string;
-    assignments: string[];
+    assignments: TeacherAssignment[];
     status: 'Actif' | 'En congé';
     hireDate: string;
 }
+
+export type TeacherAssignment = {
+    class: string;
+    courses: string[];
+};
 
 export interface Communique {
     id: string;

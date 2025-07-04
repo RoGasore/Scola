@@ -1,7 +1,9 @@
 
+'use client'
+
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { BookCopy, Users, CalendarClock } from 'lucide-react';
+import { BookCopy, Users, CalendarClock, MessageSquarePlus, Presentation } from 'lucide-react';
 import Link from 'next/link';
 
 export default function TeacherDashboard() {
@@ -15,7 +17,7 @@ export default function TeacherDashboard() {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Classes Assignées</CardTitle>
-                    <BookCopy className="h-4 w-4 text-muted-foreground" />
+                    <Presentation className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">4</div>
@@ -51,14 +53,21 @@ export default function TeacherDashboard() {
             <CardContent className="flex flex-wrap gap-4">
                  <Button asChild>
                     <Link href="/teacher/notes">
-                        Saisir de nouvelles notes
+                        <BookCopy />
+                        Saisir une nouvelle évaluation
                     </Link>
                 </Button>
-                <Button variant="outline">
-                    Voir mes classes
+                <Button asChild variant="outline">
+                    <Link href="/teacher/classes">
+                        <Presentation />
+                        Voir mes classes
+                    </Link>
                 </Button>
-                 <Button variant="outline">
-                    Publier un communiqué
+                 <Button asChild variant="outline">
+                    <Link href="/teacher/communiques">
+                        <MessageSquarePlus />
+                        Publier un communiqué
+                    </Link>
                 </Button>
             </CardContent>
         </Card>
