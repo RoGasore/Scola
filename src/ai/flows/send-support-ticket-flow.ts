@@ -15,6 +15,8 @@ const SendSupportTicketInputSchema = z.object({
   pageUrl: z.string().url().describe("The URL of the page where the user encountered the issue."),
   screenshotDataUrl: z.string().optional().describe("A data URI of the screenshot image (e.g., 'data:image/png;base64,...')."),
   audioDataUrl: z.string().optional().describe("A data URI of the recorded audio (e.g., 'data:audio/webm;base64,...')."),
+  userName: z.string().describe("The name of the user submitting the ticket."),
+  userRole: z.string().describe("The role of the user (e.g., Admin, Teacher, Student)."),
 });
 export type SendSupportTicketInput = z.infer<typeof SendSupportTicketInputSchema>;
 
@@ -38,7 +40,12 @@ const sendSupportTicketFlow = ai.defineFlow(
     // Step 1: Save the ticket to Firestore
     try {
         const ticketData: Omit<SupportTicket, 'id'> = {
-            ...input,
+            message: input.message,
+            pageUrl: input.pageUrl,
+            screenshotDataUrl: input.screenshotDataUrl,
+            audioDataUrl: input.audioDataUrl,
+            userName: input.userName,
+            userRole: input.userRole,
             createdAt: new Date().toISOString(),
             status: 'new'
         };
@@ -57,14 +64,14 @@ const sendSupportTicketFlow = ai.defineFlow(
       return { error: errorMsg };
     }
 
-    const { message, pageUrl, screenshotDataUrl, audioDataUrl } = input;
-    const subject = `Nouveau ticket de support ScolaGest de la page: ${pageUrl}`;
+    const { message, pageUrl, screenshotDataUrl, audioDataUrl, userName, userRole } = input;
+    const subject = `Nouveau ticket de support (${userRole}) : ${pageUrl}`;
     
     // Construct email body
     const htmlBody = `
       <div style="font-family: sans-serif; line-height: 1.5;">
         <h1>Nouveau Ticket de Support</h1>
-        <p>Un nouveau ticket de support a été soumis et enregistré. Vous pouvez le consulter sur le tableau de bord administrateur.</p>
+        <p>Un nouveau ticket a été soumis par <strong>${userName} (${userRole})</strong>.</p>
         <p><strong>Page concernée :</strong> <a href="${pageUrl}">${pageUrl}</a></p>
         <hr>
         <h2>Message de l'utilisateur :</h2>
@@ -72,7 +79,7 @@ const sendSupportTicketFlow = ai.defineFlow(
         <hr>
         ${screenshotDataUrl ? `
           <h2>Capture d'écran :</h2>
-          <img src="${screenshotDataUrl}" alt="Capture d'écran de l'utilisateur" style="max-width: 100%; border: 1px solid #ddd; border-radius: 5px;" />
+          <p>La capture d'écran est jointe à ce mail et visible dans le tableau de bord ScolaGest.</p>
         ` : ''}
         ${audioDataUrl ? `
           <h2>Message vocal :</h2>
@@ -82,20 +89,18 @@ const sendSupportTicketFlow = ai.defineFlow(
     `;
 
     const attachments = [];
+    if (screenshotDataUrl) {
+        attachments.push({
+            filename: 'screenshot.png',
+            content: screenshotDataUrl.split(',')[1],
+        });
+    }
     if (audioDataUrl) {
         attachments.push({
             filename: 'message_vocal.webm',
             content: audioDataUrl.split(',')[1], // Base64 content
         });
     }
-
-    // TODO: Intégrer l'API WhatsApp ici (ex: Twilio)
-    // try {
-    //   await sendWhatsAppNotification(`Nouveau ticket de support de ${pageUrl}: ${message}`);
-    // } catch (whatsappError) {
-    //   console.error("Failed to send WhatsApp notification:", whatsappError);
-    //   // Do not block the flow if WhatsApp fails
-    // }
 
     try {
       const { data, error } = await resend.emails.send({

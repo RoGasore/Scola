@@ -162,6 +162,8 @@ export interface BulletinData {
 
 export interface SupportTicket {
     id: string;
+    userName: string;
+    userRole: string;
     message: string;
     pageUrl: string;
     screenshotDataUrl?: string;

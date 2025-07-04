@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
-import { Camera, Mic, Square, Trash2, Send, Loader2 } from 'lucide-react';
+import { Camera, Mic, Square, Trash2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { sendSupportTicket } from '@/ai/flows/send-support-ticket-flow';
 import Image from 'next/image';
@@ -15,9 +15,13 @@ import Image from 'next/image';
 type SupportDialogProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    user: {
+      name: string;
+      role: string;
+    };
 };
 
-export function SupportDialog({ open, onOpenChange }: SupportDialogProps) {
+export function SupportDialog({ open, onOpenChange, user }: SupportDialogProps) {
     const { toast } = useToast();
     const [message, setMessage] = useState('');
     const [screenshotDataUrl, setScreenshotDataUrl] = useState<string | null>(null);
@@ -47,15 +51,19 @@ export function SupportDialog({ open, onOpenChange }: SupportDialogProps) {
         setIsRecording(false);
     }, []);
 
+    const cleanup = useCallback(() => {
+        stopRecording();
+        setMessage('');
+        setScreenshotDataUrl(null);
+        setAudioDataUrl(null);
+        setRecordingTime(0);
+    }, [stopRecording]);
+
     useEffect(() => {
         if (!open) {
-            stopRecording();
-            setMessage('');
-            setScreenshotDataUrl(null);
-            setAudioDataUrl(null);
-            setRecordingTime(0);
+            cleanup();
         }
-    }, [open, stopRecording]);
+    }, [open, cleanup]);
 
     const handleScreenshot = async () => {
         try {
@@ -125,6 +133,8 @@ export function SupportDialog({ open, onOpenChange }: SupportDialogProps) {
                 screenshotDataUrl: screenshotDataUrl || undefined,
                 audioDataUrl: audioDataUrl || undefined,
                 pageUrl: window.location.href,
+                userName: user.name,
+                userRole: user.role,
             });
             toast({ title: "Ticket envoyé !", description: "Votre demande de support a été envoyée à l'administrateur.", className: 'bg-green-500 text-white' });
             onOpenChange(false);

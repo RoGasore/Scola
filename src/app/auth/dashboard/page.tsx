@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getRecentSupportTickets } from '@/services/support';
 import type { SupportTicket } from '@/types';
+import { Badge } from '@/components/ui/badge';
 
 const generateDailyData = (monthDate, dataKey, min, max) => {
   const daysInMonth = getDaysInMonth(monthDate);
@@ -204,21 +205,27 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="space-y-4">
                 {supportTickets.length > 0 ? supportTickets.map((ticket) => (
-                    <div key={ticket.id} className="flex items-start gap-4">
+                    <Link key={ticket.id} href={`/auth/support?ticketId=${ticket.id}`} className="flex items-start gap-4 p-2 -m-2 rounded-lg hover:bg-muted/50 transition-colors">
                         <div className="flex-shrink-0 pt-1">
                             <LifeBuoy className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="space-y-1 flex-1">
                             <p className="text-sm font-medium leading-none truncate" title={ticket.message}>{ticket.message}</p>
                             <p className="text-xs text-muted-foreground">
-                                De: {ticket.pageUrl.split('/').pop()} &middot; {formatDistanceToNow(new Date(ticket.createdAt), { addSuffix: true, locale: fr })}
+                                De: {ticket.userName} ({ticket.userRole}) &middot; {formatDistanceToNow(new Date(ticket.createdAt), { addSuffix: true, locale: fr })}
                             </p>
                         </div>
-                    </div>
+                         <Badge variant={ticket.status === 'new' ? 'destructive' : 'secondary'} className="capitalize">{ticket.status}</Badge>
+                    </Link>
                 )) : (
                     <p className="text-sm text-muted-foreground text-center py-4">Aucun ticket de support récent.</p>
                 )}
             </CardContent>
+             <CardFooter>
+                <Button asChild size="sm" className="w-full" variant="outline">
+                    <Link href="/auth/support">Voir tous les tickets</Link>
+                </Button>
+            </CardFooter>
         </Card>
       </div>
     </div>
