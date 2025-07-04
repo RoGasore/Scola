@@ -143,7 +143,7 @@ export default function AuthorityLayout({
       <SupportDialog 
         open={isSupportDialogOpen} 
         onOpenChange={setIsSupportDialogOpen}
-        user={{ name: "Utilisateur Autorité", role: "Autorité" }}
+        user={{ name: "Utilisateur Autorité", email: "authority@scolagest.com", role: "Autorité" }}
       />
     </>
   );

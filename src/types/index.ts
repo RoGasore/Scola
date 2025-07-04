@@ -1,5 +1,4 @@
 
-
 export type StudentStatus = 'Actif' | 'Inactif' | 'En attente' | 'Transféré';
 
 export interface Student {
@@ -163,14 +162,23 @@ export interface BulletinData {
     percentage: string;
 }
 
+export interface TicketMessage {
+    author: 'user' | 'admin';
+    authorName: string;
+    message: string;
+    createdAt: string; // ISO String
+    screenshotDataUrl?: string;
+    audioDataUrls?: string[];
+}
+
 export interface SupportTicket {
     id: string;
     userName: string;
+    userEmail: string;
     userRole: string;
-    message: string;
+    subject: string;
+    conversation: TicketMessage[];
     pageUrl: string;
-    screenshotDataUrl?: string;
-    audioDataUrls: string[];
     createdAt: string; // ISO string
     status: 'new' | 'seen' | 'resolved';
 }

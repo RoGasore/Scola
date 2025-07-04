@@ -18,6 +18,7 @@ type SupportDialogProps = {
     onOpenChange: (open: boolean) => void;
     user: {
       name: string;
+      email: string;
       role: string;
     };
 };
@@ -143,6 +144,7 @@ export function SupportDialog({ open, onOpenChange, user }: SupportDialogProps) 
                 audioDataUrls: audioDataUrls,
                 pageUrl: window.location.href,
                 userName: user.name,
+                userEmail: user.email,
                 userRole: user.role,
             });
             toast({ title: "Ticket envoyé !", description: "Votre demande de support a été envoyée à l'administrateur.", className: 'bg-green-500 text-white' });

@@ -153,7 +153,7 @@ export default function ParentLayout({
       <SupportDialog 
         open={isSupportDialogOpen} 
         onOpenChange={setIsSupportDialogOpen}
-        user={{ name: "Parent d'élève", role: "Parent" }}
+        user={{ name: "Parent d'élève", email: "parent@scolagest.com", role: "Parent" }}
       />
     </>
   );

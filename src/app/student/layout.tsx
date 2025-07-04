@@ -162,7 +162,7 @@ export default function StudentLayout({
       <SupportDialog 
         open={isSupportDialogOpen} 
         onOpenChange={setIsSupportDialogOpen}
-        user={{ name: "Léo Dubois", role: "Élève" }}
+        user={{ name: "Léo Dubois", email: "leo.dubois@scolagest.com", role: "Élève" }}
       />
     </>
   );

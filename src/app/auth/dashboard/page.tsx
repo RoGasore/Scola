@@ -205,12 +205,12 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="space-y-4">
                 {supportTickets.length > 0 ? supportTickets.map((ticket) => (
-                    <Link key={ticket.id} href={`/auth/support?ticketId=${ticket.id}`} className="flex items-start gap-4 p-2 -m-2 rounded-lg hover:bg-muted/50 transition-colors">
+                    <Link key={ticket.id} href={`/auth/support/${ticket.id}`} className="flex items-start gap-4 p-2 -m-2 rounded-lg hover:bg-muted/50 transition-colors">
                         <div className="flex-shrink-0 pt-1">
                             <LifeBuoy className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="space-y-1 flex-1">
-                            <p className="text-sm font-medium leading-none truncate" title={ticket.message}>{ticket.message}</p>
+                            <p className="text-sm font-medium leading-none truncate" title={ticket.subject}>{ticket.subject}</p>
                             <p className="text-xs text-muted-foreground">
                                 De: {ticket.userName} ({ticket.userRole}) &middot; {formatDistanceToNow(new Date(ticket.createdAt), { addSuffix: true, locale: fr })}
                             </p>

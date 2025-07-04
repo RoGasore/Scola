@@ -37,7 +37,7 @@ export default function LoginPage() {
       <SupportDialog 
         open={isSupportDialogOpen} 
         onOpenChange={setIsSupportDialogOpen}
-        user={{ name: "Visiteur", role: "Non-connecté" }}
+        user={{ name: "Visiteur", email: "visitor@scolagest.com", role: "Non-connecté" }}
       />
     </>
   );

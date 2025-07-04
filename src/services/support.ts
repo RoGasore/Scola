@@ -1,6 +1,7 @@
+
 import { db } from '@/lib/firebase';
-import type { SupportTicket } from '@/types';
-import { collection, addDoc, getDocs, query, orderBy, limit, doc, updateDoc, getDoc, where } from "firebase/firestore";
+import type { SupportTicket, TicketMessage } from '@/types';
+import { collection, addDoc, getDocs, query, orderBy, limit, doc, updateDoc, getDoc, where, arrayUnion } from "firebase/firestore";
 
 const SUPPORT_TICKETS_COLLECTION = 'support-tickets';
 
@@ -41,7 +42,16 @@ export async function getSupportTicketById(ticketId: string): Promise<SupportTic
     if (!ticketSnap.exists()) {
         return null;
     }
-    return { id: ticketSnap.id, ...ticketSnap.data() } as SupportTicket;
+    
+    const ticketData = ticketSnap.data() as SupportTicket;
+
+    // If admin opens a 'new' ticket, update its status to 'seen'
+    if (ticketData.status === 'new') {
+        await updateDoc(ticketRef, { status: 'seen' });
+        ticketData.status = 'seen'; // Update the returned object as well
+    }
+    
+    return { id: ticketSnap.id, ...ticketData };
 }
 
 export async function getNewTicketCount(): Promise<number> {
@@ -59,4 +69,13 @@ export async function getNewTicketCount(): Promise<number> {
 export async function updateTicketStatus(ticketId: string, status: 'new' | 'seen' | 'resolved'): Promise<void> {
     const ticketRef = doc(db, SUPPORT_TICKETS_COLLECTION, ticketId);
     await updateDoc(ticketRef, { status: status });
+}
+
+
+export async function addMessageToTicket(ticketId: string, message: TicketMessage): Promise<void> {
+    const ticketRef = doc(db, SUPPORT_TICKETS_COLLECTION, ticketId);
+    await updateDoc(ticketRef, {
+        conversation: arrayUnion(message),
+        status: 'seen' // When admin replies, mark as seen
+    });
 }

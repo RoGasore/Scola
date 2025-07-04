@@ -16,6 +16,7 @@ const SendSupportTicketInputSchema = z.object({
   screenshotDataUrl: z.string().optional().describe("A data URI of the screenshot image (e.g., 'data:image/png;base64,...')."),
   audioDataUrls: z.array(z.string()).optional().describe("A list of data URIs of the recorded audio files (e.g., 'data:audio/webm;base64,...')."),
   userName: z.string().describe("The name of the user submitting the ticket."),
+  userEmail: z.string().email().describe("The email address of the user for replies."),
   userRole: z.string().describe("The role of the user (e.g., Admin, Teacher, Student)."),
 });
 export type SendSupportTicketInput = z.infer<typeof SendSupportTicketInputSchema>;
@@ -39,15 +40,23 @@ const sendSupportTicketFlow = ai.defineFlow(
     
     // Step 1: Save the ticket to Firestore
     try {
+        const now = new Date().toISOString();
         const ticketData: Omit<SupportTicket, 'id'> = {
-            message: input.message,
-            pageUrl: input.pageUrl,
-            screenshotDataUrl: input.screenshotDataUrl,
-            audioDataUrls: input.audioDataUrls || [],
             userName: input.userName,
+            userEmail: input.userEmail,
             userRole: input.userRole,
-            createdAt: new Date().toISOString(),
-            status: 'new'
+            subject: input.message.substring(0, 100) + (input.message.length > 100 ? '...' : ''),
+            pageUrl: input.pageUrl,
+            createdAt: now,
+            status: 'new',
+            conversation: [{
+                author: 'user',
+                authorName: input.userName,
+                message: input.message,
+                createdAt: now,
+                screenshotDataUrl: input.screenshotDataUrl,
+                audioDataUrls: input.audioDataUrls || [],
+            }]
         };
         await addSupportTicketToDb(ticketData);
     } catch(dbError: any) {
@@ -59,7 +68,8 @@ const sendSupportTicketFlow = ai.defineFlow(
     if (!resend) {
       const errorMsg = 'The email service is not configured on the server.';
       console.error(errorMsg);
-      return { error: errorMsg };
+      // We don't return an error here, as the ticket is saved. The email is just a notification.
+      return { id: "ticket_saved_no_email" }; 
     }
 
     const { message, pageUrl, screenshotDataUrl, audioDataUrls, userName, userRole } = input;
@@ -108,7 +118,7 @@ const sendSupportTicketFlow = ai.defineFlow(
         to: toAddress,
         subject: subject,
         html: htmlBody,
-        attachments: attachments,
+        attachments: attachments.length > 0 ? attachments : undefined,
       });
 
       if (error) {

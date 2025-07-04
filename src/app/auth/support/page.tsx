@@ -114,7 +114,7 @@ export default function SupportPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Utilisateur</TableHead>
-                                <TableHead>Message</TableHead>
+                                <TableHead>Sujet</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Statut</TableHead>
                                 <TableHead>Actions</TableHead>
@@ -129,7 +129,7 @@ export default function SupportPage() {
                                             <div className="text-sm text-muted-foreground">{ticket.userRole}</div>
                                         </TableCell>
                                         <TableCell>
-                                            <p className="truncate max-w-xs" title={ticket.message}>{ticket.message}</p>
+                                            <p className="truncate max-w-xs" title={ticket.subject}>{ticket.subject}</p>
                                         </TableCell>
                                         <TableCell>{formatDistanceToNow(new Date(ticket.createdAt), { addSuffix: true, locale: fr })}</TableCell>
                                         <TableCell>{getStatusBadge(ticket.status)}</TableCell>

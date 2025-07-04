@@ -83,7 +83,7 @@ export default function TeacherLayout({
               </nav>
             </div>
             <div className="mt-auto p-4">
-              {/* Support button removed from here */}
+               {/* Support button removed from here */}
             </div>
           </div>
         </div>
@@ -159,7 +159,7 @@ export default function TeacherLayout({
       <SupportDialog 
         open={isSupportDialogOpen} 
         onOpenChange={setIsSupportDialogOpen}
-        user={{ name: "Jean Dupont", role: "Enseignant" }}
+        user={{ name: "Jean Dupont", email: "jean.dupont@scolagest.com", role: "Enseignant" }}
       />
     </>
   );

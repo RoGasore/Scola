@@ -231,7 +231,7 @@ export default function DashboardLayout({
       <SupportDialog 
         open={isSupportDialogOpen} 
         onOpenChange={setIsSupportDialogOpen}
-        user={{ name: "Admin User", role: "Admin" }}
+        user={{ name: "Admin User", email: "admin@scolagest.com", role: "Admin" }}
       />
     </>
   );

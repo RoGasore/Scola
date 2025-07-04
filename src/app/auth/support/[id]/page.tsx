@@ -1,29 +1,30 @@
 
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { ArrowLeft, User, MessageSquare, Calendar, Link as LinkIcon, Image as ImageIcon, Mic, Loader2 } from 'lucide-react';
+import { ArrowLeft, User, MessageSquare, Calendar, Link as LinkIcon, Image as ImageIcon, Mic, Loader2, Send, Shield, AlertTriangle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import type { SupportTicket } from '@/types';
-import { getSupportTicketById, updateTicketStatus } from '@/services/support';
+import type { SupportTicket, TicketMessage } from '@/types';
+import { getSupportTicketById, addMessageToTicket, updateTicketStatus } from '@/services/support';
+import { sendEmail } from '@/ai/flows/send-email-flow';
 import TicketDetailLoading from './loading';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
-type Status = 'new' | 'seen' | 'resolved';
 
-const getStatusBadge = (status: Status) => {
+const getStatusBadge = (status: SupportTicket['status']) => {
     switch (status) {
         case 'new': return <Badge variant="destructive">Nouveau</Badge>;
         case 'seen': return <Badge variant="secondary">Vu</Badge>;
@@ -37,33 +38,42 @@ export default function TicketDetailPage() {
     const router = useRouter();
     const { toast } = useToast();
     const ticketId = params.id as string;
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
 
     const [ticket, setTicket] = useState<SupportTicket | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [replyMessage, setReplyMessage] = useState('');
+
+    const fetchTicket = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const data = await getSupportTicketById(ticketId);
+            if (!data) {
+                toast({ variant: 'destructive', title: 'Erreur', description: 'Ticket non trouvé.' });
+                router.push('/auth/support');
+            } else {
+                setTicket(data);
+            }
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Erreur', description: 'Impossible de charger le ticket.' });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [ticketId, router, toast]);
 
     useEffect(() => {
         if (!ticketId) return;
-        async function fetchTicket() {
-            setIsLoading(true);
-            try {
-                const data = await getSupportTicketById(ticketId);
-                if (!data) {
-                    toast({ variant: 'destructive', title: 'Erreur', description: 'Ticket non trouvé.' });
-                    router.push('/auth/support');
-                } else {
-                    setTicket(data);
-                }
-            } catch (error) {
-                toast({ variant: 'destructive', title: 'Erreur', description: 'Impossible de charger le ticket.' });
-            } finally {
-                setIsLoading(false);
-            }
-        }
         fetchTicket();
-    }, [ticketId, router, toast]);
+    }, [ticketId, fetchTicket]);
+    
+    useEffect(() => {
+      if (scrollAreaRef.current) {
+        scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight });
+      }
+    }, [ticket?.conversation]);
 
-    const handleStatusUpdate = async (newStatus: Status) => {
+    const handleStatusUpdate = async (newStatus: SupportTicket['status']) => {
         if (!ticket) return;
         setIsUpdating(true);
         try {
@@ -76,121 +86,160 @@ export default function TicketDetailPage() {
             setIsUpdating(false);
         }
     };
+    
+    const handleSendResponse = async () => {
+        if (!replyMessage.trim() || !ticket) return;
+        setIsUpdating(true);
+    
+        const newMessage: TicketMessage = {
+            author: 'admin',
+            authorName: 'Support ScolaGest', // In a real app, get admin name from auth
+            message: replyMessage,
+            createdAt: new Date().toISOString(),
+        };
+    
+        try {
+            await addMessageToTicket(ticket.id, newMessage);
+            
+            setTicket(prev => prev ? {
+                ...prev,
+                conversation: [...prev.conversation, newMessage],
+                status: prev.status === 'resolved' ? 'resolved' : 'seen',
+            } : null);
+            setReplyMessage('');
+    
+            await sendEmail({
+                to: ticket.userEmail,
+                subject: `Re: Votre ticket de support #${ticket.id.substring(0,6)}`,
+                html: `
+                  <div style="font-family: sans-serif; line-height: 1.6;">
+                    <h2>Réponse à votre ticket de support</h2>
+                    <p>Bonjour ${ticket.userName},</p>
+                    <p>Un membre de notre équipe a répondu à votre demande de support concernant : <strong>"${ticket.subject}"</strong></p>
+                    <hr>
+                    <p style="white-space: pre-wrap; background-color: #f5f5f5; padding: 15px; border-radius: 5px;">${replyMessage}</p>
+                    <hr>
+                    <p>Vous pouvez consulter la conversation complète en vous connectant à votre compte ScolaGest.</p>
+                  </div>
+                `,
+            });
+    
+            toast({ title: "Réponse envoyée", className: 'bg-green-500 text-white' });
+    
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: "Erreur d'envoi", description: error.message || "Une erreur est survenue." });
+        } finally {
+            setIsUpdating(false);
+        }
+    };
 
     if (isLoading) {
         return <TicketDetailLoading />;
     }
 
     if (!ticket) {
-        return null;
+        return (
+            <div className="flex flex-col items-center justify-center h-full text-center">
+                <AlertTriangle className="w-16 h-16 text-destructive mb-4" />
+                <h1 className="text-2xl font-bold">Ticket non trouvé</h1>
+                <p className="text-muted-foreground">Impossible de charger les détails de ce ticket.</p>
+                <Button asChild variant="link" className="mt-4">
+                    <Link href="/auth/support">
+                        <ArrowLeft className="mr-2" />
+                        Retour à la liste des tickets
+                    </Link>
+                </Button>
+            </div>
+        )
     }
 
-    const hasScreenshot = !!ticket.screenshotDataUrl;
-    const hasAudio = Array.isArray(ticket.audioDataUrls) && ticket.audioDataUrls.length > 0;
-    const hasAttachments = hasScreenshot || hasAudio;
-
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 max-w-4xl mx-auto">
             <Link href="/auth/support" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-2">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Retour à la liste des tickets
             </Link>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                <div className="lg:col-span-2 space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-start gap-4">
-                                <MessageSquare className="h-6 w-6 mt-1 text-primary flex-shrink-0"/>
-                                <div>
-                                    <span className="text-2xl break-words">Ticket de {ticket.userName}</span>
-                                    <CardDescription>
-                                        Soumis le {format(new Date(ticket.createdAt), "PPP 'à' HH:mm", { locale: fr })}
-                                    </CardDescription>
-                                </div>
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="whitespace-pre-wrap break-words">{ticket.message}</p>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Répondre au Ticket</CardTitle>
-                        </CardHeader>
-                         <CardContent className="space-y-4">
-                            <div className="flex gap-4 items-start">
-                                <Avatar>
-                                    <AvatarImage src="https://placehold.co/40x40.png" alt="Avatar Admin" data-ai-hint="femme"/>
-                                    <AvatarFallback>AD</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 space-y-2">
-                                    <Label htmlFor="response">Votre réponse</Label>
-                                    <Textarea id="response" placeholder="Écrire une réponse à l'utilisateur..." className="min-h-[120px]"/>
-                                </div>
-                            </div>
-                        </CardContent>
-                        <CardFooter className="justify-end">
-                            <Button>Envoyer la réponse</Button>
-                        </CardFooter>
-                    </Card>
-                </div>
-                
-                <div className="lg:col-span-1 space-y-6">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-lg">Détails</CardTitle>
-                             {getStatusBadge(ticket.status)}
-                        </CardHeader>
-                        <CardContent className="space-y-3 text-sm">
-                             <div className="flex items-center gap-2">
-                                <User className="h-4 w-4 text-muted-foreground flex-shrink-0"/> 
-                                <span className="break-all">{ticket.userName} ({ticket.userRole})</span>
-                            </div>
-                             <div className="flex items-center gap-2">
-                                <LinkIcon className="h-4 w-4 text-muted-foreground flex-shrink-0"/> 
-                                <a href={ticket.pageUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">{ticket.pageUrl}</a>
-                            </div>
-                            <Separator />
-                             <div className="flex flex-col sm:flex-row justify-around gap-2 pt-2">
-                                <Button onClick={() => handleStatusUpdate('seen')} disabled={isUpdating || ticket.status === 'seen' || ticket.status === 'resolved'} variant="outline" size="sm" className="w-full">
-                                    {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>} Marquer comme Vu
-                                </Button>
-                                 <Button onClick={() => handleStatusUpdate('resolved')} disabled={isUpdating || ticket.status === 'resolved'} variant="default" size="sm" className="w-full">
-                                    {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>} Marquer comme Résolu
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {hasAttachments && (
-                        <Card>
-                             <CardHeader>
-                                <CardTitle className="text-lg">Pièces Jointes</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                {hasScreenshot && (
-                                    <div>
-                                        <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><ImageIcon/> Capture d'écran</h4>
-                                        <Image src={ticket.screenshotDataUrl!} alt="Capture d'écran du problème" width={400} height={225} className="rounded-md border w-full h-auto"/>
-                                    </div>
-                                )}
-                                {hasAudio && (
-                                    <div>
-                                        <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><Mic/> Messages Vocaux</h4>
-                                        <div className="space-y-2">
-                                            {ticket.audioDataUrls.map((audioUrl, index) => (
-                                                <audio key={index} src={audioUrl} controls className="w-full h-10"/>
+            <Card className="flex flex-col h-[calc(100vh-12rem)]">
+                <CardHeader className="border-b">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="flex-1">
+                            <CardTitle className="text-xl break-words">Ticket: {ticket.subject}</CardTitle>
+                             <CardDescription>
+                                De: {ticket.userName} ({ticket.userRole}) &middot; Reçu {formatDistanceToNow(new Date(ticket.createdAt), { addSuffix: true, locale: fr })}
+                            </CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {getStatusBadge(ticket.status)}
+                             <Button onClick={() => handleStatusUpdate('resolved')} disabled={isUpdating || ticket.status === 'resolved'} variant="outline" size="sm">
+                                {isUpdating && ticket.status !== 'resolved' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null} Marquer comme Résolu
+                            </Button>
+                        </div>
+                    </div>
+                </CardHeader>
+                <ScrollArea className="flex-1" ref={scrollAreaRef}>
+                    <CardContent className="p-4 sm:p-6 space-y-6">
+                        {ticket.conversation.map((msg, index) => (
+                           <div key={index} className={cn("flex items-end gap-3", msg.author === 'admin' ? 'justify-end' : 'justify-start')}>
+                               {msg.author === 'user' && (
+                                   <Avatar className="h-8 w-8">
+                                       <AvatarFallback><User /></AvatarFallback>
+                                   </Avatar>
+                               )}
+                               <div className={cn(
+                                   "max-w-md lg:max-w-xl p-3 rounded-lg space-y-2",
+                                   msg.author === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                                )}>
+                                    <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
+                                    
+                                    {msg.screenshotDataUrl && (
+                                         <Image src={msg.screenshotDataUrl} alt="Capture d'écran du problème" width={400} height={225} className="rounded-md border w-full h-auto cursor-pointer" onClick={() => window.open(msg.screenshotDataUrl)}/>
+                                    )}
+                                    {msg.audioDataUrls && msg.audioDataUrls.length > 0 && (
+                                        <div className="space-y-2 pt-2">
+                                            {msg.audioDataUrls.map((audioUrl, audioIndex) => (
+                                                <audio key={audioIndex} src={audioUrl} controls className="w-full h-10"/>
                                             ))}
                                         </div>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    )}
-                </div>
-            </div>
+                                    )}
+
+                                    <p className="text-xs opacity-70 text-right">
+                                       {msg.authorName} &middot; {format(new Date(msg.createdAt), 'Pp', { locale: fr })}
+                                    </p>
+                               </div>
+                                {msg.author === 'admin' && (
+                                   <Avatar className="h-8 w-8 bg-primary text-primary-foreground">
+                                       <AvatarFallback><Shield /></AvatarFallback>
+                                   </Avatar>
+                               )}
+                           </div>
+                        ))}
+                    </CardContent>
+                </ScrollArea>
+                <CardFooter className="border-t p-4">
+                    <div className="flex w-full items-start gap-3">
+                        <Avatar className="h-10 w-10">
+                            <AvatarFallback><Shield /></AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 grid gap-2">
+                             <Textarea 
+                                placeholder="Écrire une réponse..." 
+                                value={replyMessage}
+                                onChange={(e) => setReplyMessage(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleSendResponse();
+                                    }
+                                }}
+                            />
+                             <Button onClick={handleSendResponse} disabled={isUpdating || !replyMessage.trim()} className="w-full sm:w-auto ml-auto">
+                                {isUpdating ? <Loader2 className="animate-spin" /> : <Send />} Envoyer
+                            </Button>
+                        </div>
+                    </div>
+                </CardFooter>
+            </Card>
         </div>
     );
 }
