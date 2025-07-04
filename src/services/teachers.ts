@@ -1,27 +1,37 @@
 
 
-// In a real app, this would fetch from a 'teachers' collection in Firestore,
-// mapping their assignments to classes and courses.
+import { flattenStructureToCourses, schoolStructure } from '@/lib/school-data';
 
-const mockTeacherAssignments = [
-  { 
-    class: '7ème Année', 
-    courses: ['Algèbre', 'Arithmétique', 'Français'] 
-  },
-  { 
-    class: '1ère Maternelle', 
-    courses: ['Psychomotricité', 'Langage'] 
-  },
-   { 
-    class: '6ème Primaire', 
-    courses: ['Mathématiques', 'Français', 'Géographie'] 
-  },
-];
+// This service simulates fetching a teacher's assignments from the school structure.
+// In a real app, this would likely come from a dedicated 'teachers' collection in Firestore.
 
-export async function getTeacherAssignments(teacherId: string): Promise<{ class: string; courses: string[] }[]> {
-  console.log(`Fetching assignments for teacher ${teacherId}...`);
+type Assignment = {
+    class: string;
+    courses: string[];
+}
+
+export async function getTeacherAssignments(teacherName: string): Promise<Assignment[]> {
+  console.log(`Fetching assignments for teacher ${teacherName}...`);
+
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 500));
-  
-  return Promise.resolve(mockTeacherAssignments);
+
+  const allCourses = flattenStructureToCourses(schoolStructure);
+  const teacherCourses = allCourses.filter(course => course.professeur === teacherName);
+
+  const assignmentsMap: { [className: string]: Set<string> } = {};
+
+  teacherCourses.forEach(course => {
+    if (!assignmentsMap[course.className]) {
+      assignmentsMap[course.className] = new Set();
+    }
+    assignmentsMap[course.className].add(course.name);
+  });
+
+  const assignments: Assignment[] = Object.entries(assignmentsMap).map(([className, coursesSet]) => ({
+    class: className,
+    courses: Array.from(coursesSet),
+  }));
+
+  return Promise.resolve(assignments);
 }

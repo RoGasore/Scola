@@ -94,7 +94,9 @@ export function CreateEvaluationWizard() {
   useEffect(() => {
     async function fetchInitialData() {
       setIsLoading(true);
-      const teacherAssignments = await getTeacherAssignments('T001'); // Mock teacher ID
+      // In a real app, you'd get the logged-in teacher's name/ID.
+      // We'll use "M. Dupont" as a mock teacher who has assignments in our data.
+      const teacherAssignments = await getTeacherAssignments('M. Dupont');
       setAssignments(teacherAssignments);
       setIsLoading(false);
     }
@@ -165,7 +167,7 @@ export function CreateEvaluationWizard() {
                 studentMatricule: g.student.matricule,
                 class: evaluationDetails.assignment.class,
                 course: evaluationDetails.assignment.course,
-                professeur: "Jean Dupont", // Mock teacher name
+                professeur: "M. Dupont", // Mock teacher name for now
                 evaluationType: finalEvaluationType,
                 evaluationDate: evaluationDetails.evaluationDate.toISOString(),
                 ponderation: evaluationDetails.ponderation,
@@ -284,7 +286,7 @@ export function CreateEvaluationWizard() {
         );
       
       case 2:
-        if (!students[currentStudentIndex]) {
+        if (!students.length || !students[currentStudentIndex]) {
           return (
             <CardContent className="flex flex-col items-center justify-center text-center gap-4 h-48">
               <p className="text-muted-foreground">Aucun élève à noter ou erreur de chargement.</p>

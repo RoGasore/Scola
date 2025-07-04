@@ -1,11 +1,5 @@
 
 
-const defaultCourse = {
-  professeur: 'N/A',
-  room: 'N/A',
-  description: ''
-};
-
 export const schoolStructure = {
   "Maternelle": {
     classes: {
@@ -13,18 +7,18 @@ export const schoolStructure = {
         name: "1ère Maternelle",
         isActive: true,
         courses: [
-          { name: "Psychomotricité", hours: 3, ...defaultCourse, domain: 'Développement Personnel', maxima: { p1: 10, p2: 10, exam: 20 } },
-          { name: "Éveil Artistique", hours: 2, ...defaultCourse, domain: 'Arts', maxima: { p1: 10, p2: 10, exam: 20 } },
-          { name: "Langage", hours: 4, ...defaultCourse, domain: 'Langues', maxima: { p1: 10, p2: 10, exam: 20 } },
+          { name: "Psychomotricité", hours: 3, professeur: 'Mme. Kanza', room: 'Salle Polyvalente', description: '', domain: 'Développement Personnel', maxima: { p1: 10, p2: 10, exam: 20 } },
+          { name: "Éveil Artistique", hours: 2, professeur: 'Mme. Kanza', room: 'Atelier 1', description: '', domain: 'Arts', maxima: { p1: 10, p2: 10, exam: 20 } },
+          { name: "Langage", hours: 4, professeur: 'Mme. Kanza', room: 'Salle 1', description: '', domain: 'Langues', maxima: { p1: 10, p2: 10, exam: 20 } },
         ]
       },
        "2ème Maternelle": {
         name: "2ème Maternelle",
         isActive: true,
         courses: [
-          { name: "Graphisme", hours: 3, ...defaultCourse, domain: 'Arts', maxima: { p1: 10, p2: 10, exam: 20 } },
-          { name: "Découverte du Monde", hours: 3, ...defaultCourse, domain: 'Univers Social et Environnement', maxima: { p1: 10, p2: 10, exam: 20 } },
-          { name: "Pré-lecture", hours: 4, ...defaultCourse, domain: 'Langues', maxima: { p1: 10, p2: 10, exam: 20 } },
+          { name: "Graphisme", hours: 3, professeur: 'Mme. Kanza', room: 'Atelier 1', description: '', domain: 'Arts', maxima: { p1: 10, p2: 10, exam: 20 } },
+          { name: "Découverte du Monde", hours: 3, professeur: 'Mme. Kanza', room: 'Salle 2', description: '', domain: 'Univers Social et Environnement', maxima: { p1: 10, p2: 10, exam: 20 } },
+          { name: "Pré-lecture", hours: 4, professeur: 'Mme. Kanza', room: 'Salle 2', description: '', domain: 'Langues', maxima: { p1: 10, p2: 10, exam: 20 } },
         ]
       },
     }
@@ -35,9 +29,9 @@ export const schoolStructure = {
           name: "6ème Primaire", 
           isActive: true, 
           courses: [
-              { name: 'Français', hours: 4, ...defaultCourse, domain: 'Langues', maxima: { p1: 20, p2: 20, exam: 40 } },
-              { name: 'Mathématiques', hours: 4, ...defaultCourse, domain: 'Sciences', subDomain: 'Mathématiques', maxima: { p1: 20, p2: 20, exam: 40 } },
-              { name: 'Géographie', hours: 2, ...defaultCourse, domain: 'Univers Social et Environnement', maxima: { p1: 10, p2: 10, exam: 20 } }
+              { name: 'Français', hours: 4, professeur: 'M. Hugo', room: 'Salle 102', description: '', domain: 'Langues', maxima: { p1: 20, p2: 20, exam: 40 } },
+              { name: 'Mathématiques', hours: 4, professeur: 'M. Dupont', room: 'Salle 101', description: '', domain: 'Sciences', subDomain: 'Mathématiques', maxima: { p1: 20, p2: 20, exam: 40 } },
+              { name: 'Géographie', hours: 2, professeur: 'M. Kabila', room: 'Salle 103', description: '', domain: 'Univers Social et Environnement', maxima: { p1: 10, p2: 10, exam: 20 } }
           ] 
       },
     }
@@ -49,12 +43,12 @@ export const schoolStructure = {
                 name: "7ème Année", 
                 isActive: true, 
                 courses: [
-                    { name: 'Algèbre', hours: 2, ...defaultCourse, domain: 'Sciences', subDomain: 'Mathématiques', maxima: { p1: 10, p2: 10, exam: 20 } },
-                    { name: 'Arithmétique', hours: 2, ...defaultCourse, domain: 'Sciences', subDomain: 'Mathématiques', maxima: { p1: 10, p2: 10, exam: 20 } },
-                    { name: 'Anatomie', hours: 2, ...defaultCourse, domain: 'Sciences', subDomain: 'Sciences de la Vie et de la Terre (SVT)', maxima: { p1: 10, p2: 10, exam: 20 } },
-                    { name: 'Français', hours: 4, ...defaultCourse, domain: 'Langues', maxima: { p1: 30, p2: 30, exam: 40 } },
-                    { name: 'Anglais', hours: 3, ...defaultCourse, domain: 'Langues', maxima: { p1: 15, p2: 15, exam: 20 } },
-                    { name: 'Histoire', hours: 2, ...defaultCourse, domain: 'Univers Social et Environnement', maxima: { p1: 10, p2: 10, exam: 20 } },
+                    { name: 'Algèbre', hours: 2, professeur: 'M. Dupont', room: 'Salle 201', description: '', domain: 'Sciences', subDomain: 'Mathématiques', maxima: { p1: 10, p2: 10, exam: 20 } },
+                    { name: 'Arithmétique', hours: 2, professeur: 'M. Dupont', room: 'Salle 201', description: '', domain: 'Sciences', subDomain: 'Mathématiques', maxima: { p1: 10, p2: 10, exam: 20 } },
+                    { name: 'Anatomie', hours: 2, professeur: 'Mme. Curie', room: 'Labo 1', description: '', domain: 'Sciences', subDomain: 'Sciences de la Vie et de la Terre (SVT)', maxima: { p1: 10, p2: 10, exam: 20 } },
+                    { name: 'Français', hours: 4, professeur: 'M. Hugo', room: 'Salle 202', description: '', domain: 'Langues', maxima: { p1: 30, p2: 30, exam: 40 } },
+                    { name: 'Anglais', hours: 3, professeur: 'Mme. Diallo', room: 'Salle 203', description: '', domain: 'Langues', maxima: { p1: 15, p2: 15, exam: 20 } },
+                    { name: 'Histoire', hours: 2, professeur: 'M. Kabila', room: 'Salle 202', description: '', domain: 'Univers Social et Environnement', maxima: { p1: 10, p2: 10, exam: 20 } },
                 ] 
             },
         }
