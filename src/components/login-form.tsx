@@ -9,8 +9,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
-type Role = 'admin' | 'teacher' | 'student' | 'parent' | 'authority';
-
+type Role = 'admin' | 'teacher' | 'student' | 'parent' | 'authority' | 'accountant';
 export function LoginForm() {
   const router = useRouter();
   const [role, setRole] = useState<Role>('admin');
@@ -33,6 +32,9 @@ export function LoginForm() {
       case 'authority':
         router.push('/authority/dashboard');
         break;
+      case 'accountant':
+        router.push('/auth/dashboard'); // Assuming accountants go to the general auth dashboard
+        break;
       default:
         router.push('/auth/dashboard');
     }
@@ -53,6 +55,7 @@ export function LoginForm() {
                     <SelectItem value="student">Élève</SelectItem>
                     <SelectItem value="parent">Parent</SelectItem>
                     <SelectItem value="authority">Autorité</SelectItem>
+                    <SelectItem value="accountant">Comptable</SelectItem>
                 </SelectContent>
             </Select>
         </div>

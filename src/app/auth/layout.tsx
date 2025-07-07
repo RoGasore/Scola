@@ -39,6 +39,11 @@ import { Label } from '@/components/ui/label';
 import { useTheme } from 'next-themes';
 import { SupportDialog } from '@/components/support-dialog';
 import { Badge } from '@/components/ui/badge';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
+import TeacherLayout from '../teacher/layout';
+import StudentLayout from '../student/layout';
+import ParentLayout from '../parent/layout';
 import { getNewTicketCount } from '@/services/support';
 
 function NavLink({ href, icon: Icon, children, badgeCount }: { href: string; icon: React.ElementType, children: React.ReactNode, badgeCount?: number }) {
@@ -69,8 +74,11 @@ function NavLink({ href, icon: Icon, children, badgeCount }: { href: string; ico
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode;
+ children: React.ReactNode;
 }) {
+ const router = useRouter();
+
+  const role = useAuth((state) => state.role);
   const pathname = usePathname();
   const { setTheme, theme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
@@ -84,6 +92,26 @@ export default function DashboardLayout({
         setNewTicketCount(count);
     };
     fetchTicketCount();
+  }, []);
+
+   useEffect(() => {
+    if (role === "admin") {
+      router.push("/auth/dashboard");
+    } else if (role === "teacher") {
+      router.push("/teacher/dashboard");
+    } else if (role === "student") {
+      router.push("/student/dashboard");
+    } else if (role === "parent") {
+      router.push("/parent/dashboard");
+    } else if (role === "authority") {
+      router.push("/authority/dashboard");
+    } else if (role === "accountant") {
+      router.push("/accountant/dashboard")
+    }
+  }, [role, router]);
+
+  switch (role) {
+    case "admin":
   }, []);
 
   const getLinkClass = (path: string) => {
